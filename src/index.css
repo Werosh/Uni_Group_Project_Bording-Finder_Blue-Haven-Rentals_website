@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Hugiller-Demo";
+  src: url("/src/assets/fonts/Hugiller DEMO.otf") format("truetype");
+}
+
+/* @font-face {
+  font-family: "Open Sauce One Regular";
+  src: url("/src/assets/fonts/open-sauce.sans-regular.ttf") format("truetype");
+} */
+
+h1 {
+  font-family: Hugiller-Demo;
+}
