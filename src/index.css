@@ -14,3 +14,17 @@ h1,
 a {
   font-family: Hugiller-Demo;
 }
+
+p {
+  font-family: poppins, sans-serif;
+}
+
+button {
+  background-color: oklch(71.5% 0.143 215.221);
+  cursor: pointer;
+}
+
+#username-drop,
+#same-font {
+  font-family: "Hugiller-Demo";
+}

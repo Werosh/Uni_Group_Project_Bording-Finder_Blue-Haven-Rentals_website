@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Search, MapPin, Calendar, Users, Menu } from "lucide-react";
 
+import BackgroundImg from "../../assets/images/background/hero-background.webp";
+
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [propertyType, setPropertyType] = useState("All Property Types");
@@ -8,17 +10,12 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-cyan-50 relative overflow-hidden">
-      {/* Background Image Divs */}
+      {/* Background Image Div */}
       <div className="absolute inset-0 flex">
-        {/* Left Image Div - 20% width */}
-        <div className="w-2/5 bg-cover bg-center bg-no-repeat opacity-20 bg-amber-500"></div>
-
-        {/* Right Image Div - 80% width */}
         <div
-          className="flex-1 bg-cover bg-center bg-no-repeat opacity-15"
+          className="flex-1 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')",
+            backgroundImage: `url(${BackgroundImg})`,
           }}
         ></div>
       </div>
@@ -31,7 +28,7 @@ const Home = () => {
             {/* Left Content */}
             <div className="space-y-8">
               <div>
-                <h1 className="text-5xl lg:text-6xl font-bold text-slate-800 leading-tight">
+                <h1 className="text-5xl lg:text-[128px]  mt-10 text-slate-800 leading-tight">
                   Discover Your
                   <br />
                   Perfect{" "}
@@ -48,8 +45,8 @@ const Home = () => {
               </div>
 
               {/* Enhanced Search Card */}
-              <div className="bg-white/80 max-w-3xl backdrop-blur-sm rounded-2xl shadow-2xl p-6 border border-white/20">
-                <div className="flex items-center gap-4">
+              <div className="bg-white/10 max-w-3xl backdrop-blur-sm rounded-2xl shadow-2xl p-6 border border-white/20 w-full">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-4">
                   {/* Location Search */}
                   <div className="flex-1">
                     <div className="flex items-center bg-gray-50 rounded-xl px-2 py-2 border border-gray-200 focus-within:border-cyan-500 transition-colors">
@@ -99,7 +96,7 @@ const Home = () => {
 
                   {/* Search Button */}
                   <div>
-                    <button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <button className="w-full md:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                       <Search className="w-5 h-5 mr-2" />
                       Find
                     </button>
@@ -112,18 +109,12 @@ const Home = () => {
 
         {/* Enhanced Bottom Section */}
         <div className="max-w-7xl mx-auto px-6 pb-16">
-          <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/30">
+          <div className="bg-transparent backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/30">
             <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-slate-800">
-                Why Choose Blue Haven?
-              </h2>
-              <p className="text-lg text-slate-700 max-w-4xl mx-auto leading-relaxed">
-                From cozy boarding houses perfect for students and professionals
-                to luxurious family homes with stunning views, we offer
-                verified, high-quality accommodations that feel like home.
-                Experience seamless booking, transparent pricing, and
-                exceptional customer service that makes finding your perfect
-                rental effortless.
+              <p className="text-lg text-slate-700 font-bold max-w-4xl mx-auto leading-relaxed">
+                Explore exceptional rental houses and boarding accommodations
+                tailored to your lifestyle. Your ideal space is just a search
+                away with Blue Haven Rentals.
               </p>
             </div>
           </div>
