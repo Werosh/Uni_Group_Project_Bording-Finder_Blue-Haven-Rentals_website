@@ -1,12 +1,14 @@
+// src/App.jsx
 import React from "react";
-import LandingPage from "./landing/LandingPage";
+import { AuthProvider } from "./context/AuthContext";
+import AppRoutes from "./routes/AppRoutes";
 
-const App = () => {
+function App() {
   return (
-    <div>
-      <LandingPage />
-    </div>
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
-};
+}
 
 export default App;

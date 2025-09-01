@@ -1,7 +1,40 @@
-import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import LandingPage from "../landing/LandingPage";
+import BrowsePlacePage from "../pages/main-pages/BrowsePlacePage";
+import UserPage from "../pages/user-pages/UserPage";
+import WelcomeBackPage from "../pages/login-pages/WelcomeBackPage";
+import GetStartedPage from "../pages/sign-up-pages/GetStartedPage";
 
-const AppRoutes = () => {
-  return <div></div>;
-};
+import ProtectedRoute from "./ProtectedRoute";
+
+function AppRoutes() {
+  return (
+    <Router>
+      <Navbar />
+      <Routes>
+        {/* Landing page */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Main pages */}
+        <Route path="/browse" element={<BrowsePlacePage />} />
+
+        {/* User pages (protected) */}
+        <Route
+          path="/user"
+          element={
+            <ProtectedRoute>
+              <UserPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Auth pages */}
+        <Route path="/login" element={<WelcomeBackPage />} />
+        <Route path="/signup" element={<GetStartedPage />} />
+      </Routes>
+    </Router>
+  );
+}
 
 export default AppRoutes;

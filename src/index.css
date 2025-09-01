@@ -10,6 +10,7 @@
   src: url("/src/assets/fonts/open-sauce.sans-regular.ttf") format("truetype");
 } */
 
-h1 {
+h1,
+a {
   font-family: Hugiller-Demo;
 }
