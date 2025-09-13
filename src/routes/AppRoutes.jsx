@@ -7,6 +7,7 @@ import WelcomeBackPage from "../pages/login-pages/WelcomeBackPage";
 import GetStartedPage from "../pages/sign-up-pages/GetStartedPage";
 
 import ProtectedRoute from "./ProtectedRoute";
+import Footer from "../components/Footer";
 
 function AppRoutes() {
   return (
@@ -33,6 +34,7 @@ function AppRoutes() {
         <Route path="/login" element={<WelcomeBackPage />} />
         <Route path="/signup" element={<GetStartedPage />} />
       </Routes>
+      <Footer />
     </Router>
   );
 }

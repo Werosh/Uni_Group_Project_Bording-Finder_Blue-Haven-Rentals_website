@@ -60,8 +60,8 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <h1 className="text-xl font-semibold text-teal-600">
+          <div className="flex-shrink-0 tracking-[.1em]">
+            <h1 className="text-xl font-semibold text-[#3ABBD0]">
               Blue <span className="text-black">Haven</span> Rentals
             </h1>
           </div>
@@ -81,7 +81,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6 text-[20px]">
+          <div className="hidden md:flex items-center space-x-6 text-[20px] tracking-[.09em] Hugiller-font-style">
             <a
               href="#home"
               className="text-gray-700 hover:text-teal-600 transition-colors duration-200"
