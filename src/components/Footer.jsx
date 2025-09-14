@@ -7,7 +7,7 @@ const Footer = () => {
       <footer className="bg-[#1E1E1E] rounded-[40px] text-white p-8 sm:p-10 lg:p-12">
         {/* Top Section: Contact & Form */}
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-8 lg:gap-12 mb-10">
-          <div className="flex-1 bg-amber-300">
+          <div className="flex-1 ">
             <h2 className="font-semibold text-[56px] text-[#3ABBD0] leading-none mb-2">
               Contact
             </h2>
@@ -21,7 +21,7 @@ const Footer = () => {
           </div>
 
           {/* Combined Input & Button */}
-          <div className="w-full ">
+          <div className=" ">
             <form className="relative flex items-center border-2 border-[#3ABBD0] rounded-full p-1 group">
               <input
                 type="email"
@@ -32,7 +32,7 @@ const Footer = () => {
                 type="submit"
                 className="relative overflow-hidden bg-[#3ABBD0] text-[#1E1E1E] px-6 py-3 rounded-full  transition-all duration-300 hover:scale-105 group"
               >
-                <span className="relative z-10 font-hugiller text-[18px] sm:text-[20px]">
+                <span className="relative z-10 font-hugiller text-[15px] ">
                   Send Your Messages
                 </span>
                 <div className="absolute inset-0 bg-white/30 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>

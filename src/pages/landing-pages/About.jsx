@@ -4,7 +4,7 @@ import ArrowIcon from "../../assets/images/icons/rightArrow.webp";
 
 const About = () => {
   return (
-    <div className="min-h-sceen bg-gradient-to-br from-blue-100 to-cyan-50 relative overflow-hidden">
+    <div className="  min-h-screen  relative overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0 ">
         <img
@@ -31,10 +31,8 @@ const About = () => {
               <br />
               Haven <span className="text-[#3ABBD0]">Rentals</span>
             </h1>
-            <p className="Hugiller-font-style text-base md:text-[17px] lg:text-[17px] text-[#303435] mb-6 opacity-80 rounded-full  mx-auto backdrop-blur-sm max-w-5xl p-3">
-              Explore exceptional rental houses and boarding accommodations
-              tailored to your lifestyle. Your ideal space is just a search away
-              with Blue Haven Rentals.
+            <p className="Hugiller-font-style text-base md:text-[17px] lg:text-[17px] text-[#303435] mb-6 opacity-80 rounded-full  mx-auto  max-w-5xl p-3">
+              Your ideal space is just a search away with Blue Haven Rentals.
             </p>
 
             <div
