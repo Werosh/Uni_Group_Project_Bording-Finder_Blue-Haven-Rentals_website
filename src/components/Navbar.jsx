@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
   MapPin,
@@ -20,8 +19,6 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef(null);
-  const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,33 +43,6 @@ const Navbar = () => {
     };
   }, []);
 
-  const handleNavigation = (path, elementId = null) => {
-    if (elementId && location.pathname === "/") {
-      // If we're on home page and clicking an anchor link, scroll to element
-      const element = document.getElementById(elementId);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    } else if (elementId) {
-      // If we're on different page and need to go to home with anchor
-      navigate("/");
-      // Wait for navigation to complete, then scroll
-      setTimeout(() => {
-        const element = document.getElementById(elementId);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 100);
-    } else {
-      // Regular navigation
-      navigate(path);
-    }
-
-    // Close mobile menu after navigation
-    setIsMobileMenuOpen(false);
-    setIsDropdownOpen(false);
-  };
-
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -83,7 +53,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-[9999] ${
+      className={`fixed top-0 left-0 right-0 z-50 ${
         isScrolled ? "bg-blue-200 shadow-sm" : "bg-transparent"
       }   transition-colors duration-300`}
     >
@@ -114,38 +84,31 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-6 text-[20px] tracking-[.09em] Hugiller-font-style">
             <a
               href="#home"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation("/", "home");
-              }}
               className="text-gray-700 hover:text-teal-600 transition-colors duration-200"
             >
               Home
             </a>
             <a
               href="#about"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation("/", "about");
-              }}
               className="text-gray-700 hover:text-teal-600 transition-colors duration-200"
             >
               About
             </a>
-
-            {/* Find Place Button */}
-            <a href="#location">
-              <button className="bg-[#3BBBD0] font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
-                <MapPin className="h-4 w-4" />
-                <span>Find place</span>
-              </button>
+            <a
+              href="#contact"
+              className="text-gray-700 hover:text-teal-600 transition-colors duration-200"
+            >
+              Contact
             </a>
 
+            {/* Find Place Button */}
+            <button className="bg-teal-500 font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
+              <MapPin className="h-4 w-4" />
+              <span>Find place</span>
+            </button>
+
             {/* Add Post Button */}
-            <button
-              onClick={() => handleNavigation("/post-add")}
-              className="bg-[#3BBBD0] font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
-            >
+            <button className="bg-teal-500 font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
               <Plus className="h-4 w-4" />
               <span>Add Post</span>
             </button>
@@ -182,7 +145,7 @@ const Navbar = () => {
                             User Name
                           </p>
                           <p className="text-sm text-gray-500">@username</p>
-                          <button className="mt-3 w-full  bg-[#3BBBD0] hover:bg-teal-600 text-white py-2 px-5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200">
+                          <button className="mt-3 w-full  bg-teal-500 hover:bg-teal-600 text-white py-2 px-5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200">
                             <Edit className="h-4 w-4 " />
                             <span>Edit Profile</span>
                           </button>
@@ -193,10 +156,6 @@ const Navbar = () => {
                     <div className="py-1 text-[24px] text-[#235A78]">
                       <a
                         href="#profile"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleNavigation("/profile");
-                        }}
                         className="flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
                       >
                         <User className="h-4 w-4 mr-3" />
@@ -204,10 +163,6 @@ const Navbar = () => {
                       </a>
                       <a
                         href="#find-place"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleNavigation("/find-place");
-                        }}
                         className="flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
                       >
                         <MapPin className="h-4 w-4 mr-3" />
@@ -215,10 +170,6 @@ const Navbar = () => {
                       </a>
                       <a
                         href="#add-post"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleNavigation("/post-add");
-                        }}
                         className="flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
                       >
                         <Plus className="h-4 w-4 mr-3" />
@@ -226,10 +177,6 @@ const Navbar = () => {
                       </a>
                       <a
                         href="#pending-posts"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleNavigation("/pending-posts");
-                        }}
                         className="flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
                       >
                         <Clock className="h-4 w-4 mr-3" />
@@ -238,10 +185,6 @@ const Navbar = () => {
                       <div className=" py-1">
                         <a
                           href="#logout"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleNavigation("/logout");
-                          }}
                           className="flex items-center px-4 py-2  hover:bg-red-50 transition-colors duration-200"
                         >
                           <LogOut className="h-4 w-4 mr-3" />
@@ -298,38 +241,31 @@ const Navbar = () => {
             {/* Mobile Navigation Links */}
             <a
               href="#home"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation("/", "home");
-              }}
               className="block  hover:text-teal-600 py-2 text-[20px] text-[#235A78]"
             >
               Home
             </a>
             <a
               href="#about"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation("/", "about");
-              }}
               className="block text-[#235A78] hover:text-teal-600 py-2 text-[20px]"
             >
               About
             </a>
+            <a
+              href="#contact"
+              className="block text-[#235A78] hover:text-teal-600 py-2 text-[20px]"
+            >
+              Contact
+            </a>
 
             {/* Mobile Action Buttons */}
-            <div id="same-font" className="pt-4 space-y-3 ">
-              <a href="#location">
-                <button className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200">
-                  <MapPin className="h-4 w-4" />
-                  <span>Find place</span>
-                </button>
-              </a>
+            <div id="same-font" className="pt-4 space-y-3">
+              <button className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200">
+                <MapPin className="h-4 w-4" />
+                <span>Find place</span>
+              </button>
 
-              <button
-                onClick={() => handleNavigation("/post-add")}
-                className="w-full bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 mt-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200"
-              >
+              <button className="w-full bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200">
                 <Plus className="h-4 w-4" />
                 <span>Add Post</span>
               </button>
@@ -355,10 +291,6 @@ const Navbar = () => {
               <div className="space-y-2">
                 <a
                   href="#profile"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigation("/profile");
-                  }}
                   className="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
                 >
                   <User className="h-4 w-4 mr-3" />
@@ -366,10 +298,6 @@ const Navbar = () => {
                 </a>
                 <a
                   href="#pending-posts"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigation("/pending-posts");
-                  }}
                   className="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
                 >
                   <Clock className="h-4 w-4 mr-3" />
@@ -377,10 +305,6 @@ const Navbar = () => {
                 </a>
                 <a
                   href="#logout"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavigation("/logout");
-                  }}
                   className="flex items-center px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 text-[20px]"
                 >
                   <LogOut className="h-4 w-4 mr-3" />

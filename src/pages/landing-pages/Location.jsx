@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import { MdFilterList } from "react-icons/md";
 
-import Home from "../../assets/images/background/location-back.webp";
+import Home from "../../assets/images/background/location-background.webp";
 
 const DISTRICTS = [
   // Western
@@ -79,8 +79,6 @@ const PROPERTY_TYPES = [
 const VIEW_MORE_ROUTE = "/cities"; // <- change to your route path
 
 const FindCity = () => {
-  const [selectedProvinceMobile, setSelectedProvinceMobile] = useState(null);
-
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(DISTRICTS[0]);
   const [zoom, setZoom] = useState(9);
@@ -179,10 +177,7 @@ const FindCity = () => {
   const clearFilters = () => setSelectedProvinces([]);
 
   return (
-    <div
-      id="location"
-      className="relative min-h-screen bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200 overflow-hidden p-6 md:p-10"
-    >
+    <div className="relative min-h-screen bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200 overflow-hidden p-6 md:p-10">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
@@ -203,20 +198,20 @@ const FindCity = () => {
 
       {/* Hero Title */}
       <div className="text-center relative z-10 max-w-6xl mx-auto mb-6 md:mb-8 animate-fadeInUp">
-        <h1 className=" text-[72px] leading-none font-['Hugiller_DEMO']">
+        <h1 className="text-[64px] md:text-[112px] leading-none font-['Hugiller_DEMO']">
           <span className="text-[#263D5D]">Choose a city </span>
           <span className="text-[#3ABBD0]">You Want</span>
         </h1>
       </div>
 
       {/* Search / Filters Bar */}
-      <div className="mb-10 animate-slideInRight relative z-50 ">
-        <div className="relative   rounded-2xl  w-full flex flex-col md:flex-row items-center gap-4 border border-white/30 max-w-5xl mx-auto">
-          <div className="absolute inset-0  rounded-2xl pointer-events-none"></div>
+      <div className="mb-10 animate-slideInRight relative z-50">
+        <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl p-4 w-full flex flex-col md:flex-row items-center gap-4 shadow-2xl border border-white/30 max-w-5xl mx-auto">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl pointer-events-none"></div>
 
           {/* Search Input */}
-          <div className="relative group flex-1  max-w-2xl">
-            <div className="bg-gray-50/80 backdrop-blur-sm shadow-md h-[44px] flex items-center px-4 gap-3 rounded-2xl border-2 border-[#3ABBD0]/30 focus-within:border-[#3ABBD0] transition-all duration-300 group-hover:border-[#3ABBD0]/50 focus-within:ring-4 focus-within:ring-[#3ABBD0]/20">
+          <div className="relative group flex-1 w-full md:w-auto">
+            <div className="bg-gray-50/80 backdrop-blur-sm shadow-md h-[64px] flex items-center px-4 gap-3 rounded-2xl border-2 border-[#3ABBD0]/30 focus-within:border-[#3ABBD0] transition-all duration-300 group-hover:border-[#3ABBD0]/50 focus-within:ring-4 focus-within:ring-[#3ABBD0]/20">
               <FaSearch className="text-[#263D5D] opacity-70" size={18} />
               <input
                 value={query}
@@ -230,10 +225,10 @@ const FindCity = () => {
           </div>
 
           {/* Property Type */}
-          <div ref={propRef} className="relative group w-full md:w-[220px]">
+          <div ref={propRef} className="relative group w-full md:w-[240px]">
             <button
               onClick={() => setPropertyTypeOpen((v) => !v)}
-              className="bg-gray-50/80 backdrop-blur-sm shadow-md h-[44px] w-full flex items-center px-4 gap-3 rounded-2xl border-2 border-[#3ABBD0]/30 focus:border-[#3ABBD0] transition-all duration-300 group-hover:border-[#3ABBD0]/50 focus:ring-4 focus:ring-[#3ABBD0]/20 cursor-pointer"
+              className="bg-gray-50/80 backdrop-blur-sm shadow-md h-[64px] w-full flex items-center px-4 gap-3 rounded-2xl border-2 border-[#3ABBD0]/30 focus:border-[#3ABBD0] transition-all duration-300 group-hover:border-[#3ABBD0]/50 focus:ring-4 focus:ring-[#3ABBD0]/20 cursor-pointer"
             >
               <FaSlidersH className="text-[#263D5D] opacity-70" size={18} />
               <span className="text-[14px] text-[#263D5D] font-poppins opacity-70 truncate flex-1 text-left">
@@ -272,7 +267,7 @@ const FindCity = () => {
           >
             <button
               onClick={() => setFiltersOpen((v) => !v)}
-              className="bg-gray-50/80 backdrop-blur-sm shadow-md h-[44px] w-full flex items-center justify-center gap-3 rounded-2xl border-2 border-[#3ABBD0]/30 cursor-pointer hover:bg-gray-100/80 transition-all duration-300 group-hover:border-[#3ABBD0]/50 hover:scale-105"
+              className="bg-gray-50/80 backdrop-blur-sm shadow-md h-[64px] w-full flex items-center justify-center gap-3 rounded-2xl border-2 border-[#3ABBD0]/30 cursor-pointer hover:bg-gray-100/80 transition-all duration-300 group-hover:border-[#3ABBD0]/50 hover:scale-105"
             >
               <MdFilterList className="text-[#263D5D] opacity-70" size={20} />
               <span className="text-[14px] text-[#263D5D] font-poppins opacity-80">
@@ -343,7 +338,7 @@ const FindCity = () => {
           {/* Find Button */}
           <button
             onClick={onFind}
-            className="relative overflow-hidden bg-[#3ABBD0] hover:bg-cyan-500 h-[42px] flex items-center justify-center gap-2 rounded-2xl border border-[#3ABBD0] w-full md:w-[142px] cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg group"
+            className="relative overflow-hidden bg-[#3ABBD0] hover:bg-cyan-500 h-[62px] flex items-center justify-center gap-2 rounded-2xl border border-[#3ABBD0] w-full md:w-[142px] cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg group"
           >
             <span className="relative z-10 flex items-center gap-2">
               <FaSearch className="text-white" size={16} />
@@ -432,10 +427,9 @@ const FindCity = () => {
           </div>
         </div>
 
-        {/* Province list card */}
+        {/* Province list card (always show all cities available) */}
         <div className="relative bg-white/60 backdrop-blur-xl border border-white/40 shadow-2xl rounded-[28px] p-4 md:p-6 lg:p-8">
-          {/* Desktop grid */}
-          <div className="hidden sm:grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-6">
             {provincesOrdered.map((prov) => (
               <div key={prov} className="relative">
                 <div className="text-[#263D5D] font-bold mb-1 text-[15px]">
@@ -469,56 +463,18 @@ const FindCity = () => {
             ))}
           </div>
 
-          {/* Mobile dropdown view */}
-          <div className="block sm:hidden">
-            {provincesOrdered.map((prov) => {
-              const isOpen = selectedProvinceMobile === prov; // track single open province
-              return (
-                <div key={prov} className="mb-3">
-                  <button
-                    onClick={
-                      () => setSelectedProvinceMobile(isOpen ? null : prov) // toggle province
-                    }
-                    className="w-full flex justify-between items-center px-4 py-2 text-[#263D5D] font-semibold bg-gray-50/80 rounded-xl shadow hover:bg-[#3ABBD0]/10 transition"
-                  >
-                    <span>{prov} Province</span>
-                    <FaChevronDown
-                      className={`transition-transform duration-300 ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  {isOpen && (
-                    <ul className="mt-2 ml-4 space-y-1 bg-white/60 rounded-xl p-2 shadow-inner">
-                      {grouped[prov].map((d) => {
-                        const isSelected = d.name === selected.name;
-                        return (
-                          <li key={d.name}>
-                            <button
-                              onClick={() => {
-                                setSelected(d);
-                                setZoom(10);
-                              }}
-                              className={[
-                                "w-full text-left text-[14px] font-poppins transition-transform",
-                                "hover:underline hover:scale-[1.02] px-2 py-1 rounded",
-                                isSelected
-                                  ? "text-cyan-700 font-semibold"
-                                  : "text-[#263D5D]",
-                              ].join(" ")}
-                            >
-                              {d.name}
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          {/* View More button (same design, routes to another page) */}
+          <button className="flex justify-end mt-12" aria-label="View More">
+            <div className="relative overflow-hidden flex items-center gap-2 bg-[#263D5D] hover:bg-[#303435] text-white rounded-2xl px-4 py-2 shadow-lg border border-white/20 hover:scale-105 transition group">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-400 text-black">
+                <FaChevronRight />
+              </span>
+              <span className="font-semibold tracking-wide font-poppins">
+                View More
+              </span>
+              <div className="absolute inset-0 rounded-full bg-white/10 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+            </div>
+          </button>
         </div>
       </div>
 

@@ -57,7 +57,7 @@ const categories = [
 
 const CategoriesGallery = () => {
   return (
-    <div className="md:p-8 min-h-screen bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200 relative overflow-hidden">
+    <div className="p-4 md:p-8 min-h-screen bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200 relative overflow-hidden">
       {/* Animated background elements from Login3 */}
       <div className="absolute inset-0 overflow-hidden z-0">
         <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
@@ -81,7 +81,7 @@ const CategoriesGallery = () => {
       {/* Main Content Container with Glass Effect */}
       <div className="relative container mx-auto rounded-[40px] shadow-2xl p-6 sm:p-10 z-10 border border-white/30 animate-fadeInUp">
         {/* Section Title */}
-        <h1 className="text-center font-hugiller text-[50px] sm:text-[70px] md:text-[100px] lg:text-[60px] text-[#263D5D] leading-[1.1] mb-10">
+        <h1 className="text-center font-hugiller text-[50px] sm:text-[70px] md:text-[100px] lg:text-[130px] text-[#263D5D] leading-[1.1] mb-10">
           Categories
         </h1>
 
