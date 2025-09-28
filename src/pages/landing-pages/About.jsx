@@ -4,7 +4,7 @@ import ArrowIcon from "../../assets/images/icons/rightArrow.webp";
 
 const About = () => {
   return (
-    <div className="  min-h-screen  relative overflow-hidden">
+    <div className="   min-h-screen  relative overflow-hidden" id="about">
       {/* Background Image */}
       <div className="absolute inset-0 z-0 ">
         <img
@@ -22,16 +22,16 @@ const About = () => {
       </div>
 
       {/* Main Content */}
-      <main className="relative z-20 px-4 md:px-8 lg:px-12 py-8 md:py-12">
+      <main className="relative z-20 px-4 md:px-8 lg:px-12 ">
         <div className="max-w-7xl mx-auto">
           {/* Hero Section */}
-          <div className="text-center mb-12 md:mb-16 animate-fadeInUp">
-            <h1 className="Hugiller-font-style text-[48px] sm:text-[70px] md:text-[90px] lg:text-[120px] text-[#263D5D] leading-[1.1] mb-4">
+          <div className="text-center mb-5 animate-fadeInUp">
+            <h1 className="Hugiller-font-style text-[48px] sm:text-[50px] md:text-[60px] lg:text-[70px] text-[#263D5D] leading-[1.1] mt-20 ">
               About Blue
               <br />
               Haven <span className="text-[#3ABBD0]">Rentals</span>
             </h1>
-            <p className="Hugiller-font-style text-base md:text-[17px] lg:text-[17px] text-[#303435] mb-6 opacity-80 rounded-full  mx-auto  max-w-5xl p-3">
+            <p className="Hugiller-font-style text-base md:text-[17px] lg:text-[20px] text-[#303435]  opacity-80 rounded-full  mx-auto  max-w-5xl p-3">
               Your ideal space is just a search away with Blue Haven Rentals.
             </p>
 
@@ -39,7 +39,7 @@ const About = () => {
               className="inline-flex items-center justify-center gap-3 w-fit 
                 bg-[#3ABBD0]/90 backdrop-blur-md text-white 
                 px-4 sm:px-6 lg:px-8 
-                py-3 sm:py-4 lg:py-5 
+                p-2
                 rounded-2xl shadow-lg 
                 text-sm sm:text-base lg:text-lg 
                 border border-white/20"
@@ -52,9 +52,9 @@ const About = () => {
           </div>
 
           {/* Content Cards */}
-          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 mb-12">
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 mt-8 ">
             {/* What We Offer Card */}
-            <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-8 relative border border-white/30 animate-slideInLeft group hover:scale-[1.02] transition-all duration-500">
+            <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-6  relative border border-white/30 animate-slideInLeft group hover:scale-[1.02] transition-all duration-500">
               {/* Glass effect overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-3xl"></div>
 

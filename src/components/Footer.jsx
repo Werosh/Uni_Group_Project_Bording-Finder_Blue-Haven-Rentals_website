@@ -1,5 +1,6 @@
 import { FaFacebookF, FaWhatsapp } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
+import { Send } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -19,7 +20,6 @@ const Footer = () => {
               products and services. <br /> You can unsubscribe at any time.
             </p>
           </div>
-
           {/* Combined Input & Button */}
           <div className=" ">
             <form className="relative flex items-center border-2 border-[#3ABBD0] rounded-full p-1 group">
@@ -30,11 +30,17 @@ const Footer = () => {
               />
               <button
                 type="submit"
-                className="relative overflow-hidden bg-[#3ABBD0] text-[#1E1E1E] px-6 py-3 rounded-full  transition-all duration-300 hover:scale-105 group"
+                className="relative flex items-center justify-center overflow-hidden bg-[#3ABBD0] text-[#1E1E1E] px-6 py-3 rounded-full transition-all duration-300 hover:scale-105 group"
               >
-                <span className="relative z-10 font-hugiller text-[15px] ">
+                {/* Icon */}
+                <Send className="w-5 h-5 text-[#1E1E1E] z-10" />
+
+                {/* Text: hidden on small screens */}
+                <span className="hidden sm:inline-block relative z-10 ml-2 font-hugiller text-[15px] font-mono">
                   Send Your Messages
                 </span>
+
+                {/* Skew background effect */}
                 <div className="absolute inset-0 bg-white/30 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
               </button>
             </form>
@@ -56,16 +62,10 @@ const Footer = () => {
             >
               About
             </a>
-            <a
-              href="#"
-              className="text-[23px] font-semibold block text-lg hover:text-[#3ABBD0] transition-colors"
-            >
-              Contact
-            </a>
           </div>
           <div className="space-y-3">
             <a
-              href="#"
+              href="#location"
               className="text-[23px] font-semibold block text-lg hover:text-[#3ABBD0] transition-colors"
             >
               Find Place

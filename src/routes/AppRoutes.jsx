@@ -8,6 +8,7 @@ import GetStartedPage from "../pages/sign-up-pages/GetStartedPage";
 
 import ProtectedRoute from "./ProtectedRoute";
 import Footer from "../components/Footer";
+import PostAdd from "../pages/main-pages/PostAddPage";
 
 function AppRoutes() {
   return (
@@ -19,6 +20,7 @@ function AppRoutes() {
 
         {/* Main pages */}
         <Route path="/browse" element={<BrowsePlacePage />} />
+        <Route path="/post-add" element={<PostAdd />} />
 
         {/* User pages (protected) */}
         <Route
