@@ -9,10 +9,7 @@ const Home = () => {
   const [guests, setGuests] = useState("Guests");
 
   return (
-    <div
-      id="home"
-      className="min-h-screen bg-gradient-to-br from-blue-100 to-cyan-50 relative overflow-hidden"
-    >
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-cyan-50 relative overflow-hidden">
       {/* Background Image Div */}
       <div className="absolute inset-0 flex">
         <div
