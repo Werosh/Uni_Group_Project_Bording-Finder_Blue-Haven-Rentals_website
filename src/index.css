@@ -9,7 +9,9 @@
   font-family: "Open Sauce One Regular";
   src: url("/src/assets/fonts/open-sauce.sans-regular.ttf") format("truetype");
 } */
-
+* {
+  scroll-behavior: smooth;
+}
 h1 {
   font-family: Hugiller-Demo;
 }
@@ -24,7 +26,6 @@ p {
 }
 
 button {
-  background-color: oklch(71.5% 0.143 215.221);
   cursor: pointer;
 }
 
