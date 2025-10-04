@@ -82,8 +82,7 @@ const SetupYourImagePage = () => {
       await createUserProfile(user.uid, {
         uid: user.uid,
         email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        fullName: formData.fullName,
         username: formData.username,
         description: formData.description,
         phone: formData.phone,

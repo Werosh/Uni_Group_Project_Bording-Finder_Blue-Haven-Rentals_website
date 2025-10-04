@@ -17,8 +17,7 @@ export const SignupProvider = ({ children }) => {
     userType: "", // boarding_finder, boarding_owner
 
     // Step 2 - Basic Info
-    firstName: "",
-    lastName: "",
+    fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -96,8 +95,7 @@ export const SignupProvider = ({ children }) => {
   const resetSignup = () => {
     setFormData({
       userType: "",
-      firstName: "",
-      lastName: "",
+      fullName: "",
       email: "",
       password: "",
       confirmPassword: "",

@@ -13,8 +13,7 @@ const GetStartedPage = () => {
   const navigate = useNavigate();
 
   const [localData, setLocalData] = useState({
-    firstName: formData.firstName || "",
-    lastName: formData.lastName || "",
+    fullName: formData.fullName || "",
     email: formData.email || "",
     password: formData.password || "",
     confirmPassword: formData.confirmPassword || "",
@@ -25,10 +24,11 @@ const GetStartedPage = () => {
 
   const validate = () => {
     let newErrors = {};
-    if (!localData.firstName.trim())
-      newErrors.firstName = "First name is required";
-    if (!localData.lastName.trim())
-      newErrors.lastName = "Last name is required";
+    if (!localData.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    } else if (localData.fullName.trim().length < 3) {
+      newErrors.fullName = "Full name must be at least 3 characters";
+    }
     if (!localData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(localData.email)) {
@@ -78,8 +78,7 @@ const GetStartedPage = () => {
         await createUserProfile(user.uid, {
           uid: user.uid,
           email: localData.email,
-          firstName: localData.firstName,
-          lastName: localData.lastName,
+          fullName: localData.fullName,
           userType: formData.userType,
         });
 
@@ -114,12 +113,11 @@ const GetStartedPage = () => {
 
   // Calculate progress
   const progress =
-    ((localData.firstName ? 1 : 0) +
-      (localData.lastName ? 1 : 0) +
+    ((localData.fullName ? 1 : 0) +
       (localData.email ? 1 : 0) +
       (localData.password ? 1 : 0) +
       (localData.confirmPassword ? 1 : 0)) /
-    5;
+    4;
 
   return (
     <div>
@@ -158,61 +156,32 @@ const GetStartedPage = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-3xl"></div>
 
             <div className="relative z-10">
-              <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                <div className="flex-1">
-                  <label className="flex items-center gap-2 text-[#263D5D] text-sm font-bold mb-1">
-                    <div className="w-2 h-2 bg-[#3ABBD0] rounded-full"></div>
-                    First Name
-                  </label>
-                  <div className="relative group">
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={localData.firstName}
-                      onChange={handleChange}
-                      className={`w-full px-6 py-4 rounded-2xl bg-gray-50/80 backdrop-blur-sm border-2 focus:outline-none focus:ring-4 focus:ring-[#3ABBD0]/20 transition-all duration-300 group-hover:border-[#3ABBD0]/50 ${
-                        errors.firstName
-                          ? "border-red-500"
-                          : "border-[#3ABBD0]/30 focus:border-[#3ABBD0]"
-                      }`}
-                      placeholder="Enter first name"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#3ABBD0]/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                  </div>
-                  {errors.firstName && (
-                    <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-red-500 rounded-full"></span>
-                      {errors.firstName}
-                    </p>
-                  )}
+              <div className="mb-4">
+                <label className="flex items-center gap-2 text-[#263D5D] text-sm font-bold mb-1">
+                  <div className="w-2 h-2 bg-[#3ABBD0] rounded-full"></div>
+                  Full Name
+                </label>
+                <div className="relative group">
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={localData.fullName}
+                    onChange={handleChange}
+                    className={`w-full px-6 py-4 rounded-2xl bg-gray-50/80 backdrop-blur-sm border-2 focus:outline-none focus:ring-4 focus:ring-[#3ABBD0]/20 transition-all duration-300 group-hover:border-[#3ABBD0]/50 ${
+                      errors.fullName
+                        ? "border-red-500"
+                        : "border-[#3ABBD0]/30 focus:border-[#3ABBD0]"
+                    }`}
+                    placeholder="Enter your full name"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#3ABBD0]/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 </div>
-                <div className="flex-1">
-                  <label className="flex items-center gap-2 text-[#263D5D] text-sm font-bold mb-1">
-                    <div className="w-2 h-2 bg-[#3ABBD0] rounded-full"></div>
-                    Last Name
-                  </label>
-                  <div className="relative group">
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={localData.lastName}
-                      onChange={handleChange}
-                      className={`w-full px-6 py-4 rounded-2xl bg-gray-50/80 backdrop-blur-sm border-2 focus:outline-none focus:ring-4 focus:ring-[#3ABBD0]/20 transition-all duration-300 group-hover:border-[#3ABBD0]/50 ${
-                        errors.lastName
-                          ? "border-red-500"
-                          : "border-[#3ABBD0]/30 focus:border-[#3ABBD0]"
-                      }`}
-                      placeholder="Enter last name"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#3ABBD0]/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                  </div>
-                  {errors.lastName && (
-                    <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-red-500 rounded-full"></span>
-                      {errors.lastName}
-                    </p>
-                  )}
-                </div>
+                {errors.fullName && (
+                  <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                    {errors.fullName}
+                  </p>
+                )}
               </div>
 
               <div className="mb-4">

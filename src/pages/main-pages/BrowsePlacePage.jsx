@@ -4,6 +4,7 @@ import {
   FaChevronDown,
   FaChevronUp,
   FaChevronRight,
+  FaChevronLeft,
   FaSlidersH,
   FaBars,
   FaTimes,
@@ -93,6 +94,8 @@ const BrowsePlacePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPostIndex, setSelectedPostIndex] = useState(null);
   const postsPerPage = 12;
 
   const propRef = useRef(null);
@@ -127,6 +130,17 @@ const BrowsePlacePage = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [propertyTypeOpen]);
+
+  // ESC key to close modal
+  useEffect(() => {
+    const handleEscKey = (e) => {
+      if (e.key === "Escape" && modalOpen) {
+        closeModal();
+      }
+    };
+    document.addEventListener("keydown", handleEscKey);
+    return () => document.removeEventListener("keydown", handleEscKey);
+  }, [modalOpen]);
 
   const toggleCategory = (category) => {
     setSelectedCategories((prev) =>
@@ -211,6 +225,34 @@ const BrowsePlacePage = () => {
       "_blank"
     );
   };
+
+  // Modal functions
+  const openModal = (index) => {
+    setSelectedPostIndex(index);
+    setModalOpen(true);
+    document.body.style.overflow = "hidden"; // Prevent background scrolling
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedPostIndex(null);
+    document.body.style.overflow = "unset"; // Restore scrolling
+  };
+
+  const goToPreviousPost = () => {
+    if (selectedPostIndex > 0) {
+      setSelectedPostIndex(selectedPostIndex - 1);
+    }
+  };
+
+  const goToNextPost = () => {
+    if (selectedPostIndex < paginatedPosts.length - 1) {
+      setSelectedPostIndex(selectedPostIndex + 1);
+    }
+  };
+
+  const selectedPost =
+    selectedPostIndex !== null ? paginatedPosts[selectedPostIndex] : null;
 
   const SidebarContent = () => (
     <div className="space-y-6">
@@ -492,11 +534,12 @@ const BrowsePlacePage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {paginatedPosts.map((post) => {
+              {paginatedPosts.map((post, index) => {
                 return (
                   <div
                     key={post.id}
-                    className="group bg-white/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                    onClick={() => openModal(index)}
+                    className="group bg-white/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                   >
                     <div className="relative h-48 overflow-hidden">
                       <img
@@ -568,6 +611,220 @@ const BrowsePlacePage = () => {
           )}
         </main>
       </div>
+
+      {/* Post Detail Modal */}
+      {modalOpen && selectedPost && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={closeModal}
+        >
+          <div
+            className="relative bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-300 hover:scale-110"
+              aria-label="Close modal"
+            >
+              <FaTimes className="text-[#263D5D] text-xl" />
+            </button>
+
+            {/* Navigation Arrows */}
+            <button
+              onClick={goToPreviousPost}
+              disabled={selectedPostIndex === 0}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white rounded-full p-3 md:p-4 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              aria-label="Previous post"
+            >
+              <FaChevronLeft className="text-[#263D5D] text-xl md:text-2xl" />
+            </button>
+
+            <button
+              onClick={goToNextPost}
+              disabled={selectedPostIndex === paginatedPosts.length - 1}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white rounded-full p-3 md:p-4 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              aria-label="Next post"
+            >
+              <FaChevronRight className="text-[#263D5D] text-xl md:text-2xl" />
+            </button>
+
+            {/* Modal Content */}
+            <div className="flex flex-col lg:flex-row">
+              {/* Image Section */}
+              <div className="lg:w-1/2 relative">
+                <img
+                  src={mockImage}
+                  alt={selectedPost.title}
+                  className="w-full h-64 md:h-80 lg:h-full object-cover rounded-t-3xl lg:rounded-l-3xl lg:rounded-tr-none"
+                />
+                <div className="absolute top-4 left-4 bg-[#3ABBD0] text-white px-4 py-2 rounded-full text-lg font-bold shadow-lg">
+                  Rs. {selectedPost.rent?.toLocaleString()}
+                </div>
+              </div>
+
+              {/* Details Section */}
+              <div className="lg:w-1/2 p-6 md:p-8 space-y-4">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-[#263D5D] mb-2">
+                    {selectedPost.title}
+                  </h2>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="inline-block bg-[#3ABBD0]/20 text-[#3ABBD0] px-3 py-1 rounded-full text-sm font-semibold">
+                      {selectedPost.category}
+                    </span>
+                    {selectedPost.forWhom && (
+                      <span className="inline-block bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold">
+                        For {selectedPost.forWhom}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <h3 className="text-lg font-semibold text-[#263D5D] mb-2 flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                    Location
+                  </h3>
+                  <p className="text-[#263D5D]/80 font-poppins ml-7">
+                    {selectedPost.location}
+                  </p>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <h3 className="text-lg font-semibold text-[#263D5D] mb-2 flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6h16M4 12h16M4 18h16"
+                      />
+                    </svg>
+                    Description
+                  </h3>
+                  <p className="text-[#263D5D]/80 font-poppins ml-7 text-sm md:text-base leading-relaxed">
+                    {selectedPost.description}
+                  </p>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <h3 className="text-lg font-semibold text-[#263D5D] mb-3">
+                    Contact Information
+                  </h3>
+                  <div className="space-y-3 ml-2">
+                    {selectedPost.ownerName && (
+                      <div className="flex items-start gap-3">
+                        <svg
+                          className="w-5 h-5 text-[#3ABBD0] mt-0.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                        <div>
+                          <p className="text-xs text-[#263D5D]/60 font-poppins">
+                            Owner Name
+                          </p>
+                          <p className="text-[#263D5D] font-poppins font-medium">
+                            {selectedPost.ownerName}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    {selectedPost.email && (
+                      <div className="flex items-start gap-3">
+                        <svg
+                          className="w-5 h-5 text-[#3ABBD0] mt-0.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <div>
+                          <p className="text-xs text-[#263D5D]/60 font-poppins">
+                            Email
+                          </p>
+                          <a
+                            href={`mailto:${selectedPost.email}`}
+                            className="text-[#3ABBD0] hover:text-cyan-600 font-poppins font-medium break-all"
+                          >
+                            {selectedPost.email}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    {selectedPost.mobile && (
+                      <div className="flex items-start gap-3">
+                        <svg
+                          className="w-5 h-5 text-[#3ABBD0] mt-0.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                          />
+                        </svg>
+                        <div>
+                          <p className="text-xs text-[#263D5D]/60 font-poppins">
+                            Mobile
+                          </p>
+                          <a
+                            href={`tel:+94${selectedPost.mobile}`}
+                            className="text-[#3ABBD0] hover:text-cyan-600 font-poppins font-medium"
+                          >
+                            +94 {selectedPost.mobile}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         @keyframes fadeInUp {

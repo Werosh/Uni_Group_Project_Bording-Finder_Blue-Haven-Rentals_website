@@ -435,7 +435,7 @@ const PostAddFormPage = () => {
         email: formData.email.trim(),
         mobile: formData.mobile.trim(),
         ownerId: user.uid,
-        ownerName: userProfile?.fullName || user.displayName || "Anonymous",
+        ownerName: userProfile?.fullName || "Anonymous",
       };
 
       // Save to Firestore
