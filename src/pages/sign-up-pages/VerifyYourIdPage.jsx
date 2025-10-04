@@ -48,8 +48,8 @@ const VerifyYourIdPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!localData.idNumber || !localData.frontImage || !localData.backImage) {
-      alert("⚠️ Please complete all fields");
+    if (!localData.idNumber) {
+      alert("⚠️ Please enter your ID number");
       return;
     }
     updateFormData(localData);
@@ -75,7 +75,7 @@ const VerifyYourIdPage = () => {
                 <span className="text-[#3ABBD0] relative">Identity</span>
               </h1>
               <p className="font-hugiller text-lg md:text-xl text-[#303435] mb-6 opacity-80">
-                Please verify your identity securely
+                Verify your identity (ID images optional)
               </p>
               <div className="flex items-center justify-center lg:justify-start gap-3 bg-[#303435]/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-lg text-sm sm:text-base border border-white/20">
                 <BsStars className="w-[25px] sm:w-[30px] text-[#3ABBD0] animate-spin-slow" />
@@ -142,7 +142,7 @@ const VerifyYourIdPage = () => {
                   <p className="text-sm font-medium text-[#263D5D]">
                     {localData.frontImage
                       ? localData.frontImage.name
-                      : "Upload front side"}
+                      : "Upload front side (optional)"}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     Drag & drop or click
@@ -175,7 +175,7 @@ const VerifyYourIdPage = () => {
                   <p className="text-sm font-medium text-[#263D5D]">
                     {localData.backImage
                       ? localData.backImage.name
-                      : "Upload back side"}
+                      : "Upload back side (optional)"}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     Drag & drop or click

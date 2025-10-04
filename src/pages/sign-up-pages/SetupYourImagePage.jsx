@@ -51,11 +51,6 @@ const SetupYourImagePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!profileImage) {
-      alert("⚠️ Please upload your profile image");
-      return;
-    }
-
     setLoading(true);
     setError("");
 
@@ -64,16 +59,25 @@ const SetupYourImagePage = () => {
       const userCredential = await signup(formData.email, formData.password);
       const user = userCredential.user;
 
-      // 2. Upload images to Firebase Storage
-      const profileImageUrl = await uploadImage(profileImage, "profiles");
-      const idFrontImageUrl = await uploadImage(
-        formData.frontImage,
-        "id-documents"
-      );
-      const idBackImageUrl = await uploadImage(
-        formData.backImage,
-        "id-documents"
-      );
+      // 2. Upload images to Firebase Storage (only if provided)
+      let profileImageUrl = null;
+      let idFrontImageUrl = null;
+      let idBackImageUrl = null;
+
+      if (profileImage) {
+        profileImageUrl = await uploadImage(profileImage, "profiles");
+      }
+
+      if (formData.frontImage) {
+        idFrontImageUrl = await uploadImage(
+          formData.frontImage,
+          "id-documents"
+        );
+      }
+
+      if (formData.backImage) {
+        idBackImageUrl = await uploadImage(formData.backImage, "id-documents");
+      }
 
       // 3. Create user profile in Firestore
       await createUserProfile(user.uid, {
@@ -143,7 +147,7 @@ const SetupYourImagePage = () => {
                 <span className="text-[#3ABBD0] relative">Profile</span>
               </h1>
               <p className="font-hugiller text-lg md:text-xl text-[#303435] mb-6 opacity-80">
-                Please upload your profile image
+                Upload your profile image (optional)
               </p>
               <div className="flex items-center justify-center lg:justify-start gap-3 bg-[#303435]/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-lg text-sm sm:text-base border border-white/20">
                 <BsStars className="w-[25px] sm:w-[30px] text-[#3ABBD0] animate-spin-slow" />
@@ -163,7 +167,7 @@ const SetupYourImagePage = () => {
               {/* Upload Header */}
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-[#263D5D] mb-2">
-                  Upload Your Profile Image
+                  Upload Your Profile Image (Optional)
                 </h2>
                 <p className="text-sm text-gray-600">
                   maximum allowed upload size of 3 MB
@@ -218,10 +222,10 @@ const SetupYourImagePage = () => {
                         </span>
                       </div>
                       <p className="text-lg font-medium text-[#263D5D] mb-2">
-                        Upload Your Profile Image
+                        Upload Your Profile Image (Optional)
                       </p>
                       <p className="text-xs text-gray-500">
-                        Drag & drop or click to upload
+                        Drag & drop or click to upload, or skip to continue
                       </p>
                     </div>
                   )}
