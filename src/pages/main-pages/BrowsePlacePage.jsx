@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import { MdFilterList } from "react-icons/md";
 import { getPosts } from "../../firebase/dbService";
-import { getStrapiMediaUrl } from "../../firebase/strapiService";
+import mockImage from "../../assets/images/background/post-back.webp";
 
 // Data from Location.jsx
 const DISTRICTS = [
@@ -493,12 +493,6 @@ const BrowsePlacePage = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {paginatedPosts.map((post) => {
-                // Get the first image URL from Strapi
-                const imageUrl =
-                  post.images && post.images.length > 0
-                    ? post.images[0].url
-                    : "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80";
-
                 return (
                   <div
                     key={post.id}
@@ -506,13 +500,9 @@ const BrowsePlacePage = () => {
                   >
                     <div className="relative h-48 overflow-hidden">
                       <img
-                        src={imageUrl}
+                        src={mockImage}
                         alt={post.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        onError={(e) => {
-                          e.target.src =
-                            "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80";
-                        }}
                       />
                       <div className="absolute top-3 right-3 bg-[#3ABBD0] text-white px-3 py-1 rounded-full text-sm font-semibold">
                         Rs. {post.rent?.toLocaleString()}

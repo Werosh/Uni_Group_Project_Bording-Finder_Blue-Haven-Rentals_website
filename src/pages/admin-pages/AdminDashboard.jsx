@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
   Users,
@@ -9,9 +10,12 @@ import {
   Building2,
   UserCheck,
   ShieldAlert,
+  PlusCircle,
+  Search,
 } from "lucide-react";
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const { userProfile } = useAuth();
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -134,18 +138,28 @@ const AdminDashboard = () => {
             <LayoutDashboard className="w-6 h-6 mr-2" />
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="flex items-center justify-center space-x-2 bg-[#3ABBD0] hover:bg-[#2BA9C1] text-white px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105">
-              <Users className="w-5 h-5" />
-              <span>Manage Users</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button
+              onClick={() => navigate("/browse")}
+              className="flex items-center justify-center space-x-2 bg-[#3ABBD0] hover:bg-[#2BA9C1] text-white px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-md"
+            >
+              <Search className="w-5 h-5" />
+              <span>Browse Listings</span>
             </button>
-            <button className="flex items-center justify-center space-x-2 bg-purple-500 hover:bg-purple-600 text-white px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105">
+            <button
+              onClick={() => navigate("/post-add")}
+              className="flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-md"
+            >
+              <PlusCircle className="w-5 h-5" />
+              <span>Create Post</span>
+            </button>
+            <button className="flex items-center justify-center space-x-2 bg-purple-500 hover:bg-purple-600 text-white px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-md">
               <Home className="w-5 h-5" />
               <span>Manage Listings</span>
             </button>
-            <button className="flex items-center justify-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105">
-              <Settings className="w-5 h-5" />
-              <span>System Settings</span>
+            <button className="flex items-center justify-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-md">
+              <Users className="w-5 h-5" />
+              <span>Manage Users</span>
             </button>
           </div>
         </div>
@@ -158,10 +172,20 @@ const AdminDashboard = () => {
               <h3 className="font-bold text-amber-900 mb-2">
                 Admin Access Notice
               </h3>
-              <p className="text-amber-800">
+              <p className="text-amber-800 mb-3">
                 You have full administrative access to the Blue Haven Rentals
-                platform. Please use your privileges responsibly and ensure all
-                actions comply with the platform's policies and guidelines.
+                platform. As an admin, you have unrestricted access to all
+                features and pages, including:
+              </p>
+              <ul className="text-amber-800 list-disc list-inside space-y-1 ml-2">
+                <li>Create and manage posts (boarding owner privileges)</li>
+                <li>Browse and view all listings</li>
+                <li>Access user profiles and settings</li>
+                <li>Manage system configurations</li>
+              </ul>
+              <p className="text-amber-800 mt-3 text-sm">
+                Please use your privileges responsibly and ensure all actions
+                comply with the platform's policies and guidelines.
               </p>
             </div>
           </div>

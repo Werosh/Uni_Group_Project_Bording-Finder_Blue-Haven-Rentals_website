@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute = ({ children, requireRole = null }) => {
-  const { user, userProfile, loading } = useAuth();
+  const { user, userProfile, loading, isAdmin } = useAuth();
 
   // Show loading state while checking auth
   if (loading) {
@@ -19,7 +19,8 @@ const ProtectedRoute = ({ children, requireRole = null }) => {
   }
 
   // Check role-based access if requireRole is specified
-  if (requireRole && userProfile?.role !== requireRole) {
+  // Admin users have unrestricted access to all routes
+  if (requireRole && userProfile?.role !== requireRole && !isAdmin()) {
     return <Navigate to="/" />;
   }
 

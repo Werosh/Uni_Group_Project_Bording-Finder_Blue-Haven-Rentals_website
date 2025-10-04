@@ -2,15 +2,10 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { createPost } from "../../firebase/dbService";
-import {
-  uploadImagesToStrapi,
-  uploadVideosToStrapi,
-  getStrapiMediaUrl,
-} from "../../firebase/strapiService";
 import postBackground from "../../assets/images/background/post-back.webp";
 import man1Img from "../../assets/images/others/Img-6.webp";
 
-// Step type (0, 1, 2)
+// Step type (0, 1)
 const steps = [
   {
     key: 0,
@@ -28,30 +23,6 @@ const steps = [
   },
   {
     key: 1,
-    label: "Gallery",
-    Icon: () => (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M4 5h16a1 1 0 0 1 1 1v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a1 1 0 0 1 1-1Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <path
-          d="M7.5 11.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"
-          fill="currentColor"
-        />
-        <path
-          d="M4 16l4.5-4.5a2 2 0 0 1 2.8 0L14 14l2-2a2 2 0 0 1 2.8 0L21 14.2"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    key: 2,
     label: "Finish",
     Icon: () => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -252,7 +223,6 @@ const PostAddFormPage = () => {
   const navigate = useNavigate();
   const { user, userProfile } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -266,13 +236,7 @@ const PostAddFormPage = () => {
     rent: "",
     email: user?.email || "",
     mobile: "",
-    images: [],
-    videos: [],
   });
-
-  // Preview URLs for uploaded files
-  const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
-  const [videoPreviewUrls, setVideoPreviewUrls] = useState([]);
 
   // Validation functions
   const validateEmail = (email) => {
@@ -283,20 +247,6 @@ const PostAddFormPage = () => {
   const validateMobile = (mobile) => {
     const mobileRegex = /^[0-9]{9}$/;
     return mobileRegex.test(mobile.replace(/\s/g, ""));
-  };
-
-  const validateFileSize = (file, maxSizeMB = 3) => {
-    return file.size <= maxSizeMB * 1024 * 1024;
-  };
-
-  const validateImageFile = (file) => {
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    return allowedTypes.includes(file.type);
-  };
-
-  const validateVideoFile = (file) => {
-    const allowedTypes = ["video/mp4", "video/avi", "video/mov", "video/wmv"];
-    return allowedTypes.includes(file.type);
   };
 
   const validateStep1 = () => {
@@ -364,44 +314,6 @@ const PostAddFormPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateStep2 = () => {
-    const newErrors = {};
-
-    // Images validation
-    if (formData.images.length === 0) {
-      newErrors.images = "At least one image is required";
-    } else if (formData.images.length > 10) {
-      newErrors.images = "Maximum 10 images allowed";
-    }
-
-    // Check individual image files
-    for (const image of formData.images) {
-      if (!validateImageFile(image)) {
-        newErrors.images = "Only JPEG, JPG, PNG, and WebP images are allowed";
-        break;
-      }
-      if (!validateFileSize(image)) {
-        newErrors.images = "Each image must be less than 3MB";
-        break;
-      }
-    }
-
-    // Video validation (optional)
-    for (const video of formData.videos) {
-      if (!validateVideoFile(video)) {
-        newErrors.videos = "Only MP4, AVI, MOV, and WMV videos are allowed";
-        break;
-      }
-      if (!validateFileSize(video, 50)) {
-        newErrors.videos = "Each video must be less than 50MB";
-        break;
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -412,119 +324,7 @@ const PostAddFormPage = () => {
     }
   };
 
-  const handleFileChange = (e, type) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-
-      if (type === "images") {
-        const totalImages = formData.images.length + newFiles.length;
-        if (totalImages > 10) {
-          setErrors({
-            ...errors,
-            images: `You can only upload up to 10 images. You currently have ${formData.images.length} image(s).`,
-          });
-          return;
-        }
-
-        // Validate each image file
-        for (const file of newFiles) {
-          if (!validateImageFile(file)) {
-            setErrors({
-              ...errors,
-              images: "Only JPEG, JPG, PNG, and WebP images are allowed",
-            });
-            return;
-          }
-          if (!validateFileSize(file)) {
-            setErrors({
-              ...errors,
-              images: `File "${file.name}" is too large. Maximum size is 3MB per image.`,
-            });
-            return;
-          }
-        }
-
-        const combinedFiles = [...formData.images, ...newFiles];
-        setFormData({ ...formData, images: combinedFiles });
-
-        // Create preview URLs for new files
-        const newUrls = newFiles.map((file) => URL.createObjectURL(file));
-        const combinedUrls = [...imagePreviewUrls, ...newUrls];
-        setImagePreviewUrls(combinedUrls);
-
-        // Clear any previous image errors
-        if (errors.images) {
-          setErrors({ ...errors, images: undefined });
-        }
-      } else {
-        // Validate video files
-        for (const file of newFiles) {
-          if (!validateVideoFile(file)) {
-            setErrors({
-              ...errors,
-              videos: "Only MP4, AVI, MOV, and WMV videos are allowed",
-            });
-            return;
-          }
-          if (!validateFileSize(file, 50)) {
-            setErrors({
-              ...errors,
-              videos: `File "${file.name}" is too large. Maximum size is 50MB per video.`,
-            });
-            return;
-          }
-        }
-
-        setFormData({ ...formData, videos: newFiles });
-        const urls = newFiles.map((file) => URL.createObjectURL(file));
-        setVideoPreviewUrls(urls);
-
-        // Clear any previous video errors
-        if (errors.videos) {
-          setErrors({ ...errors, videos: undefined });
-        }
-      }
-    }
-
-    // Reset the input value to allow re-uploading the same files
-    e.target.value = "";
-  };
-
-  const removeImage = (index) => {
-    const url = imagePreviewUrls[index];
-    const newUrls = imagePreviewUrls.filter((_, i) => i !== index);
-    const newFiles = formData.images.filter((_, i) => i !== index);
-
-    setImagePreviewUrls(newUrls);
-    setFormData({ ...formData, images: newFiles });
-    URL.revokeObjectURL(url);
-
-    // Clear image errors if removing images
-    if (errors.images) {
-      setErrors({ ...errors, images: undefined });
-    }
-  };
-
-  const removeVideo = (index) => {
-    const url = videoPreviewUrls[index];
-    const newUrls = videoPreviewUrls.filter((_, i) => i !== index);
-    const newFiles = formData.videos.filter((_, i) => i !== index);
-
-    setVideoPreviewUrls(newUrls);
-    setFormData({ ...formData, videos: newFiles });
-    URL.revokeObjectURL(url);
-
-    // Clear video errors if removing videos
-    if (errors.videos) {
-      setErrors({ ...errors, videos: undefined });
-    }
-  };
-
   const heroMan = useMemo(() => man1Img, []);
-
-  const displayImages = useMemo(() => {
-    return imagePreviewUrls.length > 0 ? imagePreviewUrls : [postBackground];
-  }, [imagePreviewUrls]);
 
   const progressPercentage = useMemo(() => {
     let totalProgress = 0;
@@ -543,16 +343,11 @@ const PostAddFormPage = () => {
     const step1FilledCount = step1Fields.filter((field) => field !== "").length;
     const step1Progress = step1FilledCount / step1Fields.length;
 
-    // Step 2 (Gallery) progress
-    const step2Progress = formData.images.length > 0 ? 1 : 0;
-
     // Calculate total progress based on current step
     if (activeStep === 0) {
-      totalProgress = step1Progress * 0.6;
+      totalProgress = step1Progress * 0.8;
     } else if (activeStep === 1) {
-      totalProgress = 0.6 + step2Progress * 0.3;
-    } else if (activeStep === 2) {
-      totalProgress = 0.9 + 0.1;
+      totalProgress = 1.0;
     }
 
     return Math.round(totalProgress * 100);
@@ -562,24 +357,12 @@ const PostAddFormPage = () => {
     if (activeStep === 0 && !validateStep1()) {
       return;
     }
-    if (activeStep === 1 && !validateStep2()) {
-      return;
-    }
-    setActiveStep((s) => Math.min(2, s + 1));
+    setActiveStep((s) => Math.min(1, s + 1));
   };
-
-  const goPrev = () => setActiveStep((s) => Math.max(0, s - 1));
-
-  const nextSlide = () =>
-    setCurrentSlide((n) => (n + 1) % displayImages.length);
-  const prevSlide = () =>
-    setCurrentSlide(
-      (n) => (n - 1 + displayImages.length) % displayImages.length
-    );
 
   const handleSubmit = async () => {
     // Final validation before submission
-    if (!validateStep1() || !validateStep2()) {
+    if (!validateStep1()) {
       alert("Please fix all errors before submitting");
       return;
     }
@@ -587,30 +370,7 @@ const PostAddFormPage = () => {
     setIsSubmitting(true);
 
     try {
-      // Upload images to Strapi
-      let imageUrls = [];
-      if (formData.images.length > 0) {
-        const uploadedImages = await uploadImagesToStrapi(formData.images);
-        imageUrls = uploadedImages.map((img) => ({
-          id: img.id,
-          url: getStrapiMediaUrl(img.url),
-          name: img.name,
-          formats: img.formats,
-        }));
-      }
-
-      // Upload videos to Strapi (optional)
-      let videoUrls = [];
-      if (formData.videos.length > 0) {
-        const uploadedVideos = await uploadVideosToStrapi(formData.videos);
-        videoUrls = uploadedVideos.map((vid) => ({
-          id: vid.id,
-          url: getStrapiMediaUrl(vid.url),
-          name: vid.name,
-        }));
-      }
-
-      // Create post data
+      // Create post data (text-only, no images or videos)
       const postData = {
         title: formData.title.trim(),
         category: formData.category,
@@ -620,8 +380,6 @@ const PostAddFormPage = () => {
         rent: Number(formData.rent.replace(/,/g, "")),
         email: formData.email.trim(),
         mobile: formData.mobile.trim(),
-        images: imageUrls,
-        videos: videoUrls,
         ownerId: user.uid,
         ownerName: userProfile?.fullName || user.displayName || "Anonymous",
       };
@@ -651,9 +409,6 @@ const PostAddFormPage = () => {
         formData.email &&
         formData.mobile
       );
-    }
-    if (activeStep === 1) {
-      return formData.images.length > 0;
     }
     return true;
   };
@@ -706,8 +461,6 @@ const PostAddFormPage = () => {
                             "mobile",
                           ].includes(field)
                         )
-                      : key === 1
-                      ? errors.images || errors.videos
                       : false;
 
                   return (
@@ -994,222 +747,8 @@ const PostAddFormPage = () => {
                 </div>
               )}
 
-              {/* STEP 1: GALLERY */}
+              {/* STEP 1: FINISH/PREVIEW */}
               {activeStep === 1 && (
-                <div className="space-y-8">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <path
-                          d="M4 5h16a1 1 0 0 1 1 1v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a1 1 0 0 1 1-1Z"
-                          stroke="#263D5D"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <h3 className="font-hugiller text-2xl text-[#263D5D]">
-                        Upload Images *
-                      </h3>
-                    </div>
-                    <span className="text-sm text-slate-500 hidden sm:block">
-                      Add up to 10 pictures (max 3MB each)
-                    </span>
-                  </div>
-                  <div className="space-y-6">
-                    {imagePreviewUrls.length > 0 ? (
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {imagePreviewUrls.map((url, index) => (
-                          <div
-                            key={index}
-                            className="rounded-2xl overflow-hidden border border-white/70 shadow-md bg-white/80 backdrop-blur relative group"
-                          >
-                            <img
-                              src={url}
-                              alt={`Preview ${index + 1}`}
-                              className="w-full h-32 object-cover"
-                            />
-                            <div className="p-2 text-xs text-slate-600 text-center">
-                              Image {index + 1}
-                            </div>
-                            <button
-                              onClick={() => removeImage(index)}
-                              className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                        {formData.images.length < 10 && (
-                          <label className="rounded-2xl border-2 border-dashed border-slate-300 bg-white/80 backdrop-blur hover:border-cyan-400 hover:bg-white transition-all cursor-pointer flex items-center justify-center h-32">
-                            <div className="text-center text-slate-500">
-                              <div className="mx-auto mb-2 inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-50 text-sky-500">
-                                <svg
-                                  width="16"
-                                  height="16"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                >
-                                  <path
-                                    d="M12 5v14M5 12h14"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                  />
-                                </svg>
-                              </div>
-                              <div className="text-xs font-medium">
-                                Add More
-                              </div>
-                            </div>
-                            <input
-                              type="file"
-                              multiple
-                              accept="image/jpeg,image/jpg,image/png,image/webp"
-                              className="hidden"
-                              onChange={(e) => handleFileChange(e, "images")}
-                            />
-                          </label>
-                        )}
-                      </div>
-                    ) : (
-                      <label className="rounded-2xl border-2 border-dashed border-slate-300 bg-white/80 backdrop-blur hover:border-cyan-400 hover:bg-white transition-all cursor-pointer flex items-center justify-center h-56 mx-auto max-w-md">
-                        <div className="text-center text-slate-500">
-                          <div className="mx-auto mb-3 inline-flex items-center justify-center w-14 h-14 rounded-full bg-sky-50 text-sky-500">
-                            <svg
-                              width="28"
-                              height="28"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <path
-                                d="M12 5v14M5 12h14"
-                                stroke="currentColor"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                              />
-                            </svg>
-                          </div>
-                          <div className="font-semibold">
-                            Upload your Images
-                          </div>
-                          <div className="text-sm mt-1">
-                            Up to 10 images (JPEG, PNG, WebP)
-                          </div>
-                        </div>
-                        <input
-                          type="file"
-                          multiple
-                          accept="image/jpeg,image/jpg,image/png,image/webp"
-                          className="hidden"
-                          onChange={(e) => handleFileChange(e, "images")}
-                        />
-                      </label>
-                    )}
-                    <ErrorMessage message={errors.images} />
-                  </div>
-
-                  <div className="flex items-center gap-3 mt-6">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M3 7a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"
-                        stroke="#263D5D"
-                        strokeWidth="2"
-                      />
-                      <path d="M21 8v8l-5-3.2V11.2L21 8Z" fill="#263D5D" />
-                    </svg>
-                    <h3 className="font-hugiller text-2xl text-[#263D5D]">
-                      Upload Videos (Optional)
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {videoPreviewUrls.length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {videoPreviewUrls.map((url, index) => (
-                          <div
-                            key={index}
-                            className="rounded-2xl overflow-hidden border border-white/70 shadow-md bg-white/80 backdrop-blur relative group"
-                          >
-                            <video
-                              src={url}
-                              className="w-full h-48 object-cover"
-                              controls
-                            />
-                            <div className="p-2 text-xs text-slate-600 text-center">
-                              Video {index + 1}
-                            </div>
-                            <button
-                              onClick={() => removeVideo(index)}
-                              className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-                    <label className="rounded-2xl border-2 border-dashed border-slate-300 bg-white/80 backdrop-blur hover:border-cyan-400 hover:bg-white transition-all cursor-pointer flex items-center justify-center h-56">
-                      <div className="text-center text-slate-500">
-                        <div className="mx-auto mb-3 inline-flex items-center justify-center w-14 h-14 rounded-full bg-sky-50 text-sky-500">
-                          <svg
-                            width="28"
-                            height="28"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                          >
-                            <path
-                              d="M12 5v14M5 12h14"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                        </div>
-                        <div className="font-semibold">
-                          {formData.videos.length > 0
-                            ? `${formData.videos.length} video(s) selected`
-                            : "Upload your Videos"}
-                        </div>
-                        <div className="text-xs mt-1">
-                          MP4, AVI, MOV, WMV (max 50MB each)
-                        </div>
-                      </div>
-                      <input
-                        type="file"
-                        multiple
-                        accept="video/mp4,video/avi,video/mov,video/wmv"
-                        className="hidden"
-                        onChange={(e) => handleFileChange(e, "videos")}
-                      />
-                    </label>
-                  </div>
-                  <ErrorMessage message={errors.videos} />
-
-                  <div className="flex items-center justify-between pt-4">
-                    <SheenButton onClick={goPrev} className="min-w-[140px]">
-                      <ArrowIcon dir="left" />
-                      Back
-                    </SheenButton>
-                    <SheenButton
-                      onClick={goNext}
-                      className="min-w-[140px]"
-                      disabled={!canProceedToNext()}
-                    >
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-cyan-500 text-white">
-                        <ArrowIcon />
-                      </span>
-                      Next
-                    </SheenButton>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 2: FINISH/PREVIEW */}
-              {activeStep === 2 && (
                 <div className="space-y-8">
                   <div className="rounded-3xl bg-white/90 border border-white/70 shadow-xl p-4 sm:p-6">
                     <div className="flex flex-col gap-4">
@@ -1266,36 +805,10 @@ const PostAddFormPage = () => {
                       </div>
                       <div className="relative rounded-2xl overflow-hidden">
                         <img
-                          src={displayImages[currentSlide]}
+                          src={postBackground}
                           alt="Preview"
                           className="w-full h-64 sm:h-80 object-cover"
                         />
-                        {displayImages.length > 1 && (
-                          <>
-                            <button
-                              onClick={prevSlide}
-                              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur hover:bg-white text-[#263D5D] w-10 h-10 rounded-full flex items-center justify-center shadow"
-                            >
-                              <ArrowIcon dir="left" />
-                            </button>
-                            <button
-                              onClick={nextSlide}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur hover:bg-white text-[#263D5D] w-10 h-10 rounded-full flex items-center justify-center shadow"
-                            >
-                              <ArrowIcon />
-                            </button>
-                          </>
-                        )}
-                        <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-2">
-                          {displayImages.map((_, i) => (
-                            <span
-                              key={i}
-                              className={`h-2 w-2 rounded-full ${
-                                i === currentSlide ? "bg-white" : "bg-white/60"
-                              }`}
-                            />
-                          ))}
-                        </div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                         <div>
@@ -1337,16 +850,6 @@ const PostAddFormPage = () => {
                             {formData.mobile && (
                               <div>
                                 <strong>Mobile:</strong> +94 {formData.mobile}
-                              </div>
-                            )}
-                            <div>
-                              <strong>Images:</strong> {formData.images.length}{" "}
-                              uploaded
-                            </div>
-                            {formData.videos.length > 0 && (
-                              <div>
-                                <strong>Videos:</strong>{" "}
-                                {formData.videos.length} uploaded
                               </div>
                             )}
                           </div>

@@ -161,9 +161,23 @@ const Navbar = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={toggleDropdown}
-                className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors duration-200"
+                className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors duration-200 font-semibold text-lg"
               >
-                <User className="h-5 w-5" />
+                {user &&
+                (userProfile?.firstName ||
+                  userProfile?.username ||
+                  user.email) ? (
+                  <span>
+                    {(
+                      userProfile?.firstName?.[0] ||
+                      userProfile?.username?.[0] ||
+                      user.email?.[0] ||
+                      "U"
+                    ).toUpperCase()}
+                  </span>
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
               </button>
 
               {/* Dropdown Menu - Only show if user is logged in */}
@@ -217,71 +231,138 @@ const Navbar = () => {
                     </div>
 
                     <div className="py-1 text-[24px] text-[#235A78]">
-                      <button
-                        onClick={() => {
-                          navigate("/user");
-                          setIsDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <User className="h-4 w-4 mr-3" />
-                        Profile
-                      </button>
-                      <button
-                        onClick={() => {
-                          navigate("/browse");
-                          setIsDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <MapPin className="h-4 w-4 mr-3" />
-                        Find Place
-                      </button>
-                      {userProfile?.role === "boarding_owner" && (
-                        <button
-                          onClick={() => {
-                            navigate("/add-post");
-                            setIsDropdownOpen(false);
-                          }}
-                          className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
-                        >
-                          <Plus className="h-4 w-4 mr-3" />
-                          Add Post
-                        </button>
+                      {/* boarding_finder: only logout */}
+                      {userProfile?.role === "boarding_finder" && (
+                        <div className=" py-1">
+                          <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center px-4 py-2  hover:bg-red-50 transition-colors duration-200"
+                          >
+                            <LogOut className="h-4 w-4 mr-3" />
+                            Logout
+                          </button>
+                        </div>
                       )}
+
+                      {/* boarding_owner: profile, find place, add post, pending posts, logout */}
                       {userProfile?.role === "boarding_owner" && (
-                        <button
-                          onClick={() => {
-                            navigate("/pending-posts");
-                            setIsDropdownOpen(false);
-                          }}
-                          className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
-                        >
-                          <Clock className="h-4 w-4 mr-3" />
-                          Pending Posts
-                        </button>
+                        <>
+                          <button
+                            onClick={() => {
+                              navigate("/user");
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <User className="h-4 w-4 mr-3" />
+                            Profile
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate("/browse");
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <MapPin className="h-4 w-4 mr-3" />
+                            Find Place
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate("/add-post");
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <Plus className="h-4 w-4 mr-3" />
+                            Add Post
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate("/pending-posts");
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <Clock className="h-4 w-4 mr-3" />
+                            Pending Posts
+                          </button>
+                          <div className=" py-1">
+                            <button
+                              onClick={handleLogout}
+                              className="w-full flex items-center px-4 py-2  hover:bg-red-50 transition-colors duration-200"
+                            >
+                              <LogOut className="h-4 w-4 mr-3" />
+                              Logout
+                            </button>
+                          </div>
+                        </>
                       )}
+
+                      {/* admin: all options including dashboard */}
                       {isAdmin() && (
-                        <button
-                          onClick={() => {
-                            navigate("/admin/dashboard");
-                            setIsDropdownOpen(false);
-                          }}
-                          className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
-                        >
-                          <LayoutDashboard className="h-4 w-4 mr-3" />
-                          Dashboard
-                        </button>
+                        <>
+                          <button
+                            onClick={() => {
+                              navigate("/user");
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <User className="h-4 w-4 mr-3" />
+                            Profile
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate("/browse");
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <MapPin className="h-4 w-4 mr-3" />
+                            Find Place
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate("/add-post");
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <Plus className="h-4 w-4 mr-3" />
+                            Add Post
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate("/pending-posts");
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <Clock className="h-4 w-4 mr-3" />
+                            Pending Posts
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate("/admin/dashboard");
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            <LayoutDashboard className="h-4 w-4 mr-3" />
+                            Dashboard
+                          </button>
+                          <div className=" py-1">
+                            <button
+                              onClick={handleLogout}
+                              className="w-full flex items-center px-4 py-2  hover:bg-red-50 transition-colors duration-200"
+                            >
+                              <LogOut className="h-4 w-4 mr-3" />
+                              Logout
+                            </button>
+                          </div>
+                        </>
                       )}
-                      <div className=" py-1">
-                        <button
-                          onClick={handleLogout}
-                          className="w-full flex items-center px-4 py-2  hover:bg-red-50 transition-colors duration-200"
-                        >
-                          <LogOut className="h-4 w-4 mr-3" />
-                          Logout
-                        </button>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -367,7 +448,7 @@ const Navbar = () => {
               {user ? (
                 <>
                   <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white overflow-hidden">
+                    <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white overflow-hidden font-semibold text-lg">
                       {userProfile?.profileImage ? (
                         <img
                           src={userProfile.profileImage}
@@ -375,7 +456,14 @@ const Navbar = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <User className="h-5 w-5" />
+                        <span>
+                          {(
+                            userProfile?.firstName?.[0] ||
+                            userProfile?.username?.[0] ||
+                            user.email?.[0] ||
+                            "U"
+                          ).toUpperCase()}
+                        </span>
                       )}
                     </div>
                     <div>
@@ -394,47 +482,132 @@ const Navbar = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <button
-                      onClick={() => {
-                        navigate("/user");
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
-                    >
-                      <User className="h-4 w-4 mr-3" />
-                      Profile
-                    </button>
+                    {/* boarding_finder: only logout */}
+                    {userProfile?.role === "boarding_finder" && (
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 text-[20px]"
+                      >
+                        <LogOut className="h-4 w-4 mr-3" />
+                        Logout
+                      </button>
+                    )}
+
+                    {/* boarding_owner: profile, find place, add post, pending posts, logout */}
                     {userProfile?.role === "boarding_owner" && (
-                      <button
-                        onClick={() => {
-                          navigate("/pending-posts");
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
-                      >
-                        <Clock className="h-4 w-4 mr-3" />
-                        Pending Posts
-                      </button>
+                      <>
+                        <button
+                          onClick={() => {
+                            navigate("/user");
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
+                        >
+                          <User className="h-4 w-4 mr-3" />
+                          Profile
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate("/browse");
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
+                        >
+                          <MapPin className="h-4 w-4 mr-3" />
+                          Find Place
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate("/add-post");
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
+                        >
+                          <Plus className="h-4 w-4 mr-3" />
+                          Add Post
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate("/pending-posts");
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
+                        >
+                          <Clock className="h-4 w-4 mr-3" />
+                          Pending Posts
+                        </button>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 text-[20px]"
+                        >
+                          <LogOut className="h-4 w-4 mr-3" />
+                          Logout
+                        </button>
+                      </>
                     )}
+
+                    {/* admin: all options including dashboard */}
                     {isAdmin() && (
-                      <button
-                        onClick={() => {
-                          navigate("/admin/dashboard");
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
-                      >
-                        <LayoutDashboard className="h-4 w-4 mr-3" />
-                        Dashboard
-                      </button>
+                      <>
+                        <button
+                          onClick={() => {
+                            navigate("/user");
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
+                        >
+                          <User className="h-4 w-4 mr-3" />
+                          Profile
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate("/browse");
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
+                        >
+                          <MapPin className="h-4 w-4 mr-3" />
+                          Find Place
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate("/add-post");
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
+                        >
+                          <Plus className="h-4 w-4 mr-3" />
+                          Add Post
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate("/pending-posts");
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
+                        >
+                          <Clock className="h-4 w-4 mr-3" />
+                          Pending Posts
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate("/admin/dashboard");
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
+                        >
+                          <LayoutDashboard className="h-4 w-4 mr-3" />
+                          Dashboard
+                        </button>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 text-[20px]"
+                        >
+                          <LogOut className="h-4 w-4 mr-3" />
+                          Logout
+                        </button>
+                      </>
                     )}
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 text-[20px]"
-                    >
-                      <LogOut className="h-4 w-4 mr-3" />
-                      Logout
-                    </button>
                   </div>
                 </>
               ) : (
