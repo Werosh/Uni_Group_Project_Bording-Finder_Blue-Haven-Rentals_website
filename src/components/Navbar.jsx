@@ -17,11 +17,13 @@ import {
 import DropDownBackImg from "../assets/images/others/handBack.webp";
 import { useAuth } from "../context/AuthContext";
 import { logout } from "../firebase/authService";
+import Modal from "./Modal";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -81,6 +83,29 @@ const Navbar = () => {
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
       }
+    }
+  };
+
+  const handleAddPostClick = () => {
+    // Check if user is logged in
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    // Check user role
+    if (userProfile?.role === "boarding_finder") {
+      // Show modal for boarding_finder users
+      setIsRoleModalOpen(true);
+    } else if (
+      userProfile?.role === "boarding_owner" ||
+      userProfile?.role === "admin"
+    ) {
+      // Navigate to post-add for boarding_owner and admin
+      navigate("/post-add");
+    } else {
+      // Default behavior for users without a role
+      navigate("/post-add");
     }
   };
 
@@ -156,7 +181,7 @@ const Navbar = () => {
 
             {/* Add Post Button */}
             <button
-              onClick={() => navigate("/post-add")}
+              onClick={handleAddPostClick}
               className="bg-teal-500 font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
             >
               <Plus className="h-4 w-4" />
@@ -451,7 +476,7 @@ const Navbar = () => {
 
               <button
                 onClick={() => {
-                  navigate("/post-add");
+                  handleAddPostClick();
                   setIsMobileMenuOpen(false);
                 }}
                 className="w-full bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200"
@@ -643,6 +668,42 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      {/* Role Restriction Modal */}
+      <Modal
+        isOpen={isRoleModalOpen}
+        onClose={() => setIsRoleModalOpen(false)}
+        title="Post Ads Restricted"
+        size="md"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-700 text-lg">
+            Only boarding owners can post ads on Blue Haven Rentals. You are
+            currently registered as a boarding finder.
+          </p>
+          <p className="text-gray-600">
+            To post your boarding property, you need to register as a boarding
+            owner.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <button
+              onClick={() => {
+                setIsRoleModalOpen(false);
+                navigate("/signup");
+              }}
+              className="flex-1 bg-teal-500 hover:bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200"
+            >
+              Register as Boarding Owner
+            </button>
+            <button
+              onClick={() => setIsRoleModalOpen(false)}
+              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors duration-200"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Modal>
     </nav>
   );
 };
