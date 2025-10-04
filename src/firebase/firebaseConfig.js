@@ -15,13 +15,6 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Debug: Check if environment variables are loaded (remove this after verification)
-if (!firebaseConfig.projectId) {
-  console.error("❌ Firebase environment variables not loaded!");
-  console.error("Please restart your dev server: npm run dev");
-  console.error("Current config:", firebaseConfig);
-}
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
