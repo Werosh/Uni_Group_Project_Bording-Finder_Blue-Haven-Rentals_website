@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Search,
   MapPin,
@@ -94,12 +95,12 @@ const Navbar = () => {
             >
               About
             </a>
-            <a
-              href="#contact"
+            <Link
+              to="/contact"
               className="text-gray-700 hover:text-teal-600 transition-colors duration-200"
             >
               Contact
-            </a>
+            </Link>
 
             {/* Find Place Button */}
             <button className="bg-teal-500 font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
@@ -251,12 +252,12 @@ const Navbar = () => {
             >
               About
             </a>
-            <a
-              href="#contact"
+            <Link
+              to="/contact"
               className="block text-[#235A78] hover:text-teal-600 py-2 text-[20px]"
             >
               Contact
-            </a>
+            </Link>
 
             {/* Mobile Action Buttons */}
             <div id="same-font" className="pt-4 space-y-3">

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import LandingPage from "../landing/LandingPage";
+import Contact from "../pages/landing-pages/Contact";
 import BrowsePlacePage from "../pages/main-pages/BrowsePlacePage";
 import UserPage from "../pages/user-pages/UserPage";
 import WelcomeBackPage from "../pages/login-pages/WelcomeBackPage";
@@ -17,6 +18,9 @@ function AppRoutes() {
       <Routes>
         {/* Landing page */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Contact page */}
+        <Route path="/contact" element={<Contact />} />
 
         {/* Main pages */}
         <Route path="/browse" element={<BrowsePlacePage />} />

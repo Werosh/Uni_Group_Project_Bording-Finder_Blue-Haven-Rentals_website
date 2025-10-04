@@ -4,7 +4,7 @@ import ArrowIcon from "../../assets/images/icons/rightArrow.webp";
 
 const About = () => {
   return (
-    <div className="  min-h-screen  relative overflow-hidden">
+    <div id="about" className="  min-h-screen  relative overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0 ">
         <img
