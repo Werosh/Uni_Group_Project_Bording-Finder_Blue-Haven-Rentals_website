@@ -5,6 +5,60 @@ import { createPost } from "../../firebase/dbService";
 import postBackground from "../../assets/images/background/post-back.webp";
 import man1Img from "../../assets/images/others/Img-6.webp";
 
+// Categories aligned with BrowsePlacePage
+const CATEGORIES = [
+  "Single Rooms",
+  "Double Rooms",
+  "Boarding Houses",
+  "Hostels",
+  "Sharing Rooms",
+  "Annexes",
+  "Houses",
+  "Apartments",
+  "Single Bedrooms",
+];
+
+// Districts aligned with BrowsePlacePage
+const DISTRICTS = [
+  { name: "Colombo", province: "Western" },
+  { name: "Gampaha", province: "Western" },
+  { name: "Kalutara", province: "Western" },
+  { name: "Kandy", province: "Central" },
+  { name: "Matale", province: "Central" },
+  { name: "Nuwara Eliya", province: "Central" },
+  { name: "Galle", province: "Southern" },
+  { name: "Matara", province: "Southern" },
+  { name: "Hambantota", province: "Southern" },
+  { name: "Jaffna", province: "Northern" },
+  { name: "Kilinochchi", province: "Northern" },
+  { name: "Mannar", province: "Northern" },
+  { name: "Vavuniya", province: "Northern" },
+  { name: "Mullaitivu", province: "Northern" },
+  { name: "Trincomalee", province: "Eastern" },
+  { name: "Batticaloa", province: "Eastern" },
+  { name: "Ampara", province: "Eastern" },
+  { name: "Kurunegala", province: "North Western" },
+  { name: "Puttalam", province: "North Western" },
+  { name: "Anuradhapura", province: "North Central" },
+  { name: "Polonnaruwa", province: "North Central" },
+  { name: "Badulla", province: "Uva" },
+  { name: "Monaragala", province: "Uva" },
+  { name: "Ratnapura", province: "Sabaragamuwa" },
+  { name: "Kegalle", province: "Sabaragamuwa" },
+];
+
+const PROVINCE_ORDER = [
+  "Western",
+  "Central",
+  "Southern",
+  "Northern",
+  "Eastern",
+  "North Western",
+  "North Central",
+  "Uva",
+  "Sabaragamuwa",
+];
+
 // Step type (0, 1)
 const steps = [
   {
@@ -603,9 +657,11 @@ const PostAddFormPage = () => {
                           <option value="" disabled>
                             Select a category
                           </option>
-                          <option>Boarding Houses</option>
-                          <option>Apartment</option>
-                          <option>House</option>
+                          {CATEGORIES.map((category) => (
+                            <option key={category} value={category}>
+                              {category}
+                            </option>
+                          ))}
                         </FormSelect>
                       </div>
                     </div>
@@ -641,17 +697,25 @@ const PostAddFormPage = () => {
                           error={errors.location}
                         >
                           <option value="" disabled>
-                            Select a city
+                            Select a district
                           </option>
-                          <option>Colombo</option>
-                          <option>Kandy</option>
-                          <option>Galle</option>
-                          <option>Gampaha</option>
-                          <option>Kalutara</option>
-                          <option>Matale</option>
-                          <option>Nuwara Eliya</option>
-                          <option>Matara</option>
-                          <option>Hambantota</option>
+                          {PROVINCE_ORDER.map((province) => {
+                            const districtsInProvince = DISTRICTS.filter(
+                              (d) => d.province === province
+                            );
+                            return (
+                              <optgroup key={province} label={province}>
+                                {districtsInProvince.map((district) => (
+                                  <option
+                                    key={district.name}
+                                    value={district.name}
+                                  >
+                                    {district.name}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            );
+                          })}
                         </FormSelect>
                       </div>
                     </div>
