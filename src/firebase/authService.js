@@ -2,6 +2,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  sendPasswordResetEmail,
+  confirmPasswordReset,
+  verifyPasswordResetCode,
 } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 
@@ -18,4 +21,19 @@ export const login = (email, password) => {
 // Logout
 export const logout = () => {
   return signOut(auth);
+};
+
+// Send password reset email
+export const sendPasswordReset = (email) => {
+  return sendPasswordResetEmail(auth, email);
+};
+
+// Verify password reset code
+export const verifyResetCode = (code) => {
+  return verifyPasswordResetCode(auth, code);
+};
+
+// Confirm password reset with code and new password
+export const confirmPasswordResetWithCode = (code, newPassword) => {
+  return confirmPasswordReset(auth, code, newPassword);
 };

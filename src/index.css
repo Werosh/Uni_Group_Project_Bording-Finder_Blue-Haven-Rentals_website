@@ -19,6 +19,10 @@ h1 {
   letter-spacing: 0.1em;
 }
 
+.font-hugiller {
+  font-family: Hugiller-Demo;
+}
+
 p {
   font-family: poppins, sans-serif;
 }
