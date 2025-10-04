@@ -209,7 +209,7 @@ const BrowsePlacePage = () => {
   const SidebarContent = () => (
     <div className="space-y-6">
       {/* Categories Section */}
-      <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-4 border border-white/40 shadow-lg">
+      <div className="bg-white/60 backdrop-blur-xl rounded-2xl mt-10 p-4 border border-white/40 shadow-lg">
         <h3 className="text-[#263D5D] font-bold text-lg mb-3 flex items-center gap-2">
           <MdFilterList /> Categories
         </h3>
@@ -379,7 +379,7 @@ const BrowsePlacePage = () => {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 pt-20 lg:pt-6">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 pt-20 lg:pt-6 mt-10">
           {/* Header */}
           <div className="text-center mb-6 animate-fadeInUp">
             <h1 className="text-[48px] md:text-[72px] lg:text-[80px] leading-none font-['Hugiller_DEMO']">
