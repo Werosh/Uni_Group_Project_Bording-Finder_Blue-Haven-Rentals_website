@@ -1,7 +1,161 @@
-import React from "react";
+import { useState } from "react";
+import Img from "../../assets/images/background/post-back.webp";
+import Man from "../../assets/images/others/img-6.webp";
+import ArrowIcon from "../../assets/images/icons/rightArrow.webp";
 
 const PostAdd = () => {
-  return <div></div>;
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-48 h-48 bg-cyan-400/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-purple-400/15 rounded-full blur-lg animate-bounce"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 px-4 py-8 lg:py-16">
+        <div className="max-w-7xl mx-auto">
+          {/* Flex column for mobile, row for desktop */}
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-6 sm:gap-8 lg:gap-20 min-h-[80vh]">
+            {/* Text Content - Mobile First, Desktop Second */}
+            <div className="order-1 lg:order-2 p-4 sm:p-8 lg:p-12 flex-1 flex flex-col items-center justify-center text-center lg:items-start lg:text-left animate-fadeInUp">
+              <h1 className="font-[Hugiller-Demo] whitespace-nowrap text-[60px] sm:text-[90px] md:text-[110px] lg:text-[120px] text-[#263D5D] leading-[1.1] mb-6">
+                Post Your <span className="text-[#3ABBD0] relative">Add</span>
+              </h1>
+
+              <p className="font-hugiller text-lg md:text-xl text-[#303435] mb-6 opacity-80 max-w-xl">
+                Discover the smarter way to rent – effortlessly list your
+                boarding rooms, houses, hostels, or luxury apartments on our
+                all-in-one platform. We bridge the gap between property owners
+                and a vibrant community of renters actively searching for their
+                perfect place to call home. Whether it's a cozy room or a lavish
+                apartment, we make connecting simple, fast, and stress-free.
+              </p>
+
+              <div className="flex justify-center lg:justify-start">
+                <button
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                  className="relative overflow-hidden bg-[#263D5D] hover:bg-[#303435] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl group flex items-center gap-2 sm:gap-3"
+                >
+                  <span className="relative z-10 flex items-center gap-2 sm:gap-3">
+                    <img
+                      src={ArrowIcon}
+                      alt="Arrow"
+                      className="w-5 h-5 sm:w-6 sm:h-6"
+                    />
+                    <span className="text-sm sm:text-base lg:inline">
+                      Add Post
+                    </span>
+                  </span>
+                  <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                </button>
+              </div>
+            </div>
+
+            {/* Man Image - Mobile Second, Desktop First */}
+            <div className="p-42 order-2 lg:order-1 flex-1 flex items-center justify-center animate-slideInLeft w-full">
+              <div className="relative max-w-[280px] xs:max-w-[320px] sm:max-w-[400px] md:max-w-[400px]  mx-auto flex items-center justify-center">
+                {/* Decorative Elements - Scaled for mobile */}
+                <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-12 h-12 sm:w-20 sm:h-20 bg-[#3ABBD0]/20 rounded-full blur-xl animate-pulse"></div>
+                <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-10 h-10 sm:w-16 sm:h-16 bg-purple-400/20 rounded-full blur-lg animate-bounce"></div>
+
+                {/* Main Image Container */}
+                <div className="relative z-10 flex items-center justify-center w-full">
+                  <img
+                    src={Man}
+                    alt="Professional man with house model"
+                    className=" absolute max-w-[500px] h-auto mt-30 mb-12  object-contain transform hover:scale-105 transition-transform duration-500
+             sm:w-auto
+             w-[400px]"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src={Img}
+          alt="Modern house background"
+          className="object-cover w-full h-full"
+        />
+        {/* Existing color overlay */}
+        <div className="absolute inset-0 opacity-30 bg-gradient-to-br from-cyan-100 via-blue-50 to-purple-100"></div>
+
+        {/* White gradient overlay with blur */}
+        <div className="absolute inset-0 bg-gradient-to-t from-white/100 via-white/0 to-white/0 backdrop-blur-[1px]"></div>
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes slideInLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes spin-slow {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        .animate-fadeInUp {
+          animation: fadeInUp 0.8s ease-out;
+        }
+        .animate-slideInLeft {
+          animation: slideInLeft 0.8s ease-out;
+        }
+        .animate-slideInRight {
+          animation: slideInRight 0.8s ease-out;
+        }
+        .animate-spin-slow {
+          animation: spin-slow 8s linear infinite;
+        }
+
+        @media (min-width: 475px) {
+          .xs\:text-\[40px\] {
+            font-size: 40px;
+          }
+          .xs\:max-w-\[320px\] {
+            max-width: 320px;
+          }
+        }
+      `}</style>
+    </div>
+  );
 };
 
 export default PostAdd;
