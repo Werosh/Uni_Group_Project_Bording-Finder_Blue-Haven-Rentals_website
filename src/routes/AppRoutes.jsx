@@ -38,6 +38,17 @@ function ScrollToTop() {
   return null;
 }
 
+function ConditionalFooter() {
+  const location = useLocation();
+  const hiddenPaths = ["/browse", "/browse-more"];
+
+  if (hiddenPaths.includes(location.pathname)) {
+    return null;
+  }
+
+  return <Footer />;
+}
+
 function AppRoutes() {
   return (
     <Router>
@@ -71,7 +82,7 @@ function AppRoutes() {
         {/* 404 Not Found - catch all unmatched routes */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      <Footer />
+      <ConditionalFooter />
     </Router>
   );
 }
