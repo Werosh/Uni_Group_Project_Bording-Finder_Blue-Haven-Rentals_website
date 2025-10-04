@@ -42,7 +42,8 @@ export const createUserProfile = async (uid, userData) => {
   const userRef = doc(db, "users", uid);
   await setDoc(userRef, {
     ...userData,
-    role: userData.userType || userData.role || "typical_user", // Store role
+    userType: userData.userType || "boarding_finder", // Store user type (boarding_finder or boarding_owner)
+    role: userData.userType || userData.role || "boarding_finder", // Also store as role for backwards compatibility
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });

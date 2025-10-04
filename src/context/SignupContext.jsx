@@ -13,31 +13,33 @@ export const useSignup = () => {
 export const SignupProvider = ({ children }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    // Step 1 - Basic Info
+    // Step 1 - User Type Selection
+    userType: "", // boarding_finder, boarding_owner
+
+    // Step 2 - Basic Info
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    userType: "typical_user", // typical_user, boarding_owner, admin
 
-    // Step 2 - Account Details
+    // Step 3 - Account Details (boarding_owner only)
     username: "",
     description: "",
     phone: "",
 
-    // Step 3 - Location
+    // Step 4 - Location (boarding_owner only)
     country: "",
     district: "",
     division: "",
     postalCode: "",
 
-    // Step 4 - ID Verification
+    // Step 5 - ID Verification (boarding_owner only)
     idNumber: "",
     frontImage: null,
     backImage: null,
 
-    // Step 5 - Profile Image
+    // Step 6 - Profile Image (boarding_owner only)
     profileImage: null,
   });
 
@@ -70,7 +72,11 @@ export const SignupProvider = ({ children }) => {
   };
 
   const nextStep = () => {
-    if (currentStep < 6) {
+    // For boarding_finder: skip steps 3-6 (account details, location, ID verification, profile image)
+    if (formData.userType === "boarding_finder" && currentStep === 2) {
+      // After step 2 (basic info), go directly to completion
+      setCurrentStep(7); // Step 7 will be the completion page
+    } else if (currentStep < 7) {
       setCurrentStep((prev) => prev + 1);
     }
   };
@@ -82,19 +88,19 @@ export const SignupProvider = ({ children }) => {
   };
 
   const goToStep = (step) => {
-    if (step >= 1 && step <= 6) {
+    if (step >= 1 && step <= 7) {
       setCurrentStep(step);
     }
   };
 
   const resetSignup = () => {
     setFormData({
+      userType: "",
       firstName: "",
       lastName: "",
       email: "",
       password: "",
       confirmPassword: "",
-      userType: "typical_user",
       username: "",
       description: "",
       phone: "",

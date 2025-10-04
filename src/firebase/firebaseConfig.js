@@ -6,14 +6,21 @@ import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDJaOcvHbTRINGT4cSgziywPkubfhKHYyY",
-  authDomain: "blue-haven-rentals-64f42.firebaseapp.com",
-  projectId: "blue-haven-rentals-64f42",
-  storageBucket: "blue-haven-rentals-64f42.firebasestorage.app",
-  messagingSenderId: "359460352567",
-  appId: "1:359460352567:web:cacc909a29e66178d705b2",
-  measurementId: "G-CC994FCRR5",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
+
+// Debug: Check if environment variables are loaded (remove this after verification)
+if (!firebaseConfig.projectId) {
+  console.error("❌ Firebase environment variables not loaded!");
+  console.error("Please restart your dev server: npm run dev");
+  console.error("Current config:", firebaseConfig);
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

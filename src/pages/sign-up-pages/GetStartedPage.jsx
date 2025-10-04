@@ -1,11 +1,16 @@
 import { Lock, Mail } from "lucide-react";
 import { useState } from "react";
 import { BsStars } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 import { useSignup } from "../../context/SignupContext";
+import { signup } from "../../firebase/authService";
+import { createUserProfile } from "../../firebase/dbService";
 import heroBackground from "../../assets/images/background/hero-background.webp";
 
 const GetStartedPage = () => {
-  const { formData, updateFormData, nextStep } = useSignup();
+  const { formData, updateFormData, nextStep, prevStep, resetSignup } =
+    useSignup();
+  const navigate = useNavigate();
 
   const [localData, setLocalData] = useState({
     firstName: formData.firstName || "",
@@ -13,10 +18,10 @@ const GetStartedPage = () => {
     email: formData.email || "",
     password: formData.password || "",
     confirmPassword: formData.confirmPassword || "",
-    userType: formData.userType || "typical_user",
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const validate = () => {
     let newErrors = {};
@@ -50,10 +55,59 @@ const GetStartedPage = () => {
     setLocalData({ ...localData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate()) {
-      updateFormData(localData);
+    if (!validate()) {
+      return;
+    }
+
+    updateFormData(localData);
+
+    // For boarding_finder users, create account immediately
+    if (formData.userType === "boarding_finder") {
+      setLoading(true);
+      try {
+        // 1. Create Firebase Authentication user
+        const userCredential = await signup(
+          localData.email,
+          localData.password
+        );
+        const user = userCredential.user;
+
+        // 2. Create user profile in Firestore with minimal information
+        await createUserProfile(user.uid, {
+          uid: user.uid,
+          email: localData.email,
+          firstName: localData.firstName,
+          lastName: localData.lastName,
+          userType: formData.userType,
+        });
+
+        // Clear local storage after successful signup
+        resetSignup();
+
+        // Navigate to completion page
+        navigate("/signup/complete");
+      } catch (error) {
+        console.error("Signup error:", error);
+
+        // Handle specific error cases
+        let errorMessage = "Failed to create account. Please try again.";
+        if (error.code === "auth/email-already-in-use") {
+          errorMessage =
+            "This email is already registered. Please use a different email.";
+        } else if (error.code === "auth/weak-password") {
+          errorMessage =
+            "Password is too weak. Please use a stronger password.";
+        } else if (error.code === "auth/invalid-email") {
+          errorMessage = "Invalid email address.";
+        }
+
+        setErrors({ submit: errorMessage });
+        setLoading(false);
+      }
+    } else {
+      // For boarding_owner users, proceed to next step
       nextStep();
     }
   };
@@ -64,9 +118,8 @@ const GetStartedPage = () => {
       (localData.lastName ? 1 : 0) +
       (localData.email ? 1 : 0) +
       (localData.password ? 1 : 0) +
-      (localData.confirmPassword ? 1 : 0) +
-      (localData.userType ? 1 : 0)) /
-    6;
+      (localData.confirmPassword ? 1 : 0)) /
+    5;
 
   return (
     <div>
@@ -249,52 +302,12 @@ const GetStartedPage = () => {
                 )}
               </div>
 
-              {/* User Type Selection */}
-              <div className="mb-8">
-                <label className="flex items-center gap-2 text-[#263D5D] text-sm font-bold mb-3">
-                  <div className="w-2 h-2 bg-[#3ABBD0] rounded-full"></div>I am
-                  a
-                </label>
-                <div className="space-y-3">
-                  <label className="flex items-center p-4 bg-gray-50/80 rounded-2xl border-2 border-[#3ABBD0]/30 cursor-pointer hover:bg-gray-100/80 transition-all duration-300 group">
-                    <input
-                      type="radio"
-                      name="userType"
-                      value="typical_user"
-                      checked={localData.userType === "typical_user"}
-                      onChange={handleChange}
-                      className="w-5 h-5 text-[#3ABBD0] focus:ring-[#3ABBD0] focus:ring-2"
-                    />
-                    <div className="ml-3">
-                      <div className="text-[#263D5D] font-semibold">
-                        Typical User
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        I'm looking for boarding/rental places
-                      </div>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center p-4 bg-gray-50/80 rounded-2xl border-2 border-[#3ABBD0]/30 cursor-pointer hover:bg-gray-100/80 transition-all duration-300 group">
-                    <input
-                      type="radio"
-                      name="userType"
-                      value="boarding_owner"
-                      checked={localData.userType === "boarding_owner"}
-                      onChange={handleChange}
-                      className="w-5 h-5 text-[#3ABBD0] focus:ring-[#3ABBD0] focus:ring-2"
-                    />
-                    <div className="ml-3">
-                      <div className="text-[#263D5D] font-semibold">
-                        Boarding Owner
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        I want to list my boarding/rental property
-                      </div>
-                    </div>
-                  </label>
+              {/* Submit Error Message */}
+              {errors.submit && (
+                <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-2xl text-center">
+                  {errors.submit}
                 </div>
-              </div>
+              )}
 
               {/* Progress Indicator */}
               <div className="mb-8">
@@ -310,14 +323,33 @@ const GetStartedPage = () => {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                className="relative overflow-hidden w-full bg-[#263D5D] hover:bg-[#303435] text-white py-4 rounded-2xl font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg group mb-4"
-              >
-                <span className="relative z-10">Sign Up</span>
-                <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-              </button>
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  disabled={loading}
+                  className="relative overflow-hidden bg-[#3ABBD0] hover:bg-cyan-500 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="relative z-10">Previous</span>
+                  <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                </button>
+                <button
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="relative overflow-hidden flex-1 bg-[#263D5D] hover:bg-[#303435] text-white py-4 rounded-2xl font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="relative z-10">
+                    {loading
+                      ? "Creating Account..."
+                      : formData.userType === "boarding_finder"
+                      ? "Complete Signup"
+                      : "Next"}
+                  </span>
+                  <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                </button>
+              </div>
 
               <p className="text-center text-[#263D5D] text-sm sm:text-base">
                 Have an account?{" "}

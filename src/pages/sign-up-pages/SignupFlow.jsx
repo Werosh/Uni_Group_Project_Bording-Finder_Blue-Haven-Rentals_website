@@ -1,27 +1,53 @@
 import { useSignup } from "../../context/SignupContext";
+import UserTypeSelectionPage from "./UserTypeSelectionPage";
 import GetStartedPage from "./GetStartedPage";
 import SetupYourAccountPage from "./SetupYourAccountPage";
 import SetupYourLocationPage from "./SetupYourLocationPage";
 import VerifyYourIdPage from "./VerifyYourIdPage";
 import SetupYourImagePage from "./SetupYourImagePage";
+import SignupCompletePage from "./SignupCompletePage";
 
 const SignupFlow = () => {
-  const { currentStep } = useSignup();
+  const { currentStep, formData } = useSignup();
 
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <GetStartedPage />;
+        return <UserTypeSelectionPage />;
       case 2:
-        return <SetupYourAccountPage />;
-      case 3:
-        return <SetupYourLocationPage />;
-      case 4:
-        return <VerifyYourIdPage />;
-      case 5:
-        return <SetupYourImagePage />;
-      default:
         return <GetStartedPage />;
+      case 3:
+        // Only for boarding_owner
+        return formData.userType === "boarding_owner" ? (
+          <SetupYourAccountPage />
+        ) : (
+          <SignupCompletePage />
+        );
+      case 4:
+        // Only for boarding_owner
+        return formData.userType === "boarding_owner" ? (
+          <SetupYourLocationPage />
+        ) : (
+          <SignupCompletePage />
+        );
+      case 5:
+        // Only for boarding_owner
+        return formData.userType === "boarding_owner" ? (
+          <VerifyYourIdPage />
+        ) : (
+          <SignupCompletePage />
+        );
+      case 6:
+        // Only for boarding_owner
+        return formData.userType === "boarding_owner" ? (
+          <SetupYourImagePage />
+        ) : (
+          <SignupCompletePage />
+        );
+      case 7:
+        return <SignupCompletePage />;
+      default:
+        return <UserTypeSelectionPage />;
     }
   };
 
