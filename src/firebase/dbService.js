@@ -6,6 +6,8 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  setDoc,
+  getDoc,
 } from "firebase/firestore";
 
 // CREATE
@@ -31,4 +33,36 @@ export const updatePlace = async (id, updatedData) => {
 export const deletePlace = async (id) => {
   const docRef = doc(db, "places", id);
   return await deleteDoc(docRef);
+};
+
+// USER PROFILE OPERATIONS
+
+// Create user profile with specific UID
+export const createUserProfile = async (uid, userData) => {
+  const userRef = doc(db, "users", uid);
+  await setDoc(userRef, {
+    ...userData,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+  return userRef;
+};
+
+// Get user profile by UID
+export const getUserProfile = async (uid) => {
+  const userRef = doc(db, "users", uid);
+  const snapshot = await getDoc(userRef);
+  if (snapshot.exists()) {
+    return { id: snapshot.id, ...snapshot.data() };
+  }
+  return null;
+};
+
+// Update user profile
+export const updateUserProfile = async (uid, updatedData) => {
+  const userRef = doc(db, "users", uid);
+  await updateDoc(userRef, {
+    ...updatedData,
+    updatedAt: new Date().toISOString(),
+  });
 };

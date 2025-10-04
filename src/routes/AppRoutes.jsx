@@ -15,7 +15,8 @@ import ForgotPwdPage from "../pages/login-pages/ForgotPwdPage";
 import PwdResetPage from "../pages/login-pages/PwdResetPage";
 import SetNewPwdPage from "../pages/login-pages/SetNewPwdPage";
 import AllDonePage from "../pages/login-pages/AllDonePage";
-import GetStartedPage from "../pages/sign-up-pages/GetStartedPage";
+import SignupFlow from "../pages/sign-up-pages/SignupFlow";
+import SignupCompletePage from "../pages/sign-up-pages/SignupCompletePage";
 import NotFoundPage from "../pages/NotFoundPage";
 
 import ProtectedRoute from "./ProtectedRoute";
@@ -85,7 +86,8 @@ function AppRoutes() {
         <Route path="/password-reset-verification" element={<PwdResetPage />} />
         <Route path="/set-new-password" element={<SetNewPwdPage />} />
         <Route path="/password-reset-success" element={<AllDonePage />} />
-        <Route path="/signup" element={<GetStartedPage />} />
+        <Route path="/signup" element={<SignupFlow />} />
+        <Route path="/signup/complete" element={<SignupCompletePage />} />
 
         {/* 404 Not Found - catch all unmatched routes */}
         <Route path="*" element={<NotFoundPage />} />
