@@ -5,6 +5,7 @@ import BrowsePlacePage from "../pages/main-pages/BrowsePlacePage";
 import UserPage from "../pages/user-pages/UserPage";
 import WelcomeBackPage from "../pages/login-pages/WelcomeBackPage";
 import GetStartedPage from "../pages/sign-up-pages/GetStartedPage";
+import NotFoundPage from "../pages/NotFoundPage";
 
 import ProtectedRoute from "./ProtectedRoute";
 import Footer from "../components/Footer";
@@ -33,6 +34,9 @@ function AppRoutes() {
         {/* Auth pages */}
         <Route path="/login" element={<WelcomeBackPage />} />
         <Route path="/signup" element={<GetStartedPage />} />
+
+        {/* 404 Not Found - catch all unmatched routes */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Footer />
     </Router>

@@ -1,0 +1,20 @@
+---
+alwaysApply: false
+---
+
+Suppose you are an expert prompt engineer working inside this codebase.
+Your task is to _enhance the following user prompt_ in a way that is:
+
+Aligned with the _actual context and structure of the project_ (feel free to refer to the code and project files)
+_Precise, actionable, structured, and unambiguous_
+Safe to use with an AI coding assistant
+
+_Do not include any implementation or solution details._
+
+The _enhanced prompt itself should include_ the following behavioral instructions at the end:
+
+"Do _not_ make assumptions or add details unless explicitly mentioned"
+"If anything is _unclear_, ask follow-up questions to clarify before proceeding"
+"Only proceed when the task is fully understood"
+
+Return the _enhanced prompt only_,in a text box with no commentary, analysis, or follow-up.
