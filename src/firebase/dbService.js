@@ -44,7 +44,7 @@ export const createPost = async (postData) => {
     ...postData,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    status: "active", // active, inactive, pending
+    status: "pending", // pending, approved, declined, active (default to pending for review)
   });
   return docRef;
 };
@@ -137,4 +137,141 @@ export const updateUserProfile = async (uid, updatedData) => {
     ...updatedData,
     updatedAt: new Date().toISOString(),
   });
+};
+
+// Get all users
+export const getAllUsers = async () => {
+  const colRef = collection(db, "users");
+  const snapshot = await getDocs(colRef);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+// Delete user
+export const deleteUser = async (uid) => {
+  const userRef = doc(db, "users", uid);
+  return await deleteDoc(userRef);
+};
+
+// ADMIN-SPECIFIC FUNCTIONS
+
+// Get posts by status (pending, approved, declined)
+export const getPostsByStatus = async (status) => {
+  const colRef = collection(db, "posts");
+  const snapshot = await getDocs(colRef);
+  const posts = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return posts.filter((post) => post.status === status);
+};
+
+// Update post status
+export const updatePostStatus = async (postId, status) => {
+  const docRef = doc(db, "posts", postId);
+  await updateDoc(docRef, {
+    status: status,
+    updatedAt: new Date().toISOString(),
+  });
+};
+
+// Get user statistics
+export const getUserStatistics = async () => {
+  const colRef = collection(db, "users");
+  const snapshot = await getDocs(colRef);
+  const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+  const stats = {
+    totalUsers: users.length,
+    boardingOwners: users.filter(
+      (u) => u.role === "boarding_owner" || u.userType === "boarding_owner"
+    ).length,
+    boardingFinders: users.filter(
+      (u) => u.role === "boarding_finder" || u.userType === "boarding_finder"
+    ).length,
+    admins: users.filter((u) => u.role === "admin").length,
+  };
+
+  return stats;
+};
+
+// Get post statistics
+export const getPostStatistics = async () => {
+  const colRef = collection(db, "posts");
+  const snapshot = await getDocs(colRef);
+  const posts = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+  const stats = {
+    totalPosts: posts.length,
+    pendingPosts: posts.filter((p) => p.status === "pending").length,
+    approvedPosts: posts.filter((p) => p.status === "approved").length,
+    declinedPosts: posts.filter((p) => p.status === "declined").length,
+    activePosts: posts.filter((p) => p.status === "active").length,
+  };
+
+  return stats;
+};
+
+// Get analytics data
+export const getAnalyticsData = async () => {
+  const postsColRef = collection(db, "posts");
+  const usersColRef = collection(db, "users");
+
+  const [postsSnapshot, usersSnapshot] = await Promise.all([
+    getDocs(postsColRef),
+    getDocs(usersColRef),
+  ]);
+
+  const posts = postsSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  const users = usersSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  // Posts by category
+  const categoryCounts = {};
+  posts.forEach((post) => {
+    const category = post.category || "Uncategorized";
+    categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+  });
+
+  // Posts by location
+  const locationCounts = {};
+  posts.forEach((post) => {
+    const location = post.location || "Unknown";
+    locationCounts[location] = (locationCounts[location] || 0) + 1;
+  });
+
+  // User growth over time (by month)
+  const userGrowth = {};
+  users.forEach((user) => {
+    if (user.createdAt) {
+      const date = new Date(user.createdAt);
+      const monthYear = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}`;
+      userGrowth[monthYear] = (userGrowth[monthYear] || 0) + 1;
+    }
+  });
+
+  // User status distribution
+  const userStatusDistribution = {
+    active: users.filter((u) => !u.inactive).length,
+    inactive: users.filter((u) => u.inactive).length,
+    pending: users.filter((u) => u.status === "pending").length,
+  };
+
+  return {
+    postsByCategory: Object.entries(categoryCounts).map(([name, value]) => ({
+      name,
+      value,
+    })),
+    postsByLocation: Object.entries(locationCounts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10), // Top 10 locations
+    userGrowth: Object.entries(userGrowth)
+      .map(([month, count]) => ({ month, count }))
+      .sort((a, b) => a.month.localeCompare(b.month)),
+    userStatusDistribution,
+  };
 };

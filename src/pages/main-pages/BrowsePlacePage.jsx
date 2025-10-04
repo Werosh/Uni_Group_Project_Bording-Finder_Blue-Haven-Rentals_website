@@ -109,7 +109,11 @@ const BrowsePlacePage = () => {
       try {
         setLoading(true);
         const fetchedPosts = await getPosts();
-        setPosts(fetchedPosts);
+        // Filter to show only approved posts to regular users
+        const approvedPosts = fetchedPosts.filter(
+          (post) => post.status === "approved"
+        );
+        setPosts(approvedPosts);
       } catch (error) {
         console.error("Error fetching posts:", error);
       } finally {

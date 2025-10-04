@@ -8,6 +8,7 @@ import {
 } from "../../firebase/storageService";
 import postBackground from "../../assets/images/background/post-back.webp";
 import man1Img from "../../assets/images/others/Img-6.webp";
+import Modal from "../../components/Modal";
 
 // Categories aligned with BrowsePlacePage
 const CATEGORIES = [
@@ -286,6 +287,7 @@ const PostAddFormPage = () => {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const imageInputRef = useRef(null);
 
   // Form data state
@@ -523,8 +525,8 @@ const PostAddFormPage = () => {
       // Save to Firestore
       await createPost(postData);
 
-      alert("Post submitted successfully!");
-      navigate("/browse");
+      // Show success modal instead of alert
+      setShowSuccessModal(true);
     } catch (error) {
       console.error("Error submitting post:", error);
       alert("Failed to submit post: " + error.message);
@@ -532,6 +534,11 @@ const PostAddFormPage = () => {
       setIsSubmitting(false);
       setUploadProgress(0);
     }
+  };
+
+  const handleModalClose = () => {
+    setShowSuccessModal(false);
+    navigate("/browse");
   };
 
   const canProceedToNext = () => {
@@ -1222,6 +1229,55 @@ const PostAddFormPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={handleModalClose}
+        title="Post Submitted Successfully!"
+        size="md"
+        showCloseButton={false}
+      >
+        <div className="text-center space-y-6">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+            <svg
+              className="w-10 h-10 text-green-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+
+          <div>
+            <h3 className="text-2xl font-bold text-[#263D5D] mb-3">
+              Thank You for Your Submission!
+            </h3>
+            <p className="text-gray-600 mb-2">
+              Your post is being reviewed by our team and will be available
+              soon.
+            </p>
+            <p className="text-sm text-gray-500">
+              We'll notify you once your post is approved and live on the
+              platform.
+            </p>
+          </div>
+
+          <button
+            onClick={handleModalClose}
+            className="w-full px-6 py-3 bg-[#3ABBD0] hover:bg-[#2BA9C1] text-white rounded-xl font-semibold transition-colors"
+          >
+            Continue Browsing
+          </button>
+        </div>
+      </Modal>
+
       <style>{`
         @keyframes fadeInUp {
           from {

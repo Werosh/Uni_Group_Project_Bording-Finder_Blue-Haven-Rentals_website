@@ -18,6 +18,11 @@ import AllDonePage from "../pages/login-pages/AllDonePage";
 import SignupFlow from "../pages/sign-up-pages/SignupFlow";
 import SignupCompletePage from "../pages/sign-up-pages/SignupCompletePage";
 import AdminDashboard from "../pages/admin-pages/AdminDashboard";
+import AdminDashboardOverview from "../pages/admin-pages/AdminDashboardOverview";
+import AdminPendingPosts from "../pages/admin-pages/AdminPendingPosts";
+import AdminApprovedPosts from "../pages/admin-pages/AdminApprovedPosts";
+import AdminUsers from "../pages/admin-pages/AdminUsers";
+import AdminAnalytics from "../pages/admin-pages/AdminAnalytics";
 import PostAddFormPage from "../pages/main-pages/PostAddFormPage";
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -49,7 +54,11 @@ function ConditionalFooter() {
   const location = useLocation();
   const hiddenPaths = ["/browse", "/browse-more"];
 
-  if (hiddenPaths.includes(location.pathname)) {
+  // Hide footer on browse pages and all admin pages
+  if (
+    hiddenPaths.includes(location.pathname) ||
+    location.pathname.startsWith("/admin")
+  ) {
     return null;
   }
 
@@ -97,7 +106,39 @@ function AppRoutes() {
           path="/admin/dashboard"
           element={
             <ProtectedRoute requireRole="admin">
-              <AdminDashboard />
+              <AdminDashboardOverview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/pending-posts"
+          element={
+            <ProtectedRoute requireRole="admin">
+              <AdminPendingPosts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/approved-posts"
+          element={
+            <ProtectedRoute requireRole="admin">
+              <AdminApprovedPosts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute requireRole="admin">
+              <AdminUsers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/analytics"
+          element={
+            <ProtectedRoute requireRole="admin">
+              <AdminAnalytics />
             </ProtectedRoute>
           }
         />
