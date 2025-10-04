@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
+import { useEffect } from "react";
 import Navbar from "../components/Navbar";
 import LandingPage from "../landing/LandingPage";
 import Contact from "../pages/landing-pages/Contact";
@@ -11,9 +17,31 @@ import NotFoundPage from "../pages/NotFoundPage";
 import ProtectedRoute from "./ProtectedRoute";
 import Footer from "../components/Footer";
 
+function ScrollToTop() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      // If there's a hash, try to scroll to that element
+      setTimeout(() => {
+        const element = document.getElementById(location.hash.substring(1));
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    } else {
+      // No hash, scroll to top
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname, location.hash]);
+
+  return null;
+}
+
 function AppRoutes() {
   return (
     <Router>
+      <ScrollToTop />
       <Navbar />
       <Routes>
         {/* Landing page */}

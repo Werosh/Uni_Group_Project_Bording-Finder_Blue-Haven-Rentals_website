@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
   MapPin,
@@ -20,6 +20,8 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,6 +52,17 @@ const Navbar = () => {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleSectionNavigation = (sectionId) => {
+    if (location.pathname !== "/") {
+      navigate(`/#${sectionId}`);
+    } else {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
   };
 
   return (
@@ -83,18 +96,18 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6 text-[20px] tracking-[.09em] Hugiller-font-style">
-            <a
-              href="#home"
+            <button
+              onClick={() => handleSectionNavigation("home")}
               className="text-gray-700 hover:text-teal-600 transition-colors duration-200"
             >
               Home
-            </a>
-            <a
-              href="#about"
+            </button>
+            <button
+              onClick={() => handleSectionNavigation("about")}
               className="text-gray-700 hover:text-teal-600 transition-colors duration-200"
             >
               About
-            </a>
+            </button>
             <Link
               to="/contact"
               className="text-gray-700 hover:text-teal-600 transition-colors duration-200"
@@ -240,18 +253,18 @@ const Navbar = () => {
             </div>
 
             {/* Mobile Navigation Links */}
-            <a
-              href="#home"
+            <button
+              onClick={() => handleSectionNavigation("home")}
               className="block  hover:text-teal-600 py-2 text-[20px] text-[#235A78]"
             >
               Home
-            </a>
-            <a
-              href="#about"
+            </button>
+            <button
+              onClick={() => handleSectionNavigation("about")}
               className="block text-[#235A78] hover:text-teal-600 py-2 text-[20px]"
             >
               About
-            </a>
+            </button>
             <Link
               to="/contact"
               className="block text-[#235A78] hover:text-teal-600 py-2 text-[20px]"
