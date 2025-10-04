@@ -31,3 +31,30 @@ button {
 #same-font {
   font-family: "Hugiller-Demo";
 }
+
+/* Custom Scrollbar - Main Website */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3abbd0 0%, #263d5d 100%);
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #48d4e8 0%, #2e4a6d 100%);
+}
+
+/* Standard Scrollbar Properties (Firefox) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3abbd0 rgba(255, 255, 255, 0.1);
+}

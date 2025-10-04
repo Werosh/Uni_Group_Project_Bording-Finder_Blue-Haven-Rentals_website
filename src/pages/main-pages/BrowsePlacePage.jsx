@@ -213,7 +213,7 @@ const BrowsePlacePage = () => {
         <h3 className="text-[#263D5D] font-bold text-lg mb-3 flex items-center gap-2">
           <MdFilterList /> Categories
         </h3>
-        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar-section">
           {CATEGORIES.map((category) => (
             <label
               key={category}
@@ -236,7 +236,7 @@ const BrowsePlacePage = () => {
       {/* Locations Section */}
       <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-4 border border-white/40 shadow-lg">
         <h3 className="text-[#263D5D] font-bold text-lg mb-3">Locations</h3>
-        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar-section">
           {PROVINCE_ORDER.map((province) => (
             <div key={province} className="border-b border-gray-200 pb-2">
               <button
@@ -370,7 +370,7 @@ const BrowsePlacePage = () => {
           bg-white/20 backdrop-blur-sm border-r border-white/30 
           overflow-y-auto p-4 pt-20 lg:pt-6 z-40
           transform transition-transform duration-300
-          scrollbar-thin scrollbar-thumb-[#3ABBD0]/50 scrollbar-track-transparent
+          custom-scrollbar-sidebar
           ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }
@@ -537,6 +537,51 @@ const BrowsePlacePage = () => {
         }
         .animate-fadeInUp { animation: fadeInUp 0.8s ease-out; }
         .animate-slideInRight { animation: slideInRight 0.8s ease-out; }
+        
+        /* Custom Scrollbar - Sidebar */
+        .custom-scrollbar-sidebar::-webkit-scrollbar {
+          width: 10px;
+        }
+        .custom-scrollbar-sidebar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+          backdrop-filter: blur(10px);
+        }
+        .custom-scrollbar-sidebar::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #3ABBD0 0%, #263D5D 100%);
+          border-radius: 10px;
+          border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .custom-scrollbar-sidebar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #48d4e8 0%, #2e4a6d 100%);
+        }
+        
+        /* Custom Scrollbar - Internal Sections */
+        .custom-scrollbar-section::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar-section::-webkit-scrollbar-track {
+          background: rgba(58, 187, 208, 0.05);
+          border-radius: 8px;
+        }
+        .custom-scrollbar-section::-webkit-scrollbar-thumb {
+          background: rgba(58, 187, 208, 0.4);
+          border-radius: 8px;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .custom-scrollbar-section::-webkit-scrollbar-thumb:hover {
+          background: rgba(58, 187, 208, 0.6);
+        }
+        
+        /* Standard Scrollbar Properties (Firefox) */
+        .custom-scrollbar-sidebar {
+          scrollbar-width: thin;
+          scrollbar-color: #3ABBD0 rgba(255, 255, 255, 0.1);
+        }
+        .custom-scrollbar-section {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(58, 187, 208, 0.4) rgba(58, 187, 208, 0.05);
+        }
       `}</style>
     </div>
   );
