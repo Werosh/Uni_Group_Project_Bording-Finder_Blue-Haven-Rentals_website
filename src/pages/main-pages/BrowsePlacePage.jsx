@@ -337,7 +337,7 @@ const BrowsePlacePage = () => {
   );
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200 overflow-hidden">
+    <div className="relative bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
@@ -362,14 +362,15 @@ const BrowsePlacePage = () => {
       )}
 
       {/* Main Container */}
-      <div className="relative z-10 flex max-w-[1600px] mx-auto">
+      <div className="relative z-10 min-h-screen max-w-[1600px] mx-auto">
         {/* Sidebar */}
         <aside
           className={`
-          fixed lg:sticky top-0 left-0 h-screen w-[280px] lg:w-[320px] 
+          fixed top-0 left-0 h-screen w-[280px] lg:w-[320px] 
           bg-white/20 backdrop-blur-sm border-r border-white/30 
           overflow-y-auto p-4 pt-20 lg:pt-6 z-40
           transform transition-transform duration-300
+          scrollbar-thin scrollbar-thumb-[#3ABBD0]/50 scrollbar-track-transparent
           ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }
@@ -379,7 +380,7 @@ const BrowsePlacePage = () => {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 pt-20 lg:pt-6 mt-10">
+        <main className="min-h-screen p-4 md:p-6 lg:p-8 pt-20 lg:pt-8 lg:ml-[320px]">
           {/* Header */}
           <div className="text-center mb-6 animate-fadeInUp">
             <h1 className="text-[48px] md:text-[72px] lg:text-[80px] leading-none font-['Hugiller_DEMO']">
