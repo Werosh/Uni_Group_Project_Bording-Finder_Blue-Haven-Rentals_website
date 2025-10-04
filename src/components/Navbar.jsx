@@ -146,13 +146,19 @@ const Navbar = () => {
             )}
 
             {/* Find Place Button */}
-            <button className="bg-teal-500 font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
+            <button
+              onClick={() => navigate("/browse")}
+              className="bg-teal-500 font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+            >
               <MapPin className="h-4 w-4" />
               <span>Find place</span>
             </button>
 
             {/* Add Post Button */}
-            <button className="bg-teal-500 font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
+            <button
+              onClick={() => navigate("/post-add")}
+              className="bg-teal-500 font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+            >
               <Plus className="h-4 w-4" />
               <span>Add Post</span>
             </button>
@@ -269,7 +275,7 @@ const Navbar = () => {
                           </button>
                           <button
                             onClick={() => {
-                              navigate("/add-post");
+                              navigate("/post-add");
                               setIsDropdownOpen(false);
                             }}
                             className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
@@ -279,13 +285,13 @@ const Navbar = () => {
                           </button>
                           <button
                             onClick={() => {
-                              navigate("/pending-posts");
+                              navigate("/post-add");
                               setIsDropdownOpen(false);
                             }}
                             className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
                           >
                             <Clock className="h-4 w-4 mr-3" />
-                            Pending Posts
+                            My Posts
                           </button>
                           <div className=" py-1">
                             <button
@@ -324,7 +330,7 @@ const Navbar = () => {
                           </button>
                           <button
                             onClick={() => {
-                              navigate("/add-post");
+                              navigate("/post-add");
                               setIsDropdownOpen(false);
                             }}
                             className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
@@ -334,13 +340,13 @@ const Navbar = () => {
                           </button>
                           <button
                             onClick={() => {
-                              navigate("/pending-posts");
+                              navigate("/post-add");
                               setIsDropdownOpen(false);
                             }}
                             className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
                           >
                             <Clock className="h-4 w-4 mr-3" />
-                            Pending Posts
+                            My Posts
                           </button>
                           <button
                             onClick={() => {
@@ -432,12 +438,24 @@ const Navbar = () => {
 
             {/* Mobile Action Buttons */}
             <div id="same-font" className="pt-4 space-y-3">
-              <button className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200">
+              <button
+                onClick={() => {
+                  navigate("/browse");
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200"
+              >
                 <MapPin className="h-4 w-4" />
                 <span>Find place</span>
               </button>
 
-              <button className="w-full bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200">
+              <button
+                onClick={() => {
+                  navigate("/post-add");
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200"
+              >
                 <Plus className="h-4 w-4" />
                 <span>Add Post</span>
               </button>
@@ -518,7 +536,7 @@ const Navbar = () => {
                         </button>
                         <button
                           onClick={() => {
-                            navigate("/add-post");
+                            navigate("/post-add");
                             setIsMobileMenuOpen(false);
                           }}
                           className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
@@ -528,13 +546,13 @@ const Navbar = () => {
                         </button>
                         <button
                           onClick={() => {
-                            navigate("/pending-posts");
+                            navigate("/post-add");
                             setIsMobileMenuOpen(false);
                           }}
                           className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
                         >
                           <Clock className="h-4 w-4 mr-3" />
-                          Pending Posts
+                          My Posts
                         </button>
                         <button
                           onClick={handleLogout}
@@ -571,7 +589,7 @@ const Navbar = () => {
                         </button>
                         <button
                           onClick={() => {
-                            navigate("/add-post");
+                            navigate("/post-add");
                             setIsMobileMenuOpen(false);
                           }}
                           className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
@@ -581,13 +599,13 @@ const Navbar = () => {
                         </button>
                         <button
                           onClick={() => {
-                            navigate("/pending-posts");
+                            navigate("/post-add");
                             setIsMobileMenuOpen(false);
                           }}
                           className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
                         >
                           <Clock className="h-4 w-4 mr-3" />
-                          Pending Posts
+                          My Posts
                         </button>
                         <button
                           onClick={() => {

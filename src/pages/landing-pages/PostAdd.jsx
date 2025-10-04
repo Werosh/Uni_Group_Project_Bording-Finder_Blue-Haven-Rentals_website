@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Img from "../../assets/images/background/post-back.webp";
-import Man from "../../assets/images/others/img-6.webp";
+import Man from "../../assets/images/others/Img-6.webp";
 import ArrowIcon from "../../assets/images/icons/rightArrow.webp";
 
 const PostAdd = () => {
