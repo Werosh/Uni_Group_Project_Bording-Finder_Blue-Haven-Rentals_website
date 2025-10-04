@@ -69,11 +69,6 @@ if (requireRole && userProfile?.role !== requireRole && !isAdmin()) {
 - `logTestUserCredentials()` - logs credentials to console
 - Exported `TEST_USERS` object with credentials
 
-**Test Credentials:**
-
-- **Admin:** `admin@bluerental.com` / `Admin@123`
-- **Owner:** `owner@bluerental.com` / `Owner@123`
-
 **Impact:** Easy testing of admin functionality during development.
 
 ---

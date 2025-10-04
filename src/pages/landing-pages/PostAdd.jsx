@@ -7,8 +7,9 @@ import ArrowIcon from "../../assets/images/icons/rightArrow.webp";
 
 const PostAdd = () => {
   const navigate = useNavigate();
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, isAdmin } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const handleAddPostClick = () => {
     // Check if user is logged in
@@ -18,16 +19,14 @@ const PostAdd = () => {
       return;
     }
 
-    // Check if user is a boarding owner
-    if (userProfile?.role !== "boarding_owner") {
-      alert(
-        "Only boarding owners can post ads. Please sign up as a boarding owner."
-      );
+    // Check if user is a boarding owner or admin
+    if (userProfile?.role === "boarding_owner" || isAdmin()) {
+      navigate("/post-add");
       return;
     }
 
-    // Navigate to post add form
-    navigate("/post-add");
+    // Show modal for users with other roles
+    setShowModal(true);
   };
 
   return (
@@ -117,6 +116,79 @@ const PostAdd = () => {
         {/* White gradient overlay with blur */}
         <div className="absolute inset-0 bg-gradient-to-t from-white/100 via-white/0 to-white/0 backdrop-blur-[1px]"></div>
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 animate-fadeInUp">
+            {/* Close button */}
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close modal"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {/* Modal content */}
+            <div className="text-center">
+              <div className="mb-4">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#3ABBD0]/10">
+                  <svg
+                    className="h-6 w-6 text-[#3ABBD0]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <h3 className="text-xl sm:text-2xl font-bold text-[#263D5D] mb-4">
+                Boarding Owners Only
+              </h3>
+
+              <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                Only boarding owners can post ads. If you want to post an ad,
+                register as a boarding owner.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  onClick={() => navigate("/signup")}
+                  className="bg-[#263D5D] hover:bg-[#303435] text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                >
+                  Register as Owner
+                </button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all duration-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         @keyframes fadeInUp {

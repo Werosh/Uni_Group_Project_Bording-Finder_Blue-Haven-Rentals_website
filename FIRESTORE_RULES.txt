@@ -30,6 +30,19 @@ service cloud.firestore {
       allow update, delete: if request.auth != null && 
         resource.data.ownerId == request.auth.uid;
     }
+    
+    // Posts collection - for rental property posts
+    match /posts/{postId} {
+      // Anyone can read posts (public listings)
+      allow read: if true;
+      
+      // Only authenticated users can create posts
+      allow create: if request.auth != null;
+      
+      // Only the owner can update/delete their post
+      allow update, delete: if request.auth != null && 
+        resource.data.ownerId == request.auth.uid;
+    }
   }
 }
 
