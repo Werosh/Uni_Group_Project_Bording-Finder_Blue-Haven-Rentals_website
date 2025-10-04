@@ -12,6 +12,7 @@ import {
 import { MdFilterList } from "react-icons/md";
 import { getPosts } from "../../firebase/dbService";
 import mockImage from "../../assets/images/background/post-back.webp";
+import placeholderImage from "../../assets/images/background/post-back.webp";
 
 // Data from Location.jsx
 const DISTRICTS = [
@@ -96,6 +97,8 @@ const BrowsePlacePage = () => {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPostIndex, setSelectedPostIndex] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageLoadErrors, setImageLoadErrors] = useState({});
   const postsPerPage = 12;
 
   const propRef = useRef(null);
@@ -226,9 +229,29 @@ const BrowsePlacePage = () => {
     );
   };
 
+  // Image helper functions
+  const getPostImage = (post) => {
+    if (!post.imageUrls || post.imageUrls.length === 0) {
+      return placeholderImage;
+    }
+    return post.imageUrls[0];
+  };
+
+  const handleImageError = (postId) => {
+    setImageLoadErrors((prev) => ({ ...prev, [postId]: true }));
+  };
+
+  const getImageSrc = (post) => {
+    if (imageLoadErrors[post.id]) {
+      return placeholderImage;
+    }
+    return getPostImage(post);
+  };
+
   // Modal functions
   const openModal = (index) => {
     setSelectedPostIndex(index);
+    setCurrentImageIndex(0);
     setModalOpen(true);
     document.body.style.overflow = "hidden"; // Prevent background scrolling
   };
@@ -236,18 +259,37 @@ const BrowsePlacePage = () => {
   const closeModal = () => {
     setModalOpen(false);
     setSelectedPostIndex(null);
+    setCurrentImageIndex(0);
     document.body.style.overflow = "unset"; // Restore scrolling
   };
 
   const goToPreviousPost = () => {
     if (selectedPostIndex > 0) {
       setSelectedPostIndex(selectedPostIndex - 1);
+      setCurrentImageIndex(0);
     }
   };
 
   const goToNextPost = () => {
     if (selectedPostIndex < paginatedPosts.length - 1) {
       setSelectedPostIndex(selectedPostIndex + 1);
+      setCurrentImageIndex(0);
+    }
+  };
+
+  const goToPreviousImage = () => {
+    if (selectedPost && selectedPost.imageUrls && currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1);
+    }
+  };
+
+  const goToNextImage = () => {
+    if (
+      selectedPost &&
+      selectedPost.imageUrls &&
+      currentImageIndex < selectedPost.imageUrls.length - 1
+    ) {
+      setCurrentImageIndex(currentImageIndex + 1);
     }
   };
 
@@ -541,12 +583,18 @@ const BrowsePlacePage = () => {
                     onClick={() => openModal(index)}
                     className="group bg-white/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                   >
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-48 overflow-hidden bg-gray-200">
                       <img
-                        src={mockImage}
+                        src={getImageSrc(post)}
                         alt={post.title}
+                        onError={() => handleImageError(post.id)}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
+                      {post.imageUrls && post.imageUrls.length > 1 && (
+                        <div className="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-semibold backdrop-blur-sm">
+                          {post.imageUrls.length} photos
+                        </div>
+                      )}
                       <div className="absolute top-3 right-3 bg-[#3ABBD0] text-white px-3 py-1 rounded-full text-sm font-semibold">
                         Rs. {post.rent?.toLocaleString()}
                       </div>
@@ -654,11 +702,59 @@ const BrowsePlacePage = () => {
             <div className="flex flex-col lg:flex-row">
               {/* Image Section */}
               <div className="lg:w-1/2 relative">
-                <img
-                  src={mockImage}
-                  alt={selectedPost.title}
-                  className="w-full h-64 md:h-80 lg:h-full object-cover rounded-t-3xl lg:rounded-l-3xl lg:rounded-tr-none"
-                />
+                <div className="relative h-64 md:h-80 lg:h-full bg-gray-200">
+                  <img
+                    src={
+                      selectedPost.imageUrls &&
+                      selectedPost.imageUrls.length > 0
+                        ? selectedPost.imageUrls[currentImageIndex]
+                        : placeholderImage
+                    }
+                    alt={selectedPost.title}
+                    onError={(e) => {
+                      e.target.src = placeholderImage;
+                    }}
+                    className="w-full h-full object-cover rounded-t-3xl lg:rounded-l-3xl lg:rounded-tr-none"
+                  />
+
+                  {/* Image Navigation Arrows (if multiple images) */}
+                  {selectedPost.imageUrls &&
+                    selectedPost.imageUrls.length > 1 && (
+                      <>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            goToPreviousImage();
+                          }}
+                          disabled={currentImageIndex === 0}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <FaChevronLeft className="text-[#263D5D] text-lg" />
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            goToNextImage();
+                          }}
+                          disabled={
+                            currentImageIndex ===
+                            selectedPost.imageUrls.length - 1
+                          }
+                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <FaChevronRight className="text-[#263D5D] text-lg" />
+                        </button>
+
+                        {/* Image Counter */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+                          {currentImageIndex + 1} /{" "}
+                          {selectedPost.imageUrls.length}
+                        </div>
+                      </>
+                    )}
+                </div>
+
                 <div className="absolute top-4 left-4 bg-[#3ABBD0] text-white px-4 py-2 rounded-full text-lg font-bold shadow-lg">
                   Rs. {selectedPost.rent?.toLocaleString()}
                 </div>

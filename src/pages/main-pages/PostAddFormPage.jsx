@@ -1,7 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { createPost } from "../../firebase/dbService";
+import {
+  uploadMultipleImages,
+  validateImages,
+} from "../../firebase/storageService";
 import postBackground from "../../assets/images/background/post-back.webp";
 import man1Img from "../../assets/images/others/Img-6.webp";
 
@@ -279,6 +283,10 @@ const PostAddFormPage = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [dragOver, setDragOver] = useState(false);
+  const imageInputRef = useRef(null);
 
   // Form data state
   const [formData, setFormData] = useState({
@@ -378,6 +386,54 @@ const PostAddFormPage = () => {
     }
   };
 
+  // Image handling functions
+  const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files);
+    addImages(files);
+  };
+
+  const handleImageDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleImageDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleImageDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const files = Array.from(e.dataTransfer.files);
+    addImages(files);
+  };
+
+  const addImages = (files) => {
+    if (uploadedImages.length + files.length > 5) {
+      alert("⚠️ Maximum 5 images allowed");
+      return;
+    }
+
+    const validation = validateImages(files);
+    if (!validation.isValid) {
+      alert("⚠️ " + validation.errors.join("\n"));
+      return;
+    }
+
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      id: Math.random().toString(36).substring(2, 9),
+    }));
+
+    setUploadedImages([...uploadedImages, ...newImages]);
+  };
+
+  const removeImage = (id) => {
+    setUploadedImages(uploadedImages.filter((img) => img.id !== id));
+  };
+
   const heroMan = useMemo(() => man1Img, []);
 
   const progressPercentage = useMemo(() => {
@@ -422,9 +478,34 @@ const PostAddFormPage = () => {
     }
 
     setIsSubmitting(true);
+    setUploadProgress(0);
 
     try {
-      // Create post data (text-only, no images or videos)
+      let imageUrls = [];
+
+      // Upload images to Firebase Storage if any
+      if (uploadedImages.length > 0) {
+        const imagesToUpload = uploadedImages.map((img) => img.file);
+        const uploadResult = await uploadMultipleImages(
+          imagesToUpload,
+          "posts",
+          (progress) => {
+            setUploadProgress(progress.percentage);
+          }
+        );
+
+        if (uploadResult.errors.length > 0) {
+          console.error("Some images failed to upload:", uploadResult.errors);
+          alert(
+            `Warning: ${uploadResult.errors.length} image(s) failed to upload. Continuing with ${uploadResult.successCount} image(s).`
+          );
+        }
+
+        // Get URLs from successful uploads (Firebase Storage returns direct URLs)
+        imageUrls = uploadResult.success;
+      }
+
+      // Create post data with image URLs
       const postData = {
         title: formData.title.trim(),
         category: formData.category,
@@ -436,6 +517,7 @@ const PostAddFormPage = () => {
         mobile: formData.mobile.trim(),
         ownerId: user.uid,
         ownerName: userProfile?.fullName || "Anonymous",
+        imageUrls: imageUrls, // Array of Firebase Storage image URLs
       };
 
       // Save to Firestore
@@ -448,6 +530,7 @@ const PostAddFormPage = () => {
       alert("Failed to submit post: " + error.message);
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -756,6 +839,82 @@ const PostAddFormPage = () => {
                         />
                       </div>
                     </div>
+
+                    {/* Image Upload Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 items-start gap-4">
+                      <TextLabel className="text-left md:col-span-1 pt-3">
+                        Images
+                      </TextLabel>
+                      <div className="md:col-span-3 space-y-4">
+                        {/* Upload Area */}
+                        <div
+                          className={`relative group flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-6 cursor-pointer bg-gray-50/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg ${
+                            dragOver
+                              ? "border-[#3ABBD0] bg-[#3ABBD0]/10"
+                              : "border-[#3ABBD0]/40 hover:border-[#3ABBD0]/80"
+                          }`}
+                          onClick={() => imageInputRef.current.click()}
+                          onDragOver={handleImageDragOver}
+                          onDragLeave={handleImageDragLeave}
+                          onDrop={handleImageDrop}
+                        >
+                          <input
+                            ref={imageInputRef}
+                            type="file"
+                            onChange={handleImageSelect}
+                            className="hidden"
+                            accept="image/*"
+                            multiple
+                          />
+                          <div className="text-center">
+                            <div className="w-16 h-16 bg-[#263D5D]/10 rounded-full flex items-center justify-center mb-3 mx-auto group-hover:bg-[#3ABBD0]/20 transition-colors duration-300">
+                              <span className="text-[#263D5D] text-3xl group-hover:text-[#3ABBD0] transition-colors duration-300">
+                                +
+                              </span>
+                            </div>
+                            <p className="text-base font-medium text-[#263D5D] mb-1">
+                              Upload Property Images
+                            </p>
+                            <p className="text-xs text-gray-500 mb-1">
+                              Drag & drop or click to upload (max 5 images, 3MB
+                              each)
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              Formats: JPEG, PNG, WebP
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Image Previews */}
+                        {uploadedImages.length > 0 && (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {uploadedImages.map((img) => (
+                              <div
+                                key={img.id}
+                                className="relative group rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                              >
+                                <img
+                                  src={img.preview}
+                                  alt="Preview"
+                                  className="w-full h-32 object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(img.id)}
+                                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <p className="text-xs text-gray-500">
+                          {uploadedImages.length} / 5 images uploaded
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   <div className="space-y-6">
                     <SectionTitle Icon={FormIcon.User}>
@@ -1000,6 +1159,22 @@ const PostAddFormPage = () => {
                             )
                         )}
                       </ul>
+                    </div>
+                  )}
+
+                  {/* Upload Progress */}
+                  {isSubmitting && uploadProgress > 0 && (
+                    <div className="mb-6">
+                      <div className="flex justify-between text-xs text-gray-600 mb-2">
+                        <span>Uploading images...</span>
+                        <span>{uploadProgress}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-[#3ABBD0] to-cyan-400 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
                     </div>
                   )}
 

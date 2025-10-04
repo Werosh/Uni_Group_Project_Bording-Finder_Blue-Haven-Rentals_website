@@ -65,17 +65,14 @@ const SetupYourImagePage = () => {
       const user = userCredential.user;
 
       // 2. Upload images to Firebase Storage
-      const profileImageUrl = await uploadImage(
-        profileImage,
-        `users/${user.uid}/profile`
-      );
+      const profileImageUrl = await uploadImage(profileImage, "profiles");
       const idFrontImageUrl = await uploadImage(
         formData.frontImage,
-        `users/${user.uid}/id`
+        "id-documents"
       );
       const idBackImageUrl = await uploadImage(
         formData.backImage,
-        `users/${user.uid}/id`
+        "id-documents"
       );
 
       // 3. Create user profile in Firestore
@@ -91,9 +88,9 @@ const SetupYourImagePage = () => {
         division: formData.division,
         postalCode: formData.postalCode,
         idNumber: formData.idNumber,
-        profileImageUrl,
-        idFrontImageUrl,
-        idBackImageUrl,
+        profileImageUrl: profileImageUrl,
+        idFrontImageUrl: idFrontImageUrl,
+        idBackImageUrl: idBackImageUrl,
         userType: formData.userType,
       });
 
@@ -118,7 +115,9 @@ const SetupYourImagePage = () => {
       } else if (error.code === "auth/invalid-email") {
         setError("Invalid email address.");
       } else {
-        setError("Failed to create account. Please try again.");
+        setError(
+          error.message || "Failed to create account. Please try again."
+        );
       }
 
       setLoading(false);
