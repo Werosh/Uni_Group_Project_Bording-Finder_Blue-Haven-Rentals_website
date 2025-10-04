@@ -1,5 +1,6 @@
 // FindCity.jsx (JSX version, with updated buttons, routing for View More, and full city list)
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaSearch,
   FaMapMarkerAlt,
@@ -79,6 +80,7 @@ const PROPERTY_TYPES = [
 const VIEW_MORE_ROUTE = "/cities"; // <- change to your route path
 
 const FindCity = () => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(DISTRICTS[0]);
   const [zoom, setZoom] = useState(9);
@@ -465,7 +467,11 @@ const FindCity = () => {
           </div>
 
           {/* View More button (same design, routes to another page) */}
-          <button className="flex justify-end mt-12" aria-label="View More">
+          <button
+            onClick={() => navigate("/browse-more")}
+            className="flex justify-end mt-12"
+            aria-label="View More"
+          >
             <div className="relative overflow-hidden flex items-center gap-2 bg-[#263D5D] hover:bg-[#303435] text-white rounded-2xl px-4 py-2 shadow-lg border border-white/20 hover:scale-105 transition group">
               <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-cyan-400 text-black">
                 <FaChevronRight />

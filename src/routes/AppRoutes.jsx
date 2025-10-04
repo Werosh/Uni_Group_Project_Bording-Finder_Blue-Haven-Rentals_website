@@ -52,6 +52,7 @@ function AppRoutes() {
 
         {/* Main pages */}
         <Route path="/browse" element={<BrowsePlacePage />} />
+        <Route path="/browse-more" element={<BrowsePlacePage />} />
 
         {/* User pages (protected) */}
         <Route

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { IoChevronForward } from "react-icons/io5";
 import Img from "../../assets/images/background/categories-background.webp";
 
@@ -56,6 +57,8 @@ const categories = [
 ];
 
 const CategoriesGallery = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="p-4 md:p-8 min-h-screen bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200 relative overflow-hidden">
       {/* Animated background elements from Login3 */}
@@ -113,7 +116,10 @@ const CategoriesGallery = () => {
 
         {/* View More Button */}
         <div className="text-center mt-12">
-          <button className="relative overflow-hidden inline-flex items-center gap-3 bg-[#263D5D] hover:bg-[#303435] text-white px-8 py-3 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg group">
+          <button
+            onClick={() => navigate("/browse-more")}
+            className="relative overflow-hidden inline-flex items-center gap-3 bg-[#263D5D] hover:bg-[#303435] text-white px-8 py-3 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg group"
+          >
             <div className="bg-[#3ABBD0] p-1 rounded-full flex items-center justify-center">
               <IoChevronForward className="text-white h-4 w-4" />
             </div>
