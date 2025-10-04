@@ -13,6 +13,7 @@ const GetStartedPage = () => {
     email: formData.email || "",
     password: formData.password || "",
     confirmPassword: formData.confirmPassword || "",
+    userType: formData.userType || "typical_user",
   });
 
   const [errors, setErrors] = useState({});
@@ -63,8 +64,9 @@ const GetStartedPage = () => {
       (localData.lastName ? 1 : 0) +
       (localData.email ? 1 : 0) +
       (localData.password ? 1 : 0) +
-      (localData.confirmPassword ? 1 : 0)) /
-    5;
+      (localData.confirmPassword ? 1 : 0) +
+      (localData.userType ? 1 : 0)) /
+    6;
 
   return (
     <div>
@@ -245,6 +247,53 @@ const GetStartedPage = () => {
                     {errors.confirmPassword}
                   </p>
                 )}
+              </div>
+
+              {/* User Type Selection */}
+              <div className="mb-8">
+                <label className="flex items-center gap-2 text-[#263D5D] text-sm font-bold mb-3">
+                  <div className="w-2 h-2 bg-[#3ABBD0] rounded-full"></div>I am
+                  a
+                </label>
+                <div className="space-y-3">
+                  <label className="flex items-center p-4 bg-gray-50/80 rounded-2xl border-2 border-[#3ABBD0]/30 cursor-pointer hover:bg-gray-100/80 transition-all duration-300 group">
+                    <input
+                      type="radio"
+                      name="userType"
+                      value="typical_user"
+                      checked={localData.userType === "typical_user"}
+                      onChange={handleChange}
+                      className="w-5 h-5 text-[#3ABBD0] focus:ring-[#3ABBD0] focus:ring-2"
+                    />
+                    <div className="ml-3">
+                      <div className="text-[#263D5D] font-semibold">
+                        Typical User
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        I'm looking for boarding/rental places
+                      </div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center p-4 bg-gray-50/80 rounded-2xl border-2 border-[#3ABBD0]/30 cursor-pointer hover:bg-gray-100/80 transition-all duration-300 group">
+                    <input
+                      type="radio"
+                      name="userType"
+                      value="boarding_owner"
+                      checked={localData.userType === "boarding_owner"}
+                      onChange={handleChange}
+                      className="w-5 h-5 text-[#3ABBD0] focus:ring-[#3ABBD0] focus:ring-2"
+                    />
+                    <div className="ml-3">
+                      <div className="text-[#263D5D] font-semibold">
+                        Boarding Owner
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        I want to list my boarding/rental property
+                      </div>
+                    </div>
+                  </label>
+                </div>
               </div>
 
               {/* Progress Indicator */}

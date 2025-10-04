@@ -17,6 +17,7 @@ import SetNewPwdPage from "../pages/login-pages/SetNewPwdPage";
 import AllDonePage from "../pages/login-pages/AllDonePage";
 import SignupFlow from "../pages/sign-up-pages/SignupFlow";
 import SignupCompletePage from "../pages/sign-up-pages/SignupCompletePage";
+import AdminDashboard from "../pages/admin-pages/AdminDashboard";
 import NotFoundPage from "../pages/NotFoundPage";
 
 import ProtectedRoute from "./ProtectedRoute";
@@ -76,6 +77,16 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <UserPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin pages (protected with admin role) */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute requireRole="admin">
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />

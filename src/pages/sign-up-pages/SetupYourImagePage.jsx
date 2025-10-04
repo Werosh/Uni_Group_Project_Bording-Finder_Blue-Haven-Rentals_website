@@ -95,6 +95,7 @@ const SetupYourImagePage = () => {
         profileImageUrl,
         idFrontImageUrl,
         idBackImageUrl,
+        userType: formData.userType || "typical_user",
       });
 
       // 4. Update local form data and move to success page

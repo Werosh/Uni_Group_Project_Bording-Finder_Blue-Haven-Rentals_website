@@ -19,6 +19,7 @@ export const SignupProvider = ({ children }) => {
     email: "",
     password: "",
     confirmPassword: "",
+    userType: "typical_user", // typical_user, boarding_owner, admin
 
     // Step 2 - Account Details
     username: "",
@@ -93,6 +94,7 @@ export const SignupProvider = ({ children }) => {
       email: "",
       password: "",
       confirmPassword: "",
+      userType: "typical_user",
       username: "",
       description: "",
       phone: "",
