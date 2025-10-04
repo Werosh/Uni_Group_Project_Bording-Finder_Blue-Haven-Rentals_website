@@ -18,6 +18,7 @@ import AllDonePage from "../pages/login-pages/AllDonePage";
 import SignupFlow from "../pages/sign-up-pages/SignupFlow";
 import SignupCompletePage from "../pages/sign-up-pages/SignupCompletePage";
 import AdminDashboard from "../pages/admin-pages/AdminDashboard";
+import PostAddFormPage from "../pages/main-pages/PostAddFormPage";
 import NotFoundPage from "../pages/NotFoundPage";
 
 import ProtectedRoute from "./ProtectedRoute";
@@ -70,6 +71,16 @@ function AppRoutes() {
         {/* Main pages */}
         <Route path="/browse" element={<BrowsePlacePage />} />
         <Route path="/browse-more" element={<BrowsePlacePage />} />
+
+        {/* Post Add page (protected - boarding owners only) */}
+        <Route
+          path="/post-add"
+          element={
+            <ProtectedRoute requireRole="boarding_owner">
+              <PostAddFormPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* User pages (protected) */}
         <Route

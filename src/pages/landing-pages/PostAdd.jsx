@@ -1,10 +1,34 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import Img from "../../assets/images/background/post-back.webp";
 import Man from "../../assets/images/others/img-6.webp";
 import ArrowIcon from "../../assets/images/icons/rightArrow.webp";
 
 const PostAdd = () => {
+  const navigate = useNavigate();
+  const { user, userProfile } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
+
+  const handleAddPostClick = () => {
+    // Check if user is logged in
+    if (!user) {
+      alert("Please login to post an ad");
+      navigate("/login");
+      return;
+    }
+
+    // Check if user is a boarding owner
+    if (userProfile?.role !== "boarding_owner") {
+      alert(
+        "Only boarding owners can post ads. Please sign up as a boarding owner."
+      );
+      return;
+    }
+
+    // Navigate to post add form
+    navigate("/post-add");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200 relative overflow-hidden">
@@ -37,6 +61,7 @@ const PostAdd = () => {
 
               <div className="flex justify-center lg:justify-start">
                 <button
+                  onClick={handleAddPostClick}
                   onMouseEnter={() => setIsHovered(true)}
                   onMouseLeave={() => setIsHovered(false)}
                   className="relative overflow-hidden bg-[#263D5D] hover:bg-[#303435] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl group flex items-center gap-2 sm:gap-3"

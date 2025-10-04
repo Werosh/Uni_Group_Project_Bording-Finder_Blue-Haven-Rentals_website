@@ -9,6 +9,8 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { MdFilterList } from "react-icons/md";
+import { getPosts } from "../../firebase/dbService";
+import { getStrapiMediaUrl } from "../../firebase/strapiService";
 
 // Data from Location.jsx
 const DISTRICTS = [
@@ -79,21 +81,6 @@ const CATEGORIES = [
   "Single Bedrooms",
 ];
 
-// Mock data for rental posts
-const MOCK_POSTS = Array.from({ length: 24 }, (_, i) => ({
-  id: i + 1,
-  title: `Comfortable Room in Heart of ${DISTRICTS[i % DISTRICTS.length].name}`,
-  location: `${DISTRICTS[i % DISTRICTS.length].name}, ${
-    DISTRICTS[i % DISTRICTS.length].province
-  }`,
-  district: DISTRICTS[i % DISTRICTS.length].name,
-  province: DISTRICTS[i % DISTRICTS.length].province,
-  price: 15000 + Math.floor(Math.random() * 70000),
-  category: CATEGORIES[i % CATEGORIES.length],
-  imageUrl:
-    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80",
-}));
-
 const BrowsePlacePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [propertyType, setPropertyType] = useState(PROPERTY_TYPES[0]);
@@ -104,9 +91,28 @@ const BrowsePlacePage = () => {
   const [priceRange, setPriceRange] = useState([0, 100000]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const postsPerPage = 12;
 
   const propRef = useRef(null);
+
+  // Fetch posts from Firestore on component mount
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const fetchedPosts = await getPosts();
+        setPosts(fetchedPosts);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -162,7 +168,7 @@ const BrowsePlacePage = () => {
   };
 
   const filteredPosts = useMemo(() => {
-    return MOCK_POSTS.filter((post) => {
+    return posts.filter((post) => {
       const matchesSearch =
         !searchQuery ||
         post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -174,16 +180,16 @@ const BrowsePlacePage = () => {
 
       const matchesDistrict =
         selectedDistricts.length === 0 ||
-        selectedDistricts.includes(post.district);
+        selectedDistricts.includes(post.location); // Using location as district
 
       const matchesPrice =
-        post.price >= priceRange[0] && post.price <= priceRange[1];
+        post.rent >= priceRange[0] && post.rent <= priceRange[1];
 
       return (
         matchesSearch && matchesCategory && matchesDistrict && matchesPrice
       );
     });
-  }, [searchQuery, selectedCategories, selectedDistricts, priceRange]);
+  }, [posts, searchQuery, selectedCategories, selectedDistricts, priceRange]);
 
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   const paginatedPosts = filteredPosts.slice(
@@ -452,40 +458,87 @@ const BrowsePlacePage = () => {
 
           {/* Results Count */}
           <div className="mb-4 text-[#263D5D] font-poppins text-sm">
-            Showing {paginatedPosts.length} of {filteredPosts.length} properties
+            {loading
+              ? "Loading..."
+              : `Showing ${paginatedPosts.length} of ${filteredPosts.length} properties`}
           </div>
 
           {/* Posts Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {paginatedPosts.map((post) => (
-              <div
-                key={post.id}
-                className="group bg-white/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3ABBD0]"></div>
+            </div>
+          ) : filteredPosts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+              <svg
+                className="w-16 h-16 text-[#263D5D]/30 mb-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={post.imageUrl}
-                    alt={post.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute top-3 right-3 bg-[#3ABBD0] text-white px-3 py-1 rounded-full text-sm font-semibold">
-                    Rs. {post.price.toLocaleString()}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                />
+              </svg>
+              <h3 className="text-xl font-semibold text-[#263D5D] mb-2">
+                No posts found
+              </h3>
+              <p className="text-[#263D5D]/70">
+                Try adjusting your filters or search criteria
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {paginatedPosts.map((post) => {
+                // Get the first image URL from Strapi
+                const imageUrl =
+                  post.images && post.images.length > 0
+                    ? post.images[0].url
+                    : "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80";
+
+                return (
+                  <div
+                    key={post.id}
+                    className="group bg-white/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      <img
+                        src={imageUrl}
+                        alt={post.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        onError={(e) => {
+                          e.target.src =
+                            "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80";
+                        }}
+                      />
+                      <div className="absolute top-3 right-3 bg-[#3ABBD0] text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        Rs. {post.rent?.toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-[#263D5D] font-semibold text-lg mb-2 line-clamp-2">
+                        {post.title}
+                      </h3>
+                      <p className="text-[#263D5D]/70 text-sm font-poppins mb-1">
+                        {post.location}
+                      </p>
+                      <p className="text-[#3ABBD0] text-xs font-poppins">
+                        {post.category}
+                      </p>
+                      {post.forWhom && (
+                        <p className="text-[#263D5D]/60 text-xs font-poppins mt-1">
+                          For {post.forWhom}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-[#263D5D] font-semibold text-lg mb-2 line-clamp-2">
-                    {post.title}
-                  </h3>
-                  <p className="text-[#263D5D]/70 text-sm font-poppins mb-1">
-                    {post.location}
-                  </p>
-                  <p className="text-[#3ABBD0] text-xs font-poppins">
-                    {post.category}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
