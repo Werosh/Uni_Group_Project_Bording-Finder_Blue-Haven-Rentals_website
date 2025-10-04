@@ -24,7 +24,6 @@ p {
 }
 
 button {
-  background-color: oklch(71.5% 0.143 215.221);
   cursor: pointer;
 }
 
