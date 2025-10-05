@@ -10,6 +10,7 @@ import LandingPage from "../landing/LandingPage";
 import Contact from "../pages/landing-pages/Contact";
 import BrowsePlacePage from "../pages/main-pages/BrowsePlacePage";
 import UserPage from "../pages/user-pages/UserPage";
+import UserDetailsEditPage from "../pages/user-pages/UserDetailsEditPage";
 import WelcomeBackPage from "../pages/login-pages/WelcomeBackPage";
 import ForgotPwdPage from "../pages/login-pages/ForgotPwdPage";
 import PwdResetPage from "../pages/login-pages/PwdResetPage";
@@ -97,6 +98,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <UserPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/edit"
+          element={
+            <ProtectedRoute>
+              <UserDetailsEditPage />
             </ProtectedRoute>
           }
         />
