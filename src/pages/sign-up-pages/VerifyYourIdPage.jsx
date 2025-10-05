@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { BsStars } from "react-icons/bs";
 import { useSignup } from "../../context/SignupContext";
 import aboutBackground from "../../assets/images/background/about-background.webp";
+import Modal from "../../components/Modal";
 
 const VerifyYourIdPage = () => {
   const { formData, updateFormData, nextStep, prevStep } = useSignup();
@@ -17,6 +18,19 @@ const VerifyYourIdPage = () => {
   // Refs for hidden file inputs
   const frontInputRef = useRef(null);
   const backInputRef = useRef(null);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    type: "info",
+    title: "",
+    message: "",
+    onClose: null,
+  });
+
+  // Helper function to show alert modal
+  const showAlert = (type, title, message, onClose = null) => {
+    setAlertConfig({ type, title, message, onClose });
+    setShowAlertModal(true);
+  };
 
   const handleChange = (e) => {
     setLocalData({ ...localData, [e.target.name]: e.target.value });
@@ -49,7 +63,11 @@ const VerifyYourIdPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!localData.idNumber) {
-      alert("⚠️ Please enter your ID number");
+      showAlert(
+        "warning",
+        "ID Number Required",
+        "Please enter your ID number to continue."
+      );
       return;
     }
     updateFormData(localData);
@@ -249,6 +267,123 @@ const VerifyYourIdPage = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-[#DFECF8]/80 to-transparent opacity-100 block md:hidden"></div>
         </div>
       </div>
+
+      {/* Alert Modal */}
+      <Modal
+        isOpen={showAlertModal}
+        onClose={() => {
+          setShowAlertModal(false);
+          if (alertConfig.onClose) {
+            alertConfig.onClose();
+          }
+        }}
+        title={alertConfig.title}
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                alertConfig.type === "error"
+                  ? "bg-red-100"
+                  : alertConfig.type === "warning"
+                  ? "bg-yellow-100"
+                  : alertConfig.type === "success"
+                  ? "bg-green-100"
+                  : "bg-blue-100"
+              }`}
+            >
+              {alertConfig.type === "error" && (
+                <svg
+                  className="w-6 h-6 text-red-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              )}
+              {alertConfig.type === "warning" && (
+                <svg
+                  className="w-6 h-6 text-yellow-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              )}
+              {alertConfig.type === "success" && (
+                <svg
+                  className="w-6 h-6 text-green-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              )}
+              {alertConfig.type === "info" && (
+                <svg
+                  className="w-6 h-6 text-blue-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              )}
+            </div>
+            <div>
+              <p className="text-gray-700 whitespace-pre-line">
+                {alertConfig.message}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <button
+              onClick={() => {
+                setShowAlertModal(false);
+                if (alertConfig.onClose) {
+                  alertConfig.onClose();
+                }
+              }}
+              className={`px-4 py-2 rounded-xl font-semibold transition-colors ${
+                alertConfig.type === "error"
+                  ? "bg-red-500 hover:bg-red-600 text-white"
+                  : alertConfig.type === "warning"
+                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                  : alertConfig.type === "success"
+                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  : "bg-blue-500 hover:bg-blue-600 text-white"
+              }`}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <style jsx>{`
         @keyframes fadeInUp {

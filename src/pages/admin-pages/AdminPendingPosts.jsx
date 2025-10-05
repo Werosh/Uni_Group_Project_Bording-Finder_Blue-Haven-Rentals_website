@@ -30,6 +30,19 @@ const AdminPendingPosts = () => {
   const [actionType, setActionType] = useState(null); // 'approve' or 'decline'
   const [processingId, setProcessingId] = useState(null);
   const [declineReason, setDeclineReason] = useState("");
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    type: "info",
+    title: "",
+    message: "",
+    onClose: null,
+  });
+
+  // Helper function to show alert modal
+  const showAlert = (type, title, message, onClose = null) => {
+    setAlertConfig({ type, title, message, onClose });
+    setShowAlertModal(true);
+  };
 
   useEffect(() => {
     fetchPendingPosts();
@@ -110,7 +123,11 @@ const AdminPendingPosts = () => {
 
     // Validate decline reason if declining
     if (actionType === "decline" && !declineReason.trim()) {
-      alert("Please provide a reason for declining this post.");
+      showAlert(
+        "warning",
+        "Reason Required",
+        "Please provide a reason for declining this post."
+      );
       return;
     }
 
@@ -135,7 +152,11 @@ const AdminPendingPosts = () => {
       setFilteredPosts(filteredPosts.filter((p) => p.id !== selectedPost.id));
     } catch (error) {
       console.error("Error updating post status:", error);
-      alert("Failed to update post status. Please try again.");
+      showAlert(
+        "error",
+        "Update Failed",
+        "Failed to update post status. Please try again."
+      );
     } finally {
       setProcessingId(null);
       setSelectedPost(null);
@@ -398,6 +419,123 @@ const AdminPendingPosts = () => {
               }`}
             >
               {actionType === "approve" ? "Approve" : "Decline"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Alert Modal */}
+      <Modal
+        isOpen={showAlertModal}
+        onClose={() => {
+          setShowAlertModal(false);
+          if (alertConfig.onClose) {
+            alertConfig.onClose();
+          }
+        }}
+        title={alertConfig.title}
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                alertConfig.type === "error"
+                  ? "bg-red-100"
+                  : alertConfig.type === "warning"
+                  ? "bg-yellow-100"
+                  : alertConfig.type === "success"
+                  ? "bg-green-100"
+                  : "bg-blue-100"
+              }`}
+            >
+              {alertConfig.type === "error" && (
+                <svg
+                  className="w-6 h-6 text-red-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              )}
+              {alertConfig.type === "warning" && (
+                <svg
+                  className="w-6 h-6 text-yellow-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              )}
+              {alertConfig.type === "success" && (
+                <svg
+                  className="w-6 h-6 text-green-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              )}
+              {alertConfig.type === "info" && (
+                <svg
+                  className="w-6 h-6 text-blue-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              )}
+            </div>
+            <div>
+              <p className="text-gray-700 whitespace-pre-line">
+                {alertConfig.message}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <button
+              onClick={() => {
+                setShowAlertModal(false);
+                if (alertConfig.onClose) {
+                  alertConfig.onClose();
+                }
+              }}
+              className={`px-4 py-2 rounded-xl font-semibold transition-colors ${
+                alertConfig.type === "error"
+                  ? "bg-red-500 hover:bg-red-600 text-white"
+                  : alertConfig.type === "warning"
+                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                  : alertConfig.type === "success"
+                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  : "bg-blue-500 hover:bg-blue-600 text-white"
+              }`}
+            >
+              OK
             </button>
           </div>
         </div>

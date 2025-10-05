@@ -57,6 +57,19 @@ const AdminUsers = () => {
     dateOfBirth: "",
     role: "",
   });
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    type: "info",
+    title: "",
+    message: "",
+    onClose: null,
+  });
+
+  // Helper function to show alert modal
+  const showAlert = (type, title, message, onClose = null) => {
+    setAlertConfig({ type, title, message, onClose });
+    setShowAlertModal(true);
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -150,7 +163,11 @@ const AdminUsers = () => {
       });
     } catch (error) {
       console.error("Error deleting user:", error);
-      alert("Failed to delete user. Please try again.");
+      showAlert(
+        "error",
+        "Delete Failed",
+        "Failed to delete user. Please try again."
+      );
     } finally {
       setDeletingUserId(null);
       setSelectedUser(null);
@@ -199,7 +216,11 @@ const AdminUsers = () => {
       });
     } catch (error) {
       console.error("Error updating user:", error);
-      alert("Failed to update user. Please try again.");
+      showAlert(
+        "error",
+        "Update Failed",
+        "Failed to update user. Please try again."
+      );
     } finally {
       setEditingUserId(null);
     }
@@ -217,7 +238,11 @@ const AdminUsers = () => {
       setFilteredUsers(updatedUsers);
     } catch (error) {
       console.error("Error toggling user status:", error);
-      alert("Failed to update user status. Please try again.");
+      showAlert(
+        "error",
+        "Status Update Failed",
+        "Failed to update user status. Please try again."
+      );
     }
   };
 
@@ -816,6 +841,123 @@ const AdminUsers = () => {
               {editingUserId === selectedUser?.id
                 ? "Updating..."
                 : "Update User"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Alert Modal */}
+      <Modal
+        isOpen={showAlertModal}
+        onClose={() => {
+          setShowAlertModal(false);
+          if (alertConfig.onClose) {
+            alertConfig.onClose();
+          }
+        }}
+        title={alertConfig.title}
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                alertConfig.type === "error"
+                  ? "bg-red-100"
+                  : alertConfig.type === "warning"
+                  ? "bg-yellow-100"
+                  : alertConfig.type === "success"
+                  ? "bg-green-100"
+                  : "bg-blue-100"
+              }`}
+            >
+              {alertConfig.type === "error" && (
+                <svg
+                  className="w-6 h-6 text-red-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              )}
+              {alertConfig.type === "warning" && (
+                <svg
+                  className="w-6 h-6 text-yellow-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              )}
+              {alertConfig.type === "success" && (
+                <svg
+                  className="w-6 h-6 text-green-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              )}
+              {alertConfig.type === "info" && (
+                <svg
+                  className="w-6 h-6 text-blue-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              )}
+            </div>
+            <div>
+              <p className="text-gray-700 whitespace-pre-line">
+                {alertConfig.message}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <button
+              onClick={() => {
+                setShowAlertModal(false);
+                if (alertConfig.onClose) {
+                  alertConfig.onClose();
+                }
+              }}
+              className={`px-4 py-2 rounded-xl font-semibold transition-colors ${
+                alertConfig.type === "error"
+                  ? "bg-red-500 hover:bg-red-600 text-white"
+                  : alertConfig.type === "warning"
+                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                  : alertConfig.type === "success"
+                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  : "bg-blue-500 hover:bg-blue-600 text-white"
+              }`}
+            >
+              OK
             </button>
           </div>
         </div>
