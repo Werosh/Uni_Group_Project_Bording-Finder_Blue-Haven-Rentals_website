@@ -16,6 +16,10 @@ import {
   getAllUsers,
   getUserStatistics,
   deleteUser,
+  updateUserDetails,
+  getUserById,
+  updateUserRole,
+  toggleUserStatus,
 } from "../../firebase/dbService";
 import AdminLayout from "./AdminLayout";
 import Modal from "../../components/Modal";
@@ -41,7 +45,18 @@ const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [deletingUserId, setDeletingUserId] = useState(null);
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    dateOfBirth: "",
+    role: "",
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -139,6 +154,70 @@ const AdminUsers = () => {
     } finally {
       setDeletingUserId(null);
       setSelectedUser(null);
+    }
+  };
+
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setEditFormData({
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      phoneNumber: user.phoneNumber || "",
+      address: user.address || "",
+      dateOfBirth: user.dateOfBirth || "",
+      role: user.role || user.userType || "boarding_finder",
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateUser = async () => {
+    if (!selectedUser) return;
+
+    try {
+      setEditingUserId(selectedUser.id);
+
+      await updateUserDetails(selectedUser.id, editFormData);
+
+      // Update user in list
+      const updatedUsers = users.map((u) =>
+        u.id === selectedUser.id ? { ...u, ...editFormData } : u
+      );
+      setUsers(updatedUsers);
+      setFilteredUsers(updatedUsers);
+
+      setShowEditModal(false);
+      setSelectedUser(null);
+      setEditFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phoneNumber: "",
+        address: "",
+        dateOfBirth: "",
+        role: "",
+      });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      alert("Failed to update user. Please try again.");
+    } finally {
+      setEditingUserId(null);
+    }
+  };
+
+  const handleToggleUserStatus = async (user) => {
+    try {
+      await toggleUserStatus(user.id, !user.inactive);
+
+      // Update user in list
+      const updatedUsers = users.map((u) =>
+        u.id === user.id ? { ...u, inactive: !user.inactive } : u
+      );
+      setUsers(updatedUsers);
+      setFilteredUsers(updatedUsers);
+    } catch (error) {
+      console.error("Error toggling user status:", error);
+      alert("Failed to update user status. Please try again.");
     }
   };
 
@@ -368,6 +447,14 @@ const AdminUsers = () => {
                         >
                           <Eye className="w-5 h-5" />
                         </button>
+                        <button
+                          onClick={() => handleEditUser(user)}
+                          disabled={editingUserId === user.id}
+                          className="p-2 hover:bg-green-50 text-green-600 rounded-lg transition-colors disabled:opacity-50"
+                          title="Edit User"
+                        >
+                          <Edit className="w-5 h-5" />
+                        </button>
                         {user.role !== "admin" && (
                           <button
                             onClick={() => {
@@ -441,6 +528,13 @@ const AdminUsers = () => {
                     className="flex-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-semibold hover:bg-blue-100 transition-colors"
                   >
                     View Details
+                  </button>
+                  <button
+                    onClick={() => handleEditUser(user)}
+                    disabled={editingUserId === user.id}
+                    className="px-4 py-2 bg-green-50 text-green-600 rounded-xl font-semibold hover:bg-green-100 transition-colors disabled:opacity-50"
+                  >
+                    <Edit className="w-5 h-5" />
                   </button>
                   {user.role !== "admin" && (
                     <button
@@ -584,6 +678,147 @@ const AdminUsers = () => {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Edit User Modal */}
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Edit User"
+        size="lg"
+      >
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">
+                First Name
+              </label>
+              <input
+                type="text"
+                value={editFormData.firstName}
+                onChange={(e) =>
+                  setEditFormData({
+                    ...editFormData,
+                    firstName: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3ABBD0] focus:border-transparent"
+                placeholder="Enter first name"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">
+                Last Name
+              </label>
+              <input
+                type="text"
+                value={editFormData.lastName}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, lastName: e.target.value })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3ABBD0] focus:border-transparent"
+                placeholder="Enter last name"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">Email</label>
+              <input
+                type="email"
+                value={editFormData.email}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, email: e.target.value })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3ABBD0] focus:border-transparent"
+                placeholder="Enter email"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                value={editFormData.phoneNumber}
+                onChange={(e) =>
+                  setEditFormData({
+                    ...editFormData,
+                    phoneNumber: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3ABBD0] focus:border-transparent"
+                placeholder="Enter phone number"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">
+                Date of Birth
+              </label>
+              <input
+                type="date"
+                value={editFormData.dateOfBirth}
+                onChange={(e) =>
+                  setEditFormData({
+                    ...editFormData,
+                    dateOfBirth: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3ABBD0] focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">Role</label>
+              <select
+                value={editFormData.role}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, role: e.target.value })
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3ABBD0] focus:border-transparent"
+              >
+                <option value="boarding_finder">Boarding Finder</option>
+                <option value="boarding_owner">Boarding Owner</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="text-sm text-gray-500 mb-1 block">
+                Address
+              </label>
+              <textarea
+                value={editFormData.address}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, address: e.target.value })
+                }
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3ABBD0] focus:border-transparent"
+                placeholder="Enter address"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleUpdateUser}
+              disabled={editingUserId === selectedUser?.id}
+              className="flex-1 px-4 py-3 bg-[#3ABBD0] hover:bg-[#3ABBD0]/90 text-white rounded-xl font-semibold transition-colors disabled:opacity-50"
+            >
+              {editingUserId === selectedUser?.id
+                ? "Updating..."
+                : "Update User"}
+            </button>
+          </div>
+        </div>
       </Modal>
     </AdminLayout>
   );

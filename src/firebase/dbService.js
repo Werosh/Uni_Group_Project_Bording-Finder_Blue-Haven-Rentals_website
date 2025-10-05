@@ -319,3 +319,46 @@ export const getAnalyticsData = async () => {
     userStatusDistribution,
   };
 };
+
+// ADMIN-SPECIFIC USER MANAGEMENT FUNCTIONS
+
+// Update user details (admin function)
+export const updateUserDetails = async (userId, updatedData) => {
+  const userRef = doc(db, "users", userId);
+  await updateDoc(userRef, {
+    ...updatedData,
+    updatedAt: new Date().toISOString(),
+  });
+  return { id: userId, ...updatedData };
+};
+
+// Get user by ID (admin function)
+export const getUserById = async (userId) => {
+  const userRef = doc(db, "users", userId);
+  const snapshot = await getDoc(userRef);
+  if (snapshot.exists()) {
+    return { id: snapshot.id, ...snapshot.data() };
+  }
+  return null;
+};
+
+// Update user role (admin function)
+export const updateUserRole = async (userId, newRole) => {
+  const userRef = doc(db, "users", userId);
+  await updateDoc(userRef, {
+    role: newRole,
+    userType: newRole, // Also update userType for backwards compatibility
+    updatedAt: new Date().toISOString(),
+  });
+  return { id: userId, role: newRole };
+};
+
+// Deactivate/Activate user (admin function)
+export const toggleUserStatus = async (userId, isActive) => {
+  const userRef = doc(db, "users", userId);
+  await updateDoc(userRef, {
+    inactive: !isActive,
+    updatedAt: new Date().toISOString(),
+  });
+  return { id: userId, inactive: !isActive };
+};
