@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { getUserProfile, updateUserProfile } from "../../firebase/dbService";
 import { uploadImage } from "../../firebase/storageService";
 import { useNavigate } from "react-router-dom";
+import { getInitials } from "../../utils/profileUtils";
 
 const UserDetailsEditPage = () => {
   const { user, userProfile } = useAuth();
@@ -99,12 +100,6 @@ const UserDetailsEditPage = () => {
     } finally {
       setSaving(false);
     }
-  };
-
-  const getInitials = (firstName, lastName) => {
-    const first = firstName ? firstName.charAt(0).toUpperCase() : "";
-    const last = lastName ? lastName.charAt(0).toUpperCase() : "";
-    return first + last;
   };
 
   if (loading) {

@@ -99,6 +99,32 @@ export const updatePost = async (id, updatedData) => {
   });
 };
 
+// Edit a post (handles status transitions)
+export const editPost = async (id, updatedData) => {
+  const docRef = doc(db, "posts", id);
+  const postDoc = await getDoc(docRef);
+
+  if (!postDoc.exists()) {
+    throw new Error("Post not found");
+  }
+
+  const currentPost = postDoc.data();
+
+  // If the post was approved and is being edited, change status to pending
+  const newStatus =
+    currentPost.status === "approved" ? "pending" : currentPost.status;
+
+  await updateDoc(docRef, {
+    ...updatedData,
+    status: newStatus,
+    editedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isEdited: true, // Flag to indicate this post was edited
+  });
+
+  return { id, ...updatedData, status: newStatus };
+};
+
 // Delete a post
 export const deletePost = async (id) => {
   const docRef = doc(db, "posts", id);
@@ -162,13 +188,31 @@ export const getPostsByStatus = async (status) => {
   return posts.filter((post) => post.status === status);
 };
 
+// Get edited posts that need re-approval
+export const getEditedPosts = async () => {
+  const colRef = collection(db, "posts");
+  const snapshot = await getDocs(colRef);
+  const posts = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return posts.filter(
+    (post) => post.isEdited === true && post.status === "pending"
+  );
+};
+
 // Update post status
 export const updatePostStatus = async (postId, status) => {
   const docRef = doc(db, "posts", postId);
-  await updateDoc(docRef, {
+  const updateData = {
     status: status,
     updatedAt: new Date().toISOString(),
-  });
+  };
+
+  // If approving a post, clear the edited flag
+  if (status === "approved") {
+    updateData.isEdited = false;
+    updateData.editedAt = null;
+  }
+
+  await updateDoc(docRef, updateData);
 };
 
 // Get user statistics

@@ -2,6 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { getUserProfile, getPostsByOwner } from "../../firebase/dbService";
 import { Link } from "react-router-dom";
+import {
+  getInitials,
+  getFullName,
+  getDisplayName,
+  getProfileImageUrl,
+  hasProfileImage,
+} from "../../utils/profileUtils";
+import EditPostModal from "../../components/EditPostModal";
 
 const UserPage = () => {
   const { user, userProfile } = useAuth();
@@ -11,6 +19,8 @@ const UserPage = () => {
   const [reviews, setReviews] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
   const [loading, setLoading] = useState(true);
+  const [editingPost, setEditingPost] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -61,12 +71,6 @@ const UserPage = () => {
     fetchUserData();
   }, [user, userProfile]);
 
-  const getInitials = (firstName, lastName) => {
-    const first = firstName ? firstName.charAt(0).toUpperCase() : "";
-    const last = lastName ? lastName.charAt(0).toUpperCase() : "";
-    return first + last;
-  };
-
   const formatMemberSince = (createdAt) => {
     if (!createdAt) return "December 28, 2018";
     const date = new Date(createdAt);
@@ -77,11 +81,11 @@ const UserPage = () => {
     });
   };
 
-  const formatPrice = (price) => {
-    if (price === undefined || price === null || isNaN(price)) {
-      return "Price not set";
+  const formatRent = (rent) => {
+    if (rent === undefined || rent === null || isNaN(rent)) {
+      return "Rent not set";
     }
-    return `Rs. ${price.toLocaleString()}/=`;
+    return `Rs. ${rent.toLocaleString()}/=`;
   };
 
   const getStatusIcon = (status) => {
@@ -115,6 +119,27 @@ const UserPage = () => {
       default:
         return null;
     }
+  };
+
+  const handleEditPost = (post) => {
+    setEditingPost(post);
+    setShowEditModal(true);
+  };
+
+  const handleEditSuccess = async () => {
+    // Refresh posts data
+    try {
+      const userPosts = await getPostsByOwner(user.uid);
+      setPosts(userPosts.filter((post) => post.status !== "draft"));
+      setDrafts(userPosts.filter((post) => post.status === "draft"));
+    } catch (error) {
+      console.error("Error refreshing posts:", error);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditingPost(null);
   };
 
   if (loading) {
@@ -180,9 +205,9 @@ const UserPage = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               {/* Profile Picture */}
               <div className="flex justify-center -mt-16 mb-6">
-                {profile.profileImageUrl ? (
+                {hasProfileImage(profile) ? (
                   <img
-                    src={profile.profileImageUrl}
+                    src={getProfileImageUrl(profile)}
                     alt="Profile"
                     className="w-32 h-32 rounded-2xl object-cover border-4 border-white shadow-lg"
                   />
@@ -197,9 +222,7 @@ const UserPage = () => {
 
               {/* Full Name */}
               <h1 className="text-2xl font-bold text-gray-900 text-center mb-6">
-                {profile.firstName && profile.lastName
-                  ? `${profile.firstName} ${profile.lastName}`
-                  : "Full Name"}
+                {getDisplayName(profile, "User")}
               </h1>
 
               {/* About Me Section */}
@@ -332,7 +355,11 @@ const UserPage = () => {
                           {getStatusIcon(post.status)}
                         </div>
                         <div className="absolute top-3 right-3 flex gap-2">
-                          <button className="bg-blue-600 bg-opacity-80 text-white p-1 rounded">
+                          <button
+                            onClick={() => handleEditPost(post)}
+                            className="bg-blue-600 bg-opacity-80 hover:bg-opacity-100 text-white p-1 rounded transition-all"
+                            title="Edit post"
+                          >
                             <svg
                               className="w-4 h-4"
                               fill="none"
@@ -347,7 +374,7 @@ const UserPage = () => {
                               />
                             </svg>
                           </button>
-                          <button className="bg-blue-600 bg-opacity-80 text-white p-1 rounded">
+                          <button className="bg-blue-600 bg-opacity-80 hover:bg-opacity-100 text-white p-1 rounded transition-all">
                             <svg
                               className="w-4 h-4"
                               fill="none"
@@ -369,7 +396,7 @@ const UserPage = () => {
                           {post.title}
                         </h3>
                         <p className="text-blue-600 font-bold text-lg">
-                          {formatPrice(post.price)}
+                          {formatRent(post.rent)}
                         </p>
                       </div>
                     </div>
@@ -435,7 +462,11 @@ const UserPage = () => {
                           </div>
                         </div>
                         <div className="absolute top-3 right-3">
-                          <button className="bg-blue-600 bg-opacity-80 text-white p-1 rounded">
+                          <button
+                            onClick={() => handleEditPost(post)}
+                            className="bg-blue-600 bg-opacity-80 hover:bg-opacity-100 text-white p-1 rounded transition-all"
+                            title="Edit draft"
+                          >
                             <svg
                               className="w-4 h-4"
                               fill="none"
@@ -457,7 +488,7 @@ const UserPage = () => {
                           {post.title}
                         </h3>
                         <p className="text-blue-600 font-bold text-lg">
-                          {formatPrice(post.price)}
+                          {formatRent(post.rent)}
                         </p>
                       </div>
                     </div>
@@ -581,6 +612,14 @@ const UserPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Post Modal */}
+      <EditPostModal
+        isOpen={showEditModal}
+        onClose={handleCloseEditModal}
+        post={editingPost}
+        onSuccess={handleEditSuccess}
+      />
     </div>
   );
 };

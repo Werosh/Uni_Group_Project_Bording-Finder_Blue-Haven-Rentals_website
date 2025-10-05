@@ -14,6 +14,7 @@ import {
   getPostsByStatus,
   updatePostStatus,
   deletePost,
+  getEditedPosts,
 } from "../../firebase/dbService";
 import AdminLayout from "./AdminLayout";
 import Modal from "../../components/Modal";
@@ -40,9 +41,15 @@ const AdminPendingPosts = () => {
   const fetchPendingPosts = async () => {
     try {
       setLoading(true);
-      const pendingPosts = await getPostsByStatus("pending");
-      setPosts(pendingPosts);
-      setFilteredPosts(pendingPosts);
+      const [pendingPosts, editedPosts] = await Promise.all([
+        getPostsByStatus("pending"),
+        getEditedPosts(),
+      ]);
+
+      // Combine regular pending posts with edited posts
+      const allPosts = [...pendingPosts, ...editedPosts];
+      setPosts(allPosts);
+      setFilteredPosts(allPosts);
     } catch (error) {
       console.error("Error fetching pending posts:", error);
     } finally {
@@ -222,9 +229,16 @@ const AdminPendingPosts = () => {
                 <div className="flex-1 p-6">
                   <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-[#263D5D] mb-2">
-                        {post.title}
-                      </h3>
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-xl font-bold text-[#263D5D]">
+                          {post.title}
+                        </h3>
+                        {post.isEdited && (
+                          <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs font-semibold">
+                            Edited
+                          </span>
+                        )}
+                      </div>
 
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center gap-2 text-gray-600">
@@ -244,8 +258,15 @@ const AdminPendingPosts = () => {
                         <div className="flex items-center gap-2 text-gray-600">
                           <Calendar className="w-4 h-4" />
                           <span className="text-sm">
+                            Created:{" "}
                             {new Date(post.createdAt).toLocaleDateString()}
                           </span>
+                          {post.editedAt && (
+                            <span className="text-sm text-orange-600">
+                              • Edited:{" "}
+                              {new Date(post.editedAt).toLocaleDateString()}
+                            </span>
+                          )}
                         </div>
 
                         <div className="flex items-center gap-2 text-[#263D5D] font-bold text-lg">
@@ -297,7 +318,9 @@ const AdminPendingPosts = () => {
         <div className="space-y-4">
           <p className="text-gray-600">
             {actionType === "approve"
-              ? "Are you sure you want to approve this post? It will be visible to all users on the browse page."
+              ? selectedPost?.isEdited
+                ? "Are you sure you want to approve this edited post? It will be visible to all users on the browse page."
+                : "Are you sure you want to approve this post? It will be visible to all users on the browse page."
               : "Are you sure you want to decline this post? The post will be marked as declined and won't be visible to users."}
           </p>
 

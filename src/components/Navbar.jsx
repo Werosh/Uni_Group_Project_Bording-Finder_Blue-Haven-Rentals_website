@@ -18,6 +18,12 @@ import DropDownBackImg from "../assets/images/others/handBack.webp";
 import { useAuth } from "../context/AuthContext";
 import { logout } from "../firebase/authService";
 import Modal from "./Modal";
+import {
+  getInitials,
+  getDisplayName,
+  getProfileImageUrl,
+  hasProfileImage,
+} from "../utils/profileUtils";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -194,17 +200,12 @@ const Navbar = () => {
                 onClick={toggleDropdown}
                 className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors duration-200 font-semibold text-lg"
               >
-                {user &&
-                (userProfile?.firstName ||
-                  userProfile?.username ||
-                  user.email) ? (
+                {user && userProfile ? (
                   <span>
-                    {(
-                      userProfile?.firstName?.[0] ||
-                      userProfile?.username?.[0] ||
-                      user.email?.[0] ||
-                      "U"
-                    ).toUpperCase()}
+                    {getInitials(userProfile.firstName, userProfile.lastName) ||
+                      userProfile.username?.[0]?.toUpperCase() ||
+                      user.email?.[0]?.toUpperCase() ||
+                      "U"}
                   </span>
                 ) : (
                   <User className="h-5 w-5" />
@@ -226,14 +227,19 @@ const Navbar = () => {
                       <div className="p-4 ">
                         <div className="flex items-center space-x-3">
                           <div className="w-32 h-32 border-[#2BA9C1B2] border-3 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                            {userProfile?.profileImage ? (
+                            {hasProfileImage(userProfile) ? (
                               <img
-                                src={userProfile.profileImage}
+                                src={getProfileImageUrl(userProfile)}
                                 alt="Profile"
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <User className="h-6 w-6 text-gray-400" />
+                              <span className="text-4xl font-bold text-teal-600">
+                                {getInitials(
+                                  userProfile.firstName,
+                                  userProfile.lastName
+                                )}
+                              </span>
                             )}
                           </div>
                           <div>
@@ -241,9 +247,10 @@ const Navbar = () => {
                               id="username-drop"
                               className="font-medium text-[24px] text-gray-900"
                             >
-                              {userProfile?.firstName && userProfile?.lastName
-                                ? `${userProfile.firstName} ${userProfile.lastName}`
-                                : user.email?.split("@")[0] || "User"}
+                              {getDisplayName(
+                                userProfile,
+                                user.email?.split("@")[0] || "User"
+                              )}
                             </p>
                             <p className="text-sm text-gray-500">
                               @
@@ -498,20 +505,21 @@ const Navbar = () => {
                   {userProfile?.role !== "boarding_finder" && (
                     <div className="flex items-center space-x-3 mb-4">
                       <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white overflow-hidden font-semibold text-lg">
-                        {userProfile?.profileImage ? (
+                        {hasProfileImage(userProfile) ? (
                           <img
-                            src={userProfile.profileImage}
+                            src={getProfileImageUrl(userProfile)}
                             alt="Profile"
                             className="w-full h-full object-cover"
                           />
                         ) : (
                           <span>
-                            {(
-                              userProfile?.firstName?.[0] ||
-                              userProfile?.username?.[0] ||
-                              user.email?.[0] ||
-                              "U"
-                            ).toUpperCase()}
+                            {getInitials(
+                              userProfile.firstName,
+                              userProfile.lastName
+                            ) ||
+                              userProfile?.username?.[0]?.toUpperCase() ||
+                              user.email?.[0]?.toUpperCase() ||
+                              "U"}
                           </span>
                         )}
                       </div>
@@ -520,9 +528,10 @@ const Navbar = () => {
                           id="same-font"
                           className="font-medium text-gray-900 text-[20px]"
                         >
-                          {userProfile?.firstName && userProfile?.lastName
-                            ? `${userProfile.firstName} ${userProfile.lastName}`
-                            : user.email?.split("@")[0] || "User"}
+                          {getDisplayName(
+                            userProfile,
+                            user.email?.split("@")[0] || "User"
+                          )}
                         </p>
                         <p className="text-sm text-gray-500">
                           @{userProfile?.username || user.email?.split("@")[0]}

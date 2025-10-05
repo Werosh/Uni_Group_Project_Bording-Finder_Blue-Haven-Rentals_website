@@ -29,6 +29,7 @@ import {
   getAllUsers,
 } from "../../firebase/dbService";
 import AdminLayout from "./AdminLayout";
+import { getDisplayName } from "../../utils/profileUtils";
 
 const COLORS = ["#3ABBD0", "#263D5D", "#8B5CF6", "#F59E0B"];
 
@@ -86,7 +87,7 @@ const AdminDashboardOverview = () => {
           const user = allUsers.find((u) => u.id === userId);
           return {
             id: userId,
-            name: user?.fullName || user?.firstName || "Unknown User",
+            name: getDisplayName(user, "Unknown User"),
             email: user?.email || "",
             postCount: count,
             rating: user?.rating || 4.5,
@@ -327,7 +328,7 @@ const AdminDashboardOverview = () => {
                   className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                 >
                   <div className="w-12 h-12 bg-gradient-to-br from-[#263D5D] to-gray-700 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                    {user.name.charAt(0)}
+                    {user.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-[#263D5D] truncate">

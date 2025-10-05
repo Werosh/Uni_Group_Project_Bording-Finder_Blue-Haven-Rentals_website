@@ -19,6 +19,12 @@ import {
 } from "../../firebase/dbService";
 import AdminLayout from "./AdminLayout";
 import Modal from "../../components/Modal";
+import {
+  getInitials,
+  getDisplayName,
+  getProfileImageUrl,
+  hasProfileImage,
+} from "../../utils/profileUtils";
 
 const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
@@ -68,8 +74,9 @@ const AdminUsers = () => {
     if (searchTerm) {
       filtered = filtered.filter(
         (user) =>
-          user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          getDisplayName(user)
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
           user.email?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -89,9 +96,7 @@ const AdminUsers = () => {
         case "oldest":
           return new Date(a.createdAt) - new Date(b.createdAt);
         case "name":
-          return (a.fullName || a.firstName || "").localeCompare(
-            b.fullName || b.firstName || ""
-          );
+          return getDisplayName(a).localeCompare(getDisplayName(b));
         default:
           return 0;
       }
@@ -313,10 +318,18 @@ const AdminUsers = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-[#3ABBD0] to-cyan-400 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                          {(user.fullName || user.firstName || "?").charAt(0)}
+                          {hasProfileImage(user) ? (
+                            <img
+                              src={getProfileImageUrl(user)}
+                              alt="Profile"
+                              className="w-full h-full object-cover rounded-full"
+                            />
+                          ) : (
+                            getInitials(user.firstName, user.lastName) || "?"
+                          )}
                         </div>
                         <div className="font-semibold text-[#263D5D]">
-                          {user.fullName || user.firstName || "Unknown User"}
+                          {getDisplayName(user, "Unknown User")}
                         </div>
                       </div>
                     </td>
@@ -382,12 +395,20 @@ const AdminUsers = () => {
               <div key={user.id} className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#3ABBD0] to-cyan-400 rounded-full flex items-center justify-center text-white font-bold">
-                      {(user.fullName || user.firstName || "?").charAt(0)}
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#3ABBD0] to-cyan-400 rounded-full flex items-center justify-center text-white font-bold overflow-hidden">
+                      {hasProfileImage(user) ? (
+                        <img
+                          src={getProfileImageUrl(user)}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        getInitials(user.firstName, user.lastName) || "?"
+                      )}
                     </div>
                     <div>
                       <div className="font-semibold text-[#263D5D]">
-                        {user.fullName || user.firstName || "Unknown User"}
+                        {getDisplayName(user, "Unknown User")}
                       </div>
                       <span
                         className={`inline-block px-2 py-1 rounded-full text-xs font-semibold mt-1 ${getUserTypeBadgeColor(
@@ -456,7 +477,7 @@ const AdminUsers = () => {
           {selectedUser && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4">
               <h4 className="font-semibold text-[#263D5D] mb-1">
-                {selectedUser.fullName || selectedUser.firstName}
+                {getDisplayName(selectedUser)}
               </h4>
               <p className="text-sm text-gray-600">{selectedUser.email}</p>
             </div>
@@ -489,18 +510,21 @@ const AdminUsers = () => {
         {selectedUser && (
           <div className="space-y-6">
             <div className="flex items-center gap-4 pb-6 border-b">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#3ABBD0] to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-3xl">
-                {(
-                  selectedUser.fullName ||
-                  selectedUser.firstName ||
+              <div className="w-20 h-20 bg-gradient-to-br from-[#3ABBD0] to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-3xl overflow-hidden">
+                {hasProfileImage(selectedUser) ? (
+                  <img
+                    src={getProfileImageUrl(selectedUser)}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  getInitials(selectedUser.firstName, selectedUser.lastName) ||
                   "?"
-                ).charAt(0)}
+                )}
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-[#263D5D]">
-                  {selectedUser.fullName ||
-                    selectedUser.firstName ||
-                    "Unknown User"}
+                  {getDisplayName(selectedUser, "Unknown User")}
                 </h3>
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mt-2 ${getUserTypeBadgeColor(
