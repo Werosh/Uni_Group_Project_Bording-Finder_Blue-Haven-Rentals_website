@@ -273,7 +273,7 @@ const BrowsePlacePage = () => {
   const SidebarContent = () => (
     <div className="space-y-6">
       {/* Categories Section */}
-      <div className="bg-white/60 backdrop-blur-xl rounded-2xl mt-10 p-4 border border-white/40 shadow-lg">
+      <div className="bg-white/60 backdrop-blur-xl rounded-2xl mt-15 p-4 border border-white/40 shadow-lg ">
         <h3 className="text-[#263D5D] font-bold text-lg mb-3 flex items-center gap-2">
           <MdFilterList /> Categories
         </h3>
@@ -445,7 +445,7 @@ const BrowsePlacePage = () => {
         <main className="min-h-screen p-4 md:p-6 lg:p-8 pt-20 lg:pt-8 lg:ml-[320px]">
           {/* Header */}
           <div className="text-center mb-6 animate-fadeInUp">
-            <h1 className="text-[48px] md:text-[72px] lg:text-[80px] leading-none font-['Hugiller_DEMO']">
+            <h1 className="text-[48px] md:text-[72px] lg:text-[80px] leading-none font-[Hugiller-Demo] mt-10">
               <span className="text-[#263D5D]">Browse </span>
               <span className="text-[#3ABBD0]">Place</span>
             </h1>
