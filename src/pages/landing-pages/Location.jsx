@@ -170,6 +170,25 @@ const FindCity = () => {
     }
   };
 
+  const handleSearchToBrowse = () => {
+    const params = new URLSearchParams();
+
+    if (query.trim()) {
+      params.append("search", query.trim());
+    }
+
+    if (propertyType && propertyType !== "Any Property Type") {
+      params.append("propertyType", propertyType);
+    }
+
+    if (selectedProvinces.length > 0) {
+      params.append("provinces", selectedProvinces.join(","));
+    }
+
+    const queryString = params.toString();
+    navigate(`/browse${queryString ? `?${queryString}` : ""}`);
+  };
+
   const toggleProvince = (prov) => {
     setSelectedProvinces((prev) =>
       prev.includes(prov) ? prev.filter((p) => p !== prov) : [...prev, prov]
@@ -218,7 +237,11 @@ const FindCity = () => {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && onFind()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearchToBrowse();
+                  }
+                }}
                 className="flex-1 bg-transparent text-[14px] text-[#263D5D] font-poppins focus:outline-none placeholder-[#263D5D]/70"
                 placeholder="Enter city, neighborhood"
               />
@@ -324,7 +347,7 @@ const FindCity = () => {
                   <button
                     onClick={() => {
                       setFiltersOpen(false);
-                      onFind();
+                      handleSearchToBrowse();
                     }}
                     className="relative overflow-hidden px-5 h-10 rounded-xl bg-[#3ABBD0] text-white hover:bg-cyan-500 transition font-poppins group"
                   >
@@ -339,7 +362,7 @@ const FindCity = () => {
 
           {/* Find Button */}
           <button
-            onClick={onFind}
+            onClick={handleSearchToBrowse}
             className="relative overflow-hidden bg-[#3ABBD0] hover:bg-cyan-500 h-[62px] flex items-center justify-center gap-2 rounded-2xl border border-[#3ABBD0] w-full md:w-[142px] cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg group"
           >
             <span className="relative z-10 flex items-center gap-2">

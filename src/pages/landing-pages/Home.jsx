@@ -1,12 +1,39 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, MapPin, Calendar, Users, Menu } from "lucide-react";
 
 import BackgroundImg from "../../assets/images/background/hero-background.webp";
 
 const Home = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [propertyType, setPropertyType] = useState("All Property Types");
   const [guests, setGuests] = useState("Guests");
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+
+    if (searchQuery.trim()) {
+      params.append("search", searchQuery.trim());
+    }
+
+    if (propertyType && propertyType !== "All Property Types") {
+      params.append("propertyType", propertyType);
+    }
+
+    if (guests && guests !== "Guests") {
+      params.append("guests", guests);
+    }
+
+    const queryString = params.toString();
+    navigate(`/browse${queryString ? `?${queryString}` : ""}`);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   return (
     <div
@@ -59,6 +86,7 @@ const Home = () => {
                         placeholder="Enter city, neighborhood, or landmark..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyPress={handleKeyPress}
                         className="bg-transparent flex-1 outline-none text-slate-700 placeholder-gray-500"
                       />
                     </div>
@@ -99,7 +127,10 @@ const Home = () => {
 
                   {/* Search Button */}
                   <div>
-                    <button className="w-full md:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <button
+                      onClick={handleSearch}
+                      className="w-full md:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
                       <Search className="w-5 h-5 mr-2" />
                       Find
                     </button>

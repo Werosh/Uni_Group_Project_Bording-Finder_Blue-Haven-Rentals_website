@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   FaSearch,
   FaChevronDown,
@@ -71,7 +72,18 @@ const CATEGORIES = [
   "Single Bedrooms",
 ];
 
+// Property type mapping from Home page to BrowsePlacePage categories
+const PROPERTY_TYPE_MAPPING = {
+  House: "Houses",
+  Apartment: "Apartments",
+  "Boarding House": "Boarding Houses",
+  Studio: "Single Rooms",
+  Villa: "Houses",
+  Condo: "Apartments",
+};
+
 const BrowsePlacePage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedDistricts, setSelectedDistricts] = useState([]);
@@ -86,6 +98,43 @@ const BrowsePlacePage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageLoadErrors, setImageLoadErrors] = useState({});
   const postsPerPage = 12;
+
+  // Handle URL parameters on component mount
+  useEffect(() => {
+    const search = searchParams.get("search");
+    const propertyType = searchParams.get("propertyType");
+    const guests = searchParams.get("guests");
+    const provinces = searchParams.get("provinces");
+
+    if (search) {
+      setSearchQuery(search);
+    }
+
+    if (propertyType && propertyType !== "Any Property Type") {
+      const mappedCategory =
+        PROPERTY_TYPE_MAPPING[propertyType] || propertyType;
+      if (CATEGORIES.includes(mappedCategory)) {
+        setSelectedCategories([mappedCategory]);
+      }
+    }
+
+    if (provinces) {
+      const provinceList = provinces.split(",");
+      const districtsToSelect = [];
+      provinceList.forEach((province) => {
+        const districtsInProvince = DISTRICTS.filter(
+          (d) => d.province === province
+        );
+        districtsInProvince.forEach((district) => {
+          districtsToSelect.push(district.name);
+        });
+      });
+      setSelectedDistricts(districtsToSelect);
+    }
+
+    // Reset page when URL parameters change
+    setCurrentPage(1);
+  }, [searchParams]);
 
   // Fetch posts from Firestore on component mount
   useEffect(() => {
