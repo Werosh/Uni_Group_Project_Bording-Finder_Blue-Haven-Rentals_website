@@ -221,45 +221,49 @@ const Navbar = () => {
                 >
                   {/* Overlay for readability */}
                   <div className="bg-white/70 rounded-lg">
-                    <div className="p-4 ">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-32 h-32 border-[#2BA9C1B2] border-3 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                          {userProfile?.profileImage ? (
-                            <img
-                              src={userProfile.profileImage}
-                              alt="Profile"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <User className="h-6 w-6 text-gray-400" />
-                          )}
-                        </div>
-                        <div>
-                          <p
-                            id="username-drop"
-                            className="font-medium text-[24px] text-gray-900"
-                          >
-                            {userProfile?.firstName && userProfile?.lastName
-                              ? `${userProfile.firstName} ${userProfile.lastName}`
-                              : user.email?.split("@")[0] || "User"}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            @
-                            {userProfile?.username || user.email?.split("@")[0]}
-                          </p>
-                          <button
-                            onClick={() => {
-                              navigate("/user");
-                              setIsDropdownOpen(false);
-                            }}
-                            className="mt-3 w-full  bg-teal-500 hover:bg-teal-600 text-white py-2 px-5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200"
-                          >
-                            <Edit className="h-4 w-4 " />
-                            <span>Edit Profile</span>
-                          </button>
+                    {/* Profile section - hide for boarding_finder users */}
+                    {userProfile?.role !== "boarding_finder" && (
+                      <div className="p-4 ">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-32 h-32 border-[#2BA9C1B2] border-3 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                            {userProfile?.profileImage ? (
+                              <img
+                                src={userProfile.profileImage}
+                                alt="Profile"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <User className="h-6 w-6 text-gray-400" />
+                            )}
+                          </div>
+                          <div>
+                            <p
+                              id="username-drop"
+                              className="font-medium text-[24px] text-gray-900"
+                            >
+                              {userProfile?.firstName && userProfile?.lastName
+                                ? `${userProfile.firstName} ${userProfile.lastName}`
+                                : user.email?.split("@")[0] || "User"}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              @
+                              {userProfile?.username ||
+                                user.email?.split("@")[0]}
+                            </p>
+                            <button
+                              onClick={() => {
+                                navigate("/user");
+                                setIsDropdownOpen(false);
+                              }}
+                              className="mt-3 w-full  bg-teal-500 hover:bg-teal-600 text-white py-2 px-5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200"
+                            >
+                              <Edit className="h-4 w-4 " />
+                              <span>Edit Profile</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     <div className="py-1 text-[24px] text-[#235A78]">
                       {/* boarding_finder: only logout */}
@@ -490,39 +494,42 @@ const Navbar = () => {
             <div className="pt-4 border-t">
               {user ? (
                 <>
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white overflow-hidden font-semibold text-lg">
-                      {userProfile?.profileImage ? (
-                        <img
-                          src={userProfile.profileImage}
-                          alt="Profile"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span>
-                          {(
-                            userProfile?.firstName?.[0] ||
-                            userProfile?.username?.[0] ||
-                            user.email?.[0] ||
-                            "U"
-                          ).toUpperCase()}
-                        </span>
-                      )}
+                  {/* Profile section - hide for boarding_finder users */}
+                  {userProfile?.role !== "boarding_finder" && (
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white overflow-hidden font-semibold text-lg">
+                        {userProfile?.profileImage ? (
+                          <img
+                            src={userProfile.profileImage}
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span>
+                            {(
+                              userProfile?.firstName?.[0] ||
+                              userProfile?.username?.[0] ||
+                              user.email?.[0] ||
+                              "U"
+                            ).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <p
+                          id="same-font"
+                          className="font-medium text-gray-900 text-[20px]"
+                        >
+                          {userProfile?.firstName && userProfile?.lastName
+                            ? `${userProfile.firstName} ${userProfile.lastName}`
+                            : user.email?.split("@")[0] || "User"}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          @{userProfile?.username || user.email?.split("@")[0]}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p
-                        id="same-font"
-                        className="font-medium text-gray-900 text-[20px]"
-                      >
-                        {userProfile?.firstName && userProfile?.lastName
-                          ? `${userProfile.firstName} ${userProfile.lastName}`
-                          : user.email?.split("@")[0] || "User"}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        @{userProfile?.username || user.email?.split("@")[0]}
-                      </p>
-                    </div>
-                  </div>
+                  )}
 
                   <div className="space-y-2">
                     {/* boarding_finder: only logout */}
