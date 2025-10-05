@@ -277,6 +277,11 @@ const EditPostModal = ({ isOpen, onClose, post, onSuccess }) => {
       // Update the post
       await editPost(post.id, updatedData);
 
+      // Show success message for resubmitted declined posts
+      if (post.status === "declined") {
+        alert("Post has been successfully resubmitted for review!");
+      }
+
       onSuccess();
       onClose();
     } catch (error) {
@@ -295,7 +300,19 @@ const EditPostModal = ({ isOpen, onClose, post, onSuccess }) => {
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-[#263D5D]">Edit Post</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-[#263D5D]">Edit Post</h2>
+              {post.status === "declined" && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">
+                    Previously Declined
+                  </div>
+                  <span className="text-sm text-gray-600">
+                    This post will be resubmitted for review after editing
+                  </span>
+                </div>
+              )}
+            </div>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -596,7 +613,13 @@ const EditPostModal = ({ isOpen, onClose, post, onSuccess }) => {
                 disabled={isSubmitting}
                 className="flex-1 px-4 py-3 bg-[#3ABBD0] hover:bg-[#2BA9C1] text-white rounded-xl font-semibold transition-colors disabled:opacity-50"
               >
-                {isSubmitting ? "Updating..." : "Update Post"}
+                {isSubmitting
+                  ? post.status === "declined"
+                    ? "Resubmitting..."
+                    : "Updating..."
+                  : post.status === "declined"
+                  ? "Resubmit for Review"
+                  : "Update Post"}
               </button>
             </div>
           </form>

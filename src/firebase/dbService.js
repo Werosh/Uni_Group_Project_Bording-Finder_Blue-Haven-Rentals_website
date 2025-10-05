@@ -110,17 +110,32 @@ export const editPost = async (id, updatedData) => {
 
   const currentPost = postDoc.data();
 
-  // If the post was approved and is being edited, change status to pending
-  const newStatus =
-    currentPost.status === "approved" ? "pending" : currentPost.status;
-
-  await updateDoc(docRef, {
+  // Determine new status based on current status
+  let newStatus = currentPost.status;
+  let updateData = {
     ...updatedData,
-    status: newStatus,
-    editedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    isEdited: true, // Flag to indicate this post was edited
-  });
+  };
+
+  // If the post was approved and is being edited, change status to pending
+  if (currentPost.status === "approved") {
+    newStatus = "pending";
+    updateData.status = newStatus;
+    updateData.editedAt = new Date().toISOString();
+    updateData.isEdited = true;
+  }
+  // If the post was declined and is being edited, change status to pending and clear decline data
+  else if (currentPost.status === "declined") {
+    newStatus = "pending";
+    updateData.status = newStatus;
+    updateData.editedAt = new Date().toISOString();
+    updateData.isEdited = true;
+    updateData.declineReason = null;
+    updateData.declinedAt = null;
+    updateData.resubmittedAt = new Date().toISOString();
+  }
+
+  await updateDoc(docRef, updateData);
 
   return { id, ...updatedData, status: newStatus };
 };
@@ -188,6 +203,16 @@ export const getPostsByStatus = async (status) => {
   return posts.filter((post) => post.status === status);
 };
 
+// Get declined posts by owner
+export const getDeclinedPostsByOwner = async (ownerId) => {
+  const colRef = collection(db, "posts");
+  const snapshot = await getDocs(colRef);
+  const posts = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return posts.filter(
+    (post) => post.ownerId === ownerId && post.status === "declined"
+  );
+};
+
 // Get edited posts that need re-approval
 export const getEditedPosts = async () => {
   const colRef = collection(db, "posts");
@@ -199,7 +224,11 @@ export const getEditedPosts = async () => {
 };
 
 // Update post status
-export const updatePostStatus = async (postId, status) => {
+export const updatePostStatus = async (
+  postId,
+  status,
+  declineReason = null
+) => {
   const docRef = doc(db, "posts", postId);
   const updateData = {
     status: status,
@@ -210,6 +239,12 @@ export const updatePostStatus = async (postId, status) => {
   if (status === "approved") {
     updateData.isEdited = false;
     updateData.editedAt = null;
+  }
+
+  // If declining a post, add decline reason and timestamp
+  if (status === "declined") {
+    updateData.declineReason = declineReason;
+    updateData.declinedAt = new Date().toISOString();
   }
 
   await updateDoc(docRef, updateData);

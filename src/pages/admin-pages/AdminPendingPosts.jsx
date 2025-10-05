@@ -29,6 +29,7 @@ const AdminPendingPosts = () => {
   const [selectedPost, setSelectedPost] = useState(null);
   const [actionType, setActionType] = useState(null); // 'approve' or 'decline'
   const [processingId, setProcessingId] = useState(null);
+  const [declineReason, setDeclineReason] = useState("");
 
   useEffect(() => {
     fetchPendingPosts();
@@ -100,11 +101,18 @@ const AdminPendingPosts = () => {
   const handleDecline = async (post) => {
     setSelectedPost(post);
     setActionType("decline");
+    setDeclineReason("");
     setShowConfirmModal(true);
   };
 
   const confirmAction = async () => {
     if (!selectedPost) return;
+
+    // Validate decline reason if declining
+    if (actionType === "decline" && !declineReason.trim()) {
+      alert("Please provide a reason for declining this post.");
+      return;
+    }
 
     try {
       setProcessingId(selectedPost.id);
@@ -113,7 +121,11 @@ const AdminPendingPosts = () => {
       if (actionType === "approve") {
         await updatePostStatus(selectedPost.id, "approved");
       } else if (actionType === "decline") {
-        await updatePostStatus(selectedPost.id, "declined");
+        await updatePostStatus(
+          selectedPost.id,
+          "declined",
+          declineReason.trim()
+        );
         // Optionally delete the post instead
         // await deletePost(selectedPost.id);
       }
@@ -128,6 +140,7 @@ const AdminPendingPosts = () => {
       setProcessingId(null);
       setSelectedPost(null);
       setActionType(null);
+      setDeclineReason("");
     }
   };
 
@@ -345,6 +358,26 @@ const AdminPendingPosts = () => {
               <p className="text-sm text-gray-600">
                 {selectedPost.location} • Rs.{" "}
                 {selectedPost.rent?.toLocaleString()}
+              </p>
+            </div>
+          )}
+
+          {/* Decline reason input */}
+          {actionType === "decline" && (
+            <div>
+              <label className="block text-sm font-semibold text-[#263D5D] mb-2">
+                Reason for declining <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={declineReason}
+                onChange={(e) => setDeclineReason(e.target.value)}
+                placeholder="Please provide a reason for declining this post..."
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-transparent resize-none"
+                rows={3}
+                required
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                This reason will be shown to the user who submitted the post.
               </p>
             </div>
           )}
