@@ -5,7 +5,7 @@ import {
   getPostsByOwner,
   getDeclinedPostsByOwner,
 } from "../../firebase/dbService";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   getInitials,
   getFullName,
@@ -17,6 +17,8 @@ import EditPostModal from "../../components/EditPostModal";
 
 const UserPage = () => {
   const { user, userProfile } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [drafts, setDrafts] = useState([]);
@@ -26,6 +28,22 @@ const UserPage = () => {
   const [loading, setLoading] = useState(true);
   const [editingPost, setEditingPost] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+
+  // Handle URL query parameters for tab navigation
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const tabParam = urlParams.get("tab");
+
+    // Valid tabs
+    const validTabs = ["posts", "drafts", "declined", "reviews"];
+
+    if (tabParam && validTabs.includes(tabParam)) {
+      setActiveTab(tabParam);
+    } else {
+      // Default to posts if no valid tab parameter
+      setActiveTab("posts");
+    }
+  }, [location.search]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -209,7 +227,7 @@ const UserPage = () => {
         {/* Edit Profile Button */}
         <Link
           to="/user/edit"
-          className="absolute top-4 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          className="absolute md:top-34 top-15 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
         >
           <svg
             className="w-4 h-4"
@@ -325,7 +343,10 @@ const UserPage = () => {
               <div className="flex items-center justify-between border-b border-gray-200 mb-6">
                 <div className="flex space-x-8">
                   <button
-                    onClick={() => setActiveTab("posts")}
+                    onClick={() => {
+                      setActiveTab("posts");
+                      navigate("/user?tab=posts", { replace: true });
+                    }}
                     className={`pb-4 font-medium transition-colors ${
                       activeTab === "posts"
                         ? "text-gray-900 border-b-2 border-blue-500"
@@ -335,7 +356,10 @@ const UserPage = () => {
                     Posts
                   </button>
                   <button
-                    onClick={() => setActiveTab("drafts")}
+                    onClick={() => {
+                      setActiveTab("drafts");
+                      navigate("/user?tab=drafts", { replace: true });
+                    }}
                     className={`pb-4 font-medium transition-colors ${
                       activeTab === "drafts"
                         ? "text-gray-900 border-b-2 border-blue-500"
@@ -345,7 +369,10 @@ const UserPage = () => {
                     Drafts
                   </button>
                   <button
-                    onClick={() => setActiveTab("declined")}
+                    onClick={() => {
+                      setActiveTab("declined");
+                      navigate("/user?tab=declined", { replace: true });
+                    }}
                     className={`pb-4 font-medium transition-colors ${
                       activeTab === "declined"
                         ? "text-gray-900 border-b-2 border-blue-500"
@@ -360,7 +387,10 @@ const UserPage = () => {
                     )}
                   </button>
                   <button
-                    onClick={() => setActiveTab("reviews")}
+                    onClick={() => {
+                      setActiveTab("reviews");
+                      navigate("/user?tab=reviews", { replace: true });
+                    }}
                     className={`pb-4 font-medium transition-colors ${
                       activeTab === "reviews"
                         ? "text-gray-900 border-b-2 border-blue-500"

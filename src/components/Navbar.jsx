@@ -259,7 +259,7 @@ const Navbar = () => {
                             </p>
                             <button
                               onClick={() => {
-                                navigate("/user");
+                                navigate("/user/edit");
                                 setIsDropdownOpen(false);
                               }}
                               className="mt-3 w-full  bg-teal-500 hover:bg-teal-600 text-white py-2 px-5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200"
@@ -321,7 +321,7 @@ const Navbar = () => {
                           </button>
                           <button
                             onClick={() => {
-                              navigate("/post-add");
+                              navigate("/user?tab=posts");
                               setIsDropdownOpen(false);
                             }}
                             className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
@@ -376,7 +376,7 @@ const Navbar = () => {
                           </button>
                           <button
                             onClick={() => {
-                              navigate("/post-add");
+                              navigate("/user?tab=posts");
                               setIsDropdownOpen(false);
                             }}
                             className="w-full flex items-center px-4 py-2  hover:bg-gray-50 transition-colors duration-200"
@@ -438,7 +438,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200">
+        <div className="md:hidden bg-white border-t border-gray-200 max-h-[calc(100vh-4rem)] overflow-y-auto">
           <div className="px-4 py-4 space-y-3">
             {/* Mobile Search Bar - Now inside the menu */}
             <div className="relative mb-4">
@@ -587,7 +587,7 @@ const Navbar = () => {
                         </button>
                         <button
                           onClick={() => {
-                            navigate("/post-add");
+                            navigate("/user?tab=posts");
                             setIsMobileMenuOpen(false);
                           }}
                           className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
@@ -640,7 +640,7 @@ const Navbar = () => {
                         </button>
                         <button
                           onClick={() => {
-                            navigate("/post-add");
+                            navigate("/user?tab=posts");
                             setIsMobileMenuOpen(false);
                           }}
                           className="w-full flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200 text-[20px]"
