@@ -78,6 +78,9 @@ const UserPage = () => {
   };
 
   const formatPrice = (price) => {
+    if (price === undefined || price === null || isNaN(price)) {
+      return "Price not set";
+    }
     return `Rs. ${price.toLocaleString()}/=`;
   };
 
