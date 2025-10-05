@@ -46,8 +46,21 @@ const AdminPendingPosts = () => {
         getEditedPosts(),
       ]);
 
-      // Combine regular pending posts with edited posts
-      const allPosts = [...pendingPosts, ...editedPosts];
+      // Create a Set to track unique post IDs to avoid duplicates
+      const uniquePosts = new Map();
+
+      // First add all pending posts
+      pendingPosts.forEach((post) => {
+        uniquePosts.set(post.id, post);
+      });
+
+      // Then add edited posts (this will overwrite if duplicate, ensuring edited posts have priority)
+      editedPosts.forEach((post) => {
+        uniquePosts.set(post.id, post);
+      });
+
+      // Convert Map values back to array
+      const allPosts = Array.from(uniquePosts.values());
       setPosts(allPosts);
       setFilteredPosts(allPosts);
     } catch (error) {
