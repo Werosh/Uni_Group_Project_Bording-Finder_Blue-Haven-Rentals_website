@@ -1,17 +1,15 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   FaSearch,
   FaChevronDown,
   FaChevronUp,
   FaChevronRight,
   FaChevronLeft,
-  FaSlidersH,
   FaBars,
   FaTimes,
 } from "react-icons/fa";
 import { MdFilterList } from "react-icons/md";
 import { getPosts } from "../../firebase/dbService";
-import mockImage from "../../assets/images/background/post-back.webp";
 import placeholderImage from "../../assets/images/background/post-back.webp";
 
 // Data from Location.jsx
@@ -60,16 +58,6 @@ const PROVINCE_ORDER = [
   "Sabaragamuwa",
 ];
 
-const PROPERTY_TYPES = [
-  "Any Property Type",
-  "Apartment",
-  "House",
-  "Villa",
-  "Land",
-  "Commercial",
-  "Room",
-];
-
 // Categories from Categories.jsx
 const CATEGORIES = [
   "Single Rooms",
@@ -85,8 +73,6 @@ const CATEGORIES = [
 
 const BrowsePlacePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [propertyType, setPropertyType] = useState(PROPERTY_TYPES[0]);
-  const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedDistricts, setSelectedDistricts] = useState([]);
   const [expandedProvinces, setExpandedProvinces] = useState([]);
@@ -100,8 +86,6 @@ const BrowsePlacePage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageLoadErrors, setImageLoadErrors] = useState({});
   const postsPerPage = 12;
-
-  const propRef = useRef(null);
 
   // Fetch posts from Firestore on component mount
   useEffect(() => {
@@ -123,20 +107,6 @@ const BrowsePlacePage = () => {
 
     fetchPosts();
   }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        propertyTypeOpen &&
-        propRef.current &&
-        !propRef.current.contains(e.target)
-      ) {
-        setPropertyTypeOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [propertyTypeOpen]);
 
   // ESC key to close modal
   useEffect(() => {
@@ -455,24 +425,22 @@ const BrowsePlacePage = () => {
         />
       )}
 
+      {/* Sidebar */}
+      <aside
+        className={`
+        fixed top-0 left-0 h-screen w-[280px] lg:w-[320px] 
+        bg-white/20 backdrop-blur-sm border-r border-white/30 
+        overflow-y-auto p-4 pt-20 lg:pt-6 z-50
+        transform transition-transform duration-300
+        custom-scrollbar-sidebar
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+      `}
+      >
+        <SidebarContent />
+      </aside>
+
       {/* Main Container */}
       <div className="relative z-10 min-h-screen max-w-[1600px] mx-auto">
-        {/* Sidebar */}
-        <aside
-          className={`
-          fixed top-0 left-0 h-screen w-[280px] lg:w-[320px] 
-          bg-white/20 backdrop-blur-sm border-r border-white/30 
-          overflow-y-auto p-4 pt-20 lg:pt-6 z-40
-          transform transition-transform duration-300
-          custom-scrollbar-sidebar
-          ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-          }
-        `}
-        >
-          <SidebarContent />
-        </aside>
-
         {/* Main Content Area */}
         <main className="min-h-screen p-4 md:p-6 lg:p-8 pt-20 lg:pt-8 lg:ml-[320px]">
           {/* Header */}
@@ -484,12 +452,12 @@ const BrowsePlacePage = () => {
           </div>
 
           {/* Search Bar */}
-          <div className="mb-6 animate-slideInRight relative">
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl p-4 w-full flex flex-col md:flex-row items-center gap-4 shadow-2xl border border-white/30">
+          <div className="mb-6 animate-slideInRight relative max-w-4xl mx-auto">
+            <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl p-4 w-full shadow-2xl border border-white/30">
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl pointer-events-none"></div>
 
               {/* Search Input */}
-              <div className="relative group flex-1 w-full z-10">
+              <div className="relative group w-full z-10">
                 <div className="bg-gray-50/80 backdrop-blur-sm shadow-md h-[64px] flex items-center px-4 gap-3 rounded-2xl border-2 border-[#3ABBD0]/30 focus-within:border-[#3ABBD0] transition-all duration-300 group-hover:border-[#3ABBD0]/50 focus-within:ring-4 focus-within:ring-[#3ABBD0]/20">
                   <FaSearch className="text-[#263D5D] opacity-70" size={18} />
                   <input
@@ -499,47 +467,6 @@ const BrowsePlacePage = () => {
                     placeholder="Search by location or property name"
                   />
                 </div>
-              </div>
-
-              {/* Property Type Dropdown */}
-              <div
-                ref={propRef}
-                className="relative group w-full md:w-[240px] z-20"
-              >
-                <button
-                  onClick={() => setPropertyTypeOpen((v) => !v)}
-                  className="bg-gray-50/80 backdrop-blur-sm shadow-md h-[64px] w-full flex items-center px-4 gap-3 rounded-2xl border-2 border-[#3ABBD0]/30 focus:border-[#3ABBD0] transition-all duration-300 group-hover:border-[#3ABBD0]/50 focus:ring-4 focus:ring-[#3ABBD0]/20 cursor-pointer"
-                >
-                  <FaSlidersH className="text-[#263D5D] opacity-70" size={18} />
-                  <span className="text-[14px] text-[#263D5D] font-poppins opacity-70 truncate flex-1 text-left">
-                    {propertyType}
-                  </span>
-                  <FaChevronDown
-                    className="text-[#263D5D] opacity-60"
-                    size={12}
-                  />
-                </button>
-                {propertyTypeOpen && (
-                  <div className="absolute z-30 mt-2 w-full bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[#3ABBD0]/20 overflow-hidden">
-                    {PROPERTY_TYPES.map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => {
-                          setPropertyType(t);
-                          setPropertyTypeOpen(false);
-                        }}
-                        className={[
-                          "w-full text-left px-4 py-3 text-sm font-poppins hover:bg-[#3ABBD0]/10 transition",
-                          t === propertyType
-                            ? "bg-[#3ABBD0]/10 text-[#263D5D] font-medium"
-                            : "text-[#263D5D]",
-                        ].join(" ")}
-                      >
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
           </div>

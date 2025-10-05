@@ -200,7 +200,7 @@ const FindCity = () => {
 
       {/* Hero Title */}
       <div className="text-center relative z-10 max-w-6xl mx-auto mb-6 md:mb-8 animate-fadeInUp">
-        <h1 className="text-[64px] md:text-[112px] leading-none font-['Hugiller_DEMO']">
+        <h1 className="text-[64px] md:text-[112px] leading-none font-[Hugiller-Demo]">
           <span className="text-[#263D5D]">Choose a city </span>
           <span className="text-[#3ABBD0]">You Want</span>
         </h1>
