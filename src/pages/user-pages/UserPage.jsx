@@ -220,7 +220,7 @@ const UserPage = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage:
-              "url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwMCIgaGVpZ2h0PSIzMDAiIHZpZXdCb3g9IjAgMCAxMDAwIDMwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMzc4QkU4Ii8+CjxyZWN0IHg9IjAiIHk9IjIwMCIgd2lkdGg9IjEwMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjNjQ4Q0U4Ii8+CjxyZWN0IHg9IjAiIHk9IjI1MCIgd2lkdGg9IjEwMDAiIGhlaWdodD0iNTAiIGZpbGw9IiM4OEE4RjgiLz4KPC9zdmc+')",
+              "url('https://media.craiyon.com/2025-08-19/fNJtbLg-QeaVwd0OpPtrww.webp')",
           }}
         ></div>
 
