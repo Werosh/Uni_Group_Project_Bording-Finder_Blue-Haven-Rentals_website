@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { editPost } from "../firebase/dbService";
 import {
-  uploadMultipleImages,
-  validateImages,
+  uploadMultipleCompressedImages,
+  validateRequiredImages,
 } from "../firebase/storageService";
 import Modal from "./Modal";
 

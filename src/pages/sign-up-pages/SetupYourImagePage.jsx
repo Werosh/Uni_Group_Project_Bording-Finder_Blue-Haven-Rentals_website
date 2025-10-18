@@ -3,7 +3,10 @@ import { BsStars } from "react-icons/bs";
 import { useSignup } from "../../context/SignupContext";
 import { signup } from "../../firebase/authService";
 import { createUserProfile } from "../../firebase/dbService";
-import { uploadImage } from "../../firebase/storageService";
+import {
+  uploadCompressedImage,
+  validateRequiredImages,
+} from "../../firebase/storageService";
 import { useNavigate } from "react-router-dom";
 import heroBackground from "../../assets/images/background/hero-background.webp";
 
@@ -55,29 +58,53 @@ const SetupYourImagePage = () => {
     setError("");
 
     try {
+      // Validate required images
+      if (!profileImage) {
+        setError("Profile image is required");
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.frontImage || !formData.backImage) {
+        setError("Both front and back ID images are required");
+        setLoading(false);
+        return;
+      }
+
       // 1. Create Firebase Authentication user
       const userCredential = await signup(formData.email, formData.password);
       const user = userCredential.user;
 
-      // 2. Upload images to Firebase Storage (only if provided)
-      let profileImageUrl = null;
-      let idFrontImageUrl = null;
-      let idBackImageUrl = null;
+      // 2. Upload images to Firebase Storage (MANDATORY)
+      const profileImageUrl = await uploadCompressedImage(
+        profileImage,
+        "profiles",
+        {
+          maxWidth: 800,
+          maxHeight: 800,
+          quality: 0.8,
+        }
+      );
 
-      if (profileImage) {
-        profileImageUrl = await uploadImage(profileImage, "profiles");
-      }
+      const idFrontImageUrl = await uploadCompressedImage(
+        formData.frontImage,
+        "id-documents",
+        {
+          maxWidth: 1200,
+          maxHeight: 1200,
+          quality: 0.9,
+        }
+      );
 
-      if (formData.frontImage) {
-        idFrontImageUrl = await uploadImage(
-          formData.frontImage,
-          "id-documents"
-        );
-      }
-
-      if (formData.backImage) {
-        idBackImageUrl = await uploadImage(formData.backImage, "id-documents");
-      }
+      const idBackImageUrl = await uploadCompressedImage(
+        formData.backImage,
+        "id-documents",
+        {
+          maxWidth: 1200,
+          maxHeight: 1200,
+          quality: 0.9,
+        }
+      );
 
       // 3. Create user profile in Firestore
       await createUserProfile(user.uid, {

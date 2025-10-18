@@ -20,20 +20,21 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Combined Input & Button */}
-          <div className=" ">
-            <form className="relative flex items-center border-2 border-[#3ABBD0] rounded-full p-1 group">
+          {/* Input & Button - Separate in mobile, combined in desktop */}
+          <div className="w-full lg:w-auto">
+            <form className="flex flex-col sm:flex-row items-center gap-3 sm:gap-0 sm:border-2 sm:border-[#3ABBD0] sm:rounded-full sm:p-1">
               <input
                 type="email"
                 placeholder="Your Email"
-                className="flex-1 bg-transparent text-white placeholder-white/60 px-5 py-2 focus:outline-none"
+                className="w-full sm:flex-1 bg-transparent text-white placeholder-white/60 px-5 py-3 focus:outline-none border-2 border-[#3ABBD0] rounded-full sm:border-0 sm:rounded-none sm:bg-transparent"
               />
               <button
                 type="submit"
-                className="relative overflow-hidden bg-[#3ABBD0] text-[#1E1E1E] px-6 py-3 rounded-full  transition-all duration-300 hover:scale-105 group"
+                className="relative overflow-hidden bg-[#3ABBD0] text-[#1E1E1E] px-6 py-3 rounded-full transition-all duration-300 hover:scale-105 group w-full sm:w-auto whitespace-nowrap min-w-fit"
               >
-                <span className="relative z-10 font-hugiller text-[15px] ">
-                  Send Your Messages
+                <span className="relative z-10 font-montserrat text-sm sm:text-[15px]">
+                  <span className="hidden sm:inline">Send Your Messages</span>
+                  <span className="sm:hidden">Send Message</span>
                 </span>
                 <div className="absolute inset-0 bg-white/30 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
               </button>

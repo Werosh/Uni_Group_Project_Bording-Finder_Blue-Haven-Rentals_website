@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import { MdFilterList } from "react-icons/md";
 import { getPosts } from "../../firebase/dbService";
+import { fetchImageUrl } from "../../firebase/storageService";
 import placeholderImage from "../../assets/images/background/post-back.webp";
 
 // Data from Location.jsx

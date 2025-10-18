@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { createPost } from "../../firebase/dbService";
 import {
-  uploadMultipleImages,
-  validateImages,
+  uploadMultipleCompressedImages,
+  validateRequiredImages,
 } from "../../firebase/storageService";
 import postBackground from "../../assets/images/background/post-back.webp";
 import man1Img from "../../assets/images/others/Img-6.webp";
@@ -386,6 +386,17 @@ const PostAddFormPage = () => {
       newErrors.mobile = "Please enter a valid 9-digit mobile number";
     }
 
+    // MANDATORY IMAGE VALIDATION
+    if (uploadedImages.length === 0) {
+      newErrors.images = "At least 1 property image is required";
+    } else {
+      const imageFiles = uploadedImages.map((img) => img.file);
+      const imageValidation = validateRequiredImages(imageFiles, 1, 5);
+      if (!imageValidation.isValid) {
+        newErrors.images = imageValidation.errors.join(", ");
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -433,7 +444,7 @@ const PostAddFormPage = () => {
       return;
     }
 
-    const validation = validateImages(files);
+    const validation = validateRequiredImages(files, 1, 5);
     if (!validation.isValid) {
       showAlert(
         "error",
@@ -509,29 +520,36 @@ const PostAddFormPage = () => {
     try {
       let imageUrls = [];
 
-      // Upload images to Firebase Storage if any
-      if (uploadedImages.length > 0) {
-        const imagesToUpload = uploadedImages.map((img) => img.file);
-        const uploadResult = await uploadMultipleImages(
-          imagesToUpload,
-          "posts",
-          (progress) => {
-            setUploadProgress(progress.percentage);
-          }
-        );
-
-        if (uploadResult.errors.length > 0) {
-          console.error("Some images failed to upload:", uploadResult.errors);
-          showAlert(
-            "warning",
-            "Image Upload Warning",
-            `${uploadResult.errors.length} image(s) failed to upload. Continuing with ${uploadResult.successCount} image(s).`
-          );
-        }
-
-        // Get URLs from successful uploads (Firebase Storage returns direct URLs)
-        imageUrls = uploadResult.success;
+      // Upload images to Firebase Storage (MANDATORY)
+      if (uploadedImages.length === 0) {
+        throw new Error("At least 1 property image is required");
       }
+
+      const imagesToUpload = uploadedImages.map((img) => img.file);
+      const uploadResult = await uploadMultipleCompressedImages(
+        imagesToUpload,
+        "posts",
+        {
+          maxWidth: 1920,
+          maxHeight: 1080,
+          quality: 0.8,
+        },
+        (progress) => {
+          setUploadProgress(progress.percentage);
+        }
+      );
+
+      if (uploadResult.errors.length > 0) {
+        console.error("Some images failed to upload:", uploadResult.errors);
+        showAlert(
+          "warning",
+          "Image Upload Warning",
+          `${uploadResult.errors.length} image(s) failed to upload. Continuing with ${uploadResult.successCount} image(s).`
+        );
+      }
+
+      // Get URLs from successful uploads (Firebase Storage returns direct URLs)
+      imageUrls = uploadResult.success;
 
       // Create post data with image URLs
       const postData = {
@@ -879,8 +897,11 @@ const PostAddFormPage = () => {
 
                     {/* Image Upload Section */}
                     <div className="grid grid-cols-1 md:grid-cols-4 items-start gap-4">
-                      <TextLabel className="text-left md:col-span-1 pt-3">
-                        Images
+                      <TextLabel
+                        className="text-left md:col-span-1 pt-3"
+                        required
+                      >
+                        Property Images
                       </TextLabel>
                       <div className="md:col-span-3 space-y-4">
                         {/* Upload Area */}
@@ -910,14 +931,16 @@ const PostAddFormPage = () => {
                               </span>
                             </div>
                             <p className="text-base font-medium text-[#263D5D] mb-1">
-                              Upload Property Images
+                              Upload Property Images{" "}
+                              <span className="text-red-500">*</span>
                             </p>
                             <p className="text-xs text-gray-500 mb-1">
-                              Drag & drop or click to upload (max 5 images, 3MB
-                              each)
+                              Drag & drop or click to upload (min 1, max 5
+                              images, 3MB each)
                             </p>
                             <p className="text-xs text-gray-400">
-                              Formats: JPEG, PNG, WebP
+                              Formats: JPEG, PNG, WebP (Images will be
+                              automatically compressed)
                             </p>
                           </div>
                         </div>
@@ -949,7 +972,15 @@ const PostAddFormPage = () => {
 
                         <p className="text-xs text-gray-500">
                           {uploadedImages.length} / 5 images uploaded
+                          {uploadedImages.length === 0 && (
+                            <span className="text-red-500 ml-2">
+                              (At least 1 image required)
+                            </span>
+                          )}
                         </p>
+                        {errors.images && (
+                          <ErrorMessage message={errors.images} />
+                        )}
                       </div>
                     </div>
                   </div>

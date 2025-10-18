@@ -43,7 +43,7 @@ const Contact = () => {
   ];
 
   return (
-    <div id="contact" className="min-h-screen relative overflow-hidden">
+    <div id="contact" className="min-h-screen relative overflow-hidden mt-5">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
@@ -70,7 +70,7 @@ const Contact = () => {
               <br />
               <span className="text-[#3ABBD0]">Touch</span> With Us
             </h1>
-            <p className="Hugiller-font-style text-base md:text-[17px] lg:text-[17px] text-[#303435] mb-6 opacity-80 rounded-full mx-auto max-w-5xl p-3">
+            <p className="font-montserrat text-base md:text-[17px] lg:text-[17px] text-[#303435] mb-6 opacity-80 rounded-full mx-auto max-w-5xl p-3">
               We're here to help you find your perfect haven. Reach out to us
               anytime!
             </p>
@@ -150,7 +150,7 @@ const Contact = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-3xl"></div>
 
               <div className="relative z-10">
-                <h2 className="Hugiller-font-style text-[40px] md:text-[50px] text-[#263D5D] text-center mb-8">
+                <h2 className="font-montserrat text-[30px]  font-bold text-[#263D5D] text-center mb-8">
                   Frequently Asked{" "}
                   <span className="text-[#3ABBD0]">Questions</span>
                 </h2>
