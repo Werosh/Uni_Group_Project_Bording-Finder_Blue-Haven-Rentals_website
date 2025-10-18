@@ -67,14 +67,16 @@ const PROVINCE_ORDER = [
   "Sabaragamuwa",
 ];
 
-const PROPERTY_TYPES = [
-  "Any Property Type",
-  "Apartment",
-  "House",
-  "Villa",
-  "Land",
-  "Commercial",
-  "Room",
+// Categories from Categories.jsx and BrowsePlacePage
+const CATEGORIES = [
+  "Single Rooms",
+  "Double Rooms",
+  "Boarding Houses",
+  "Hostels",
+  "Sharing Rooms",
+  "Annexes",
+  "Houses",
+  "Apartments",
 ];
 
 const VIEW_MORE_ROUTE = "/cities"; // <- change to your route path
@@ -85,24 +87,24 @@ const FindCity = () => {
   const [selected, setSelected] = useState(DISTRICTS[0]);
   const [zoom, setZoom] = useState(9);
 
-  const [propertyType, setPropertyType] = useState(PROPERTY_TYPES[0]);
-  const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [categoryOpen, setCategoryOpen] = useState(false);
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedProvinces, setSelectedProvinces] = useState([]);
 
   const mapWrapRef = useRef(null);
-  const propRef = useRef(null);
+  const categoryRef = useRef(null);
   const filtersRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
-        propertyTypeOpen &&
-        propRef.current &&
-        !propRef.current.contains(e.target)
+        categoryOpen &&
+        categoryRef.current &&
+        !categoryRef.current.contains(e.target)
       ) {
-        setPropertyTypeOpen(false);
+        setCategoryOpen(false);
       }
       if (
         filtersOpen &&
@@ -114,7 +116,7 @@ const FindCity = () => {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [propertyTypeOpen, filtersOpen]);
+  }, [categoryOpen, filtersOpen]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -177,10 +179,6 @@ const FindCity = () => {
       params.append("search", query.trim());
     }
 
-    if (propertyType && propertyType !== "Any Property Type") {
-      params.append("propertyType", propertyType);
-    }
-
     if (selectedProvinces.length > 0) {
       params.append("provinces", selectedProvinces.join(","));
     }
@@ -195,7 +193,17 @@ const FindCity = () => {
     );
   };
 
-  const clearFilters = () => setSelectedProvinces([]);
+  const toggleCategory = (category) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedProvinces([]);
+  };
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200 overflow-hidden p-6 md:p-10">
@@ -249,36 +257,37 @@ const FindCity = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-[#3ABBD0]/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
           </div>
 
-          {/* Property Type */}
-          <div ref={propRef} className="relative group w-full md:w-[240px]">
+          {/* Property Categories */}
+          <div ref={categoryRef} className="relative group w-full md:w-[240px]">
             <button
-              onClick={() => setPropertyTypeOpen((v) => !v)}
+              onClick={() => setCategoryOpen((v) => !v)}
               className="bg-gray-50/80 backdrop-blur-sm shadow-md h-[64px] w-full flex items-center px-4 gap-3 rounded-2xl border-2 border-[#3ABBD0]/30 focus:border-[#3ABBD0] transition-all duration-300 group-hover:border-[#3ABBD0]/50 focus:ring-4 focus:ring-[#3ABBD0]/20 cursor-pointer"
             >
               <FaSlidersH className="text-[#263D5D] opacity-70" size={18} />
               <span className="text-[14px] text-[#263D5D] font-poppins opacity-70 truncate flex-1 text-left">
-                {propertyType}
+                {selectedCategories.length === 0
+                  ? "Any Property Type"
+                  : selectedCategories.length === 1
+                  ? selectedCategories[0]
+                  : `${selectedCategories.length} selected`}
               </span>
               <FaChevronDown className="text-[#263D5D] opacity-60" size={12} />
             </button>
-            {propertyTypeOpen && (
-              <div className="absolute z-20 mt-2 w-full bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[#3ABBD0]/20 overflow-hidden">
-                {PROPERTY_TYPES.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => {
-                      setPropertyType(t);
-                      setPropertyTypeOpen(false);
-                    }}
-                    className={[
-                      "w-full text-left px-4 py-3 text-sm font-poppins hover:bg-[#3ABBD0]/10 transition",
-                      t === propertyType
-                        ? "bg-[#3ABBD0]/10 text-[#263D5D] font-medium"
-                        : "text-[#263D5D]",
-                    ].join(" ")}
+            {categoryOpen && (
+              <div className="absolute z-20 mt-2 w-full bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[#3ABBD0]/20 overflow-hidden max-h-[300px] overflow-y-auto">
+                {CATEGORIES.map((category) => (
+                  <label
+                    key={category}
+                    className="flex items-center gap-2 px-4 py-3 text-sm font-poppins hover:bg-[#3ABBD0]/10 transition cursor-pointer"
                   >
-                    {t}
-                  </button>
+                    <input
+                      type="checkbox"
+                      className="accent-[#3ABBD0] w-4 h-4"
+                      checked={selectedCategories.includes(category)}
+                      onChange={() => toggleCategory(category)}
+                    />
+                    <span className="text-[#263D5D]">{category}</span>
+                  </label>
                 ))}
               </div>
             )}
