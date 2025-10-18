@@ -1095,11 +1095,39 @@ const PostAddFormPage = () => {
                         </div>
                       </div>
                       <div className="relative rounded-2xl overflow-hidden">
-                        <img
-                          src={postBackground}
-                          alt="Preview"
-                          className="w-full h-64 sm:h-80 object-cover"
-                        />
+                        {uploadedImages.length > 0 ? (
+                          <div className="relative">
+                            <img
+                              src={uploadedImages[0].preview}
+                              alt="Property Preview"
+                              className="w-full h-64 sm:h-80 object-cover"
+                            />
+                            {uploadedImages.length > 1 && (
+                              <div className="absolute top-3 left-3 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-semibold backdrop-blur-sm">
+                                {uploadedImages.length} photos
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="w-full h-64 sm:h-80 bg-gray-200 flex items-center justify-center">
+                            <div className="text-center text-gray-500">
+                              <svg
+                                className="w-16 h-16 mx-auto mb-2"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={1}
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                              </svg>
+                              <p className="text-sm">No images uploaded</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                         <div>

@@ -11,10 +11,24 @@ import {
 export const validateImage = (file) => {
   const errors = [];
 
-  // Check file type
-  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+  // Check file type - support all standard image formats
+  const allowedTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "image/bmp",
+    "image/tiff",
+    "image/svg+xml",
+    "image/avif",
+    "image/heic",
+    "image/heif",
+  ];
   if (!allowedTypes.includes(file.type)) {
-    errors.push("Only JPEG, PNG, and WebP formats are allowed");
+    errors.push(
+      "Only standard image formats are allowed (JPEG, PNG, WebP, GIF, BMP, TIFF, SVG, AVIF, HEIC)"
+    );
   }
 
   // Check file size (3MB limit)
