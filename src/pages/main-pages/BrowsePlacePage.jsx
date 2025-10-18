@@ -69,7 +69,6 @@ const CATEGORIES = [
   "Annexes",
   "Houses",
   "Apartments",
-  "Single Bedrooms",
 ];
 
 // Property type mapping is no longer needed since home page now uses exact same categories
