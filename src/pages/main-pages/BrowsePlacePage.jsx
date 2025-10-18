@@ -647,7 +647,7 @@ const BrowsePlacePage = () => {
           onClick={closeModal}
         >
           <div
-            className="relative bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            className="relative bg-white rounded-[5px] shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -681,8 +681,8 @@ const BrowsePlacePage = () => {
             {/* Modal Content */}
             <div className="flex flex-col lg:flex-row">
               {/* Image Section */}
-              <div className="lg:w-1/2 relative">
-                <div className="relative h-64 md:h-80 lg:h-full bg-gray-200">
+              <div className="lg:w-2/5 relative">
+                <div className="relative h-48 md:h-56 lg:h-48 bg-gray-200">
                   <img
                     src={
                       selectedPost.imageUrls &&
@@ -741,12 +741,12 @@ const BrowsePlacePage = () => {
               </div>
 
               {/* Details Section */}
-              <div className="lg:w-1/2 p-6 md:p-8 space-y-4">
+              <div className="lg:w-3/5 p-4 md:p-6 space-y-3">
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#263D5D] mb-2">
+                  <h2 className="text-xl md:text-2xl font-bold text-[#263D5D] mb-2">
                     {selectedPost.title}
                   </h2>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 mb-3">
                     <span className="inline-block bg-[#3ABBD0]/20 text-[#3ABBD0] px-3 py-1 rounded-full text-sm font-semibold">
                       {selectedPost.category}
                     </span>
@@ -758,10 +758,10 @@ const BrowsePlacePage = () => {
                   </div>
                 </div>
 
-                <div className="border-t border-gray-200 pt-4">
-                  <h3 className="text-lg font-semibold text-[#263D5D] mb-2 flex items-center gap-2">
+                <div className="border-t border-gray-200 pt-3">
+                  <h3 className="text-base font-semibold text-[#263D5D] mb-2 flex items-center gap-2">
                     <svg
-                      className="w-5 h-5"
+                      className="w-4 h-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -786,10 +786,10 @@ const BrowsePlacePage = () => {
                   </p>
                 </div>
 
-                <div className="border-t border-gray-200 pt-4">
-                  <h3 className="text-lg font-semibold text-[#263D5D] mb-2 flex items-center gap-2">
+                <div className="border-t border-gray-200 pt-3">
+                  <h3 className="text-base font-semibold text-[#263D5D] mb-2 flex items-center gap-2">
                     <svg
-                      className="w-5 h-5"
+                      className="w-4 h-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -808,11 +808,11 @@ const BrowsePlacePage = () => {
                   </p>
                 </div>
 
-                <div className="border-t border-gray-200 pt-4">
-                  <h3 className="text-lg font-semibold text-[#263D5D] mb-3">
+                <div className="border-t border-gray-200 pt-3">
+                  <h3 className="text-base font-semibold text-[#263D5D] mb-2">
                     Contact Information
                   </h3>
-                  <div className="space-y-3 ml-2">
+                  <div className="space-y-2 ml-2">
                     {selectedPost.ownerName && (
                       <div className="flex items-start gap-3">
                         <svg
