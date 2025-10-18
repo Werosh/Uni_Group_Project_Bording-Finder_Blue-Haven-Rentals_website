@@ -242,8 +242,8 @@ const Navbar = () => {
                             ) : (
                               <span className="text-4xl font-bold text-teal-600">
                                 {getInitials(
-                                  userProfile.firstName,
-                                  userProfile.lastName
+                                  userProfile?.firstName,
+                                  userProfile?.lastName
                                 )}
                               </span>
                             )}
@@ -523,8 +523,8 @@ const Navbar = () => {
                         ) : (
                           <span>
                             {getInitials(
-                              userProfile.firstName,
-                              userProfile.lastName
+                              userProfile?.firstName,
+                              userProfile?.lastName
                             ) ||
                               userProfile?.username?.[0]?.toUpperCase() ||
                               user.email?.[0]?.toUpperCase() ||

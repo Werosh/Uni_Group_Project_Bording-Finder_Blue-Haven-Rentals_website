@@ -125,8 +125,8 @@ const CategoriesGallery = () => {
         </div>
       </div>
 
-      {/* Corrected global styles */}
-      <style jsx global>{`
+      {/* Global styles */}
+      <style>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;

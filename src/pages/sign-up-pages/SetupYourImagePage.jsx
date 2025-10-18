@@ -174,7 +174,7 @@ const SetupYourImagePage = () => {
                 <span className="text-[#3ABBD0] relative">Profile</span>
               </h1>
               <p className="font-hugiller text-lg md:text-xl text-[#303435] mb-6 opacity-80">
-                Upload your profile image (optional)
+                Upload your profile image
               </p>
               <div className="flex items-center justify-center lg:justify-start gap-3 bg-[#303435]/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-lg text-sm sm:text-base border border-white/20">
                 <BsStars className="w-[25px] sm:w-[30px] text-[#3ABBD0] animate-spin-slow" />
@@ -194,7 +194,7 @@ const SetupYourImagePage = () => {
               {/* Upload Header */}
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-[#263D5D] mb-2">
-                  Upload Your Profile Image (Optional)
+                  Upload Your Profile Image
                 </h2>
                 <p className="text-sm text-gray-600">
                   maximum allowed upload size of 3 MB
@@ -249,7 +249,7 @@ const SetupYourImagePage = () => {
                         </span>
                       </div>
                       <p className="text-lg font-medium text-[#263D5D] mb-2">
-                        Upload Your Profile Image (Optional)
+                        Upload Your Profile Image
                       </p>
                       <p className="text-xs text-gray-500">
                         Drag & drop or click to upload, or skip to continue
@@ -316,7 +316,7 @@ const SetupYourImagePage = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;

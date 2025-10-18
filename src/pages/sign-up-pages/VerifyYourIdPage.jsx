@@ -93,7 +93,7 @@ const VerifyYourIdPage = () => {
                 <span className="text-[#3ABBD0] relative">Identity</span>
               </h1>
               <p className="font-hugiller text-lg md:text-xl text-[#303435] mb-6 opacity-80">
-                Verify your identity (ID images optional)
+                Verify your identity
               </p>
               <div className="flex items-center justify-center lg:justify-start gap-3 bg-[#303435]/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-lg text-sm sm:text-base border border-white/20">
                 <BsStars className="w-[25px] sm:w-[30px] text-[#3ABBD0] animate-spin-slow" />
@@ -160,7 +160,7 @@ const VerifyYourIdPage = () => {
                   <p className="text-sm font-medium text-[#263D5D]">
                     {localData.frontImage
                       ? localData.frontImage.name
-                      : "Upload front side (optional)"}
+                      : "Upload front side"}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     Drag & drop or click
@@ -193,7 +193,7 @@ const VerifyYourIdPage = () => {
                   <p className="text-sm font-medium text-[#263D5D]">
                     {localData.backImage
                       ? localData.backImage.name
-                      : "Upload back side (optional)"}
+                      : "Upload back side"}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     Drag & drop or click
@@ -385,7 +385,7 @@ const VerifyYourIdPage = () => {
         </div>
       </Modal>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;

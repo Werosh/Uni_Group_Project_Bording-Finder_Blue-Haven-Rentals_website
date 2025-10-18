@@ -77,7 +77,7 @@ const AllDonePage = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-[#DFECF8]/80 to-transparent opacity-100 block md:hidden"></div>
 
       {/* Animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes spin-slow {
           from {
             transform: rotate(0deg);

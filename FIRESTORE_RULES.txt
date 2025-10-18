@@ -12,8 +12,9 @@ service cloud.firestore {
     
     // Users collection - allow authenticated users to read/write their own profile
     match /users/{userId} {
-      // Anyone can read user profiles (for public listings, etc.)
-      allow read: if true;
+      // Authenticated users can read their own profile OR admins can read any profile
+      allow read: if request.auth != null && 
+        (request.auth.uid == userId || isAdmin());
       
       // Only authenticated users can create their own profile
       allow create: if request.auth != null && request.auth.uid == userId;
