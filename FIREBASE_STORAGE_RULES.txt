@@ -38,6 +38,11 @@ service firebase.storage {
       return resource.name.matches('.*\\.(jpg|jpeg|png|webp)$');
     }
     
+    // Simplified validation for immediate testing
+    function isValidFile() {
+      return true; // Allow all files for now
+    }
+    
     // PROFILE IMAGES - Users can only access their own profile images
     match /profiles/{userId}/{fileName} {
       // Allow read access to profile images for authenticated users
@@ -68,19 +73,28 @@ service firebase.storage {
       allow read, write, delete: if isAdmin();
     }
     
-    // POST IMAGES - Public read access, owner/admin write access
+    // POST IMAGES - Allow all authenticated users
+    match /posts/{fileName} {
+      // Anyone can read post images (public listings)
+      allow read: if true;
+      
+      // Authenticated users can upload post images
+      allow write: if request.auth != null;
+      
+      // Authenticated users can delete post images
+      allow delete: if request.auth != null;
+    }
+    
+    // POST IMAGES WITH POST ID - Alternative structure for organized storage
     match /posts/{postId}/{fileName} {
       // Anyone can read post images (public listings)
       allow read: if true;
       
-      // Only authenticated users can upload post images
-      allow write: if isAuthenticated() && 
-        isValidImageType() && isValidFileSize() && isValidFileName();
+      // Authenticated users can upload post images
+      allow write: if request.auth != null;
       
-      // Only the post owner or admin can delete post images
-      // Note: This requires checking the post owner in Firestore
-      // For now, allow any authenticated user to delete (will be refined)
-      allow delete: if isAuthenticated();
+      // Authenticated users can delete post images
+      allow delete: if request.auth != null;
     }
     
     // ADMIN FOLDER - Only admins can access

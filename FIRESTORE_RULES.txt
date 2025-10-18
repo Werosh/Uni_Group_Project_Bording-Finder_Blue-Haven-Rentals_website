@@ -3,6 +3,16 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
     // Helper function to check if user is admin
     function isAdmin() {
       return request.auth != null && 
@@ -12,20 +22,11 @@ service cloud.firestore {
     
     // Users collection - allow authenticated users to read/write their own profile
     match /users/{userId} {
-      // Authenticated users can read their own profile OR admins can read any profile
-      allow read: if request.auth != null && 
-        (request.auth.uid == userId || isAdmin());
+      // Users can read, create, update, delete their own profile
+      allow read, create, update, delete: if isAuthenticated() && isOwner(userId);
       
-      // Only authenticated users can create their own profile
-      allow create: if request.auth != null && request.auth.uid == userId;
-      
-      // Users can update their own profile OR admins can update any profile
-      allow update: if request.auth != null && 
-        (request.auth.uid == userId || isAdmin());
-      
-      // Users can delete their own profile OR admins can delete any profile
-      allow delete: if request.auth != null && 
-        (request.auth.uid == userId || isAdmin());
+      // Admins can read, update, delete any user profile
+      allow read, update, delete: if isAdmin();
     }
     
     // Places collection - for boarding/rental listings
@@ -33,11 +34,11 @@ service cloud.firestore {
       // Anyone can read places (public listings)
       allow read: if true;
       
-      // Only authenticated boarding_owner users can create places
-      allow create: if request.auth != null;
+      // Only authenticated users can create places
+      allow create: if isAuthenticated();
       
       // Only the owner can update/delete their place OR admins can manage any place
-      allow update, delete: if request.auth != null && 
+      allow update, delete: if isAuthenticated() && 
         (resource.data.ownerId == request.auth.uid || isAdmin());
     }
     
@@ -47,10 +48,10 @@ service cloud.firestore {
       allow read: if true;
       
       // Only authenticated users can create posts
-      allow create: if request.auth != null;
+      allow create: if isAuthenticated();
       
       // Only the owner can update/delete their post OR admins can manage any post
-      allow update, delete: if request.auth != null && 
+      allow update, delete: if isAuthenticated() && 
         (resource.data.ownerId == request.auth.uid || isAdmin());
     }
   }
