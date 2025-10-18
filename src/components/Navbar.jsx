@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import DropDownBackImg from "../assets/images/others/handBack.webp";
+import LogoImg from "../assets/images/logo/logo.png";
 import { useAuth } from "../context/AuthContext";
 import { logout } from "../firebase/authService";
 import Modal from "./Modal";
@@ -133,23 +134,31 @@ const Navbar = () => {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-[9999] ${
-        isScrolled ? "bg-blue-200 shadow-sm" : "bg-transparent"
-      }   transition-colors duration-300`}
+        isScrolled
+          ? "bg-blue-200 shadow-sm"
+          : "bg-[#05153b]/80 backdrop-blur-md border-b border-white/20"
+      } transition-all duration-300`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex-shrink-0 tracking-[.1em]">
-            <h1 className="text-xl font-semibold text-[#3ABBD0]">
-              Blue <span className="text-black">Haven</span> Rentals
-            </h1>
+          <div className="flex-shrink-0">
+            <img
+              src={LogoImg}
+              alt="Blue Haven Rentals"
+              className="h-10 w-auto"
+            />
           </div>
 
           {/* Desktop Search Bar */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
             <div className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+                <Search
+                  className={`h-5 w-5 ${
+                    isScrolled ? "text-gray-400" : "text-gray-300"
+                  }`}
+                />
               </div>
               <input
                 type="text"
@@ -157,7 +166,11 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleSearchKeyPress}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                className={`w-full pl-10 pr-4 py-2 border rounded-full focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none ${
+                  isScrolled
+                    ? "border-gray-300 bg-white"
+                    : "border-gray-400 bg-white/90 placeholder-gray-400"
+                }`}
               />
             </div>
           </div>
@@ -166,19 +179,31 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-6 text-[20px] tracking-[.09em] Hugiller-font-style">
             <button
               onClick={() => handleSectionNavigation("home")}
-              className="text-gray-700 hover:text-teal-600 transition-colors duration-200"
+              className={`${
+                isScrolled
+                  ? "text-gray-700 hover:text-teal-600"
+                  : "text-white hover:text-gray-300"
+              } transition-colors duration-200`}
             >
               Home
             </button>
             <button
               onClick={() => handleSectionNavigation("about")}
-              className="text-gray-700 hover:text-teal-600 transition-colors duration-200"
+              className={`${
+                isScrolled
+                  ? "text-gray-700 hover:text-teal-600"
+                  : "text-white hover:text-gray-300"
+              } transition-colors duration-200`}
             >
               About
             </button>
             <Link
               to="/contact"
-              className="text-gray-700 hover:text-teal-600 transition-colors duration-200"
+              className={`${
+                isScrolled
+                  ? "text-gray-700 hover:text-teal-600"
+                  : "text-white hover:text-gray-300"
+              } transition-colors duration-200`}
             >
               Contact
             </Link>
@@ -187,7 +212,11 @@ const Navbar = () => {
             {user && isAdmin() && (
               <Link
                 to="/admin/dashboard"
-                className="text-gray-700 hover:text-teal-600 transition-colors duration-200 flex items-center space-x-1"
+                className={`${
+                  isScrolled
+                    ? "text-gray-700 hover:text-teal-600"
+                    : "text-white hover:text-gray-300"
+                } transition-colors duration-200 flex items-center space-x-1`}
               >
                 <LayoutDashboard className="h-4 w-4" />
                 <span>Dashboard</span>
@@ -197,7 +226,7 @@ const Navbar = () => {
             {/* Find Place Button */}
             <button
               onClick={() => navigate("/browse")}
-              className="bg-teal-500 font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+              className="bg-white font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-[#324262] hover:text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
             >
               <MapPin className="h-4 w-4" />
               <span>Find place</span>
@@ -206,7 +235,7 @@ const Navbar = () => {
             {/* Add Post Button */}
             <button
               onClick={handleAddPostClick}
-              className="bg-teal-500 font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+              className="bg-white font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-[#324262] hover:text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
             >
               <Plus className="h-4 w-4" />
               <span>Add Post</span>
@@ -434,7 +463,11 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={toggleMobileMenu}
-              className="p-2 rounded-md text-gray-700 hover:text-teal-600"
+              className={`p-2 rounded-md ${
+                isScrolled
+                  ? "text-gray-700 hover:text-teal-600"
+                  : "text-white hover:text-gray-300"
+              } transition-colors duration-200`}
             >
               <svg
                 className="h-6 w-6"
