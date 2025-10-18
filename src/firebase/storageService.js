@@ -11,6 +11,7 @@ import {
 export const validateImage = (file) => {
   const errors = [];
 
+  // test comment
   // Check file type - support all standard image formats
   const allowedTypes = [
     "image/jpeg",
