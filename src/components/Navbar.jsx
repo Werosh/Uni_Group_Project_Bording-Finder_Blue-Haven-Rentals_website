@@ -29,22 +29,12 @@ import {
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, userProfile, isAdmin } = useAuth();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -132,13 +122,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-[9999] ${
-        isScrolled
-          ? "bg-blue-200 shadow-sm"
-          : "bg-[#05153b]/80 backdrop-blur-md border-b border-white/20"
-      } transition-all duration-300`}
-    >
+    <nav className="fixed top-0 left-0 right-0 z-[9999] bg-[#05153b]/80 backdrop-blur-md border-b border-white/20 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -154,11 +138,7 @@ const Navbar = () => {
           <div className="hidden md:flex flex-1 max-w-md mx-8">
             <div className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search
-                  className={`h-5 w-5 ${
-                    isScrolled ? "text-gray-400" : "text-gray-300"
-                  }`}
-                />
+                <Search className="h-5 w-5 text-gray-300" />
               </div>
               <input
                 type="text"
@@ -166,44 +146,28 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleSearchKeyPress}
-                className={`w-full pl-10 pr-4 py-2 border rounded-full focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none ${
-                  isScrolled
-                    ? "border-gray-300 bg-white"
-                    : "border-gray-400 bg-white/90 placeholder-gray-400"
-                }`}
+                className="w-full pl-10 pr-4 py-2 border border-gray-400 rounded-full focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none bg-white/90 placeholder-gray-400"
               />
             </div>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6 text-[20px] tracking-[.09em] Hugiller-font-style">
+          <div className="hidden md:flex items-center space-x-6 text-[12px] tracking-[.09em] font-montserrat">
             <button
               onClick={() => handleSectionNavigation("home")}
-              className={`${
-                isScrolled
-                  ? "text-gray-700 hover:text-teal-600"
-                  : "text-white hover:text-gray-300"
-              } transition-colors duration-200`}
+              className="text-white hover:text-gray-300 transition-colors duration-200"
             >
               Home
             </button>
             <button
               onClick={() => handleSectionNavigation("about")}
-              className={`${
-                isScrolled
-                  ? "text-gray-700 hover:text-teal-600"
-                  : "text-white hover:text-gray-300"
-              } transition-colors duration-200`}
+              className="text-white hover:text-gray-300 transition-colors duration-200"
             >
               About
             </button>
             <Link
               to="/contact"
-              className={`${
-                isScrolled
-                  ? "text-gray-700 hover:text-teal-600"
-                  : "text-white hover:text-gray-300"
-              } transition-colors duration-200`}
+              className="text-white hover:text-gray-300 transition-colors duration-200"
             >
               Contact
             </Link>
@@ -212,13 +176,8 @@ const Navbar = () => {
             {user && isAdmin() && (
               <Link
                 to="/admin/dashboard"
-                className={`${
-                  isScrolled
-                    ? "text-gray-700 hover:text-teal-600"
-                    : "text-white hover:text-gray-300"
-                } transition-colors duration-200 flex items-center space-x-1`}
+                className="text-white hover:text-gray-300 transition-colors duration-200 flex items-center space-x-1"
               >
-                <LayoutDashboard className="h-4 w-4" />
                 <span>Dashboard</span>
               </Link>
             )}
@@ -226,7 +185,7 @@ const Navbar = () => {
             {/* Find Place Button */}
             <button
               onClick={() => navigate("/browse")}
-              className="bg-white font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-[#324262] hover:text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+              className="bg-white font-montserrat text-[12px] hover:bg-teal-600 text-[#324262] hover:text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
             >
               <MapPin className="h-4 w-4" />
               <span>Find place</span>
@@ -235,7 +194,7 @@ const Navbar = () => {
             {/* Add Post Button */}
             <button
               onClick={handleAddPostClick}
-              className="bg-white font-[Hugiller-Demo] text-[20px] hover:bg-teal-600 text-[#324262] hover:text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+              className="bg-white font-montserrat text-[12px] hover:bg-teal-600 text-[#324262] hover:text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
             >
               <Plus className="h-4 w-4" />
               <span>Add Post</span>
@@ -245,7 +204,7 @@ const Navbar = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={toggleDropdown}
-                className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors duration-200 font-semibold text-lg"
+                className="w-10 h-10  rounded-full flex items-center justify-center text-white border-2 border-white  transition-colors duration-200 font-semibold text-lg"
               >
                 {user && userProfile ? (
                   <span>
@@ -319,7 +278,7 @@ const Navbar = () => {
                       </div>
                     )}
 
-                    <div className="py-1 text-[24px] text-[#235A78]">
+                    <div className="py-1 text-[15px] text-[#235A78]">
                       {/* boarding_finder: only logout */}
                       {userProfile?.role === "boarding_finder" && (
                         <div className=" py-1">
@@ -463,11 +422,7 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={toggleMobileMenu}
-              className={`p-2 rounded-md ${
-                isScrolled
-                  ? "text-gray-700 hover:text-teal-600"
-                  : "text-white hover:text-gray-300"
-              } transition-colors duration-200`}
+              className="p-2 rounded-md text-white hover:text-gray-300 transition-colors duration-200"
             >
               <svg
                 className="h-6 w-6"
@@ -509,31 +464,31 @@ const Navbar = () => {
             {/* Mobile Navigation Links */}
             <button
               onClick={() => handleSectionNavigation("home")}
-              className="block  hover:text-teal-600 py-2 text-[20px] text-[#235A78]"
+              className="block hover:text-teal-600 py-2 text-[10px] text-[#235A78] font-montserrat"
             >
               Home
             </button>
             <button
               onClick={() => handleSectionNavigation("about")}
-              className="block text-[#235A78] hover:text-teal-600 py-2 text-[20px]"
+              className="block text-[#235A78] hover:text-teal-600 py-2 text-[10px] font-montserrat"
             >
               About
             </button>
             <Link
               to="/contact"
-              className="block text-[#235A78] hover:text-teal-600 py-2 text-[20px]"
+              className="block text-[#235A78] hover:text-teal-600 py-2 text-[10px] font-montserrat"
             >
               Contact
             </Link>
 
             {/* Mobile Action Buttons */}
-            <div id="same-font" className="pt-4 space-y-3">
+            <div className="pt-4 space-y-3">
               <button
                 onClick={() => {
                   navigate("/browse");
                   setIsMobileMenuOpen(false);
                 }}
-                className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200"
+                className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-montserrat"
               >
                 <MapPin className="h-4 w-4" />
                 <span>Find place</span>
@@ -544,7 +499,7 @@ const Navbar = () => {
                   handleAddPostClick();
                   setIsMobileMenuOpen(false);
                 }}
-                className="w-full bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200"
+                className="w-full bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-montserrat"
               >
                 <Plus className="h-4 w-4" />
                 <span>Add Post</span>
