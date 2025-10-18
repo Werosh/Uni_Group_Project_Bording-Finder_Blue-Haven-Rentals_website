@@ -69,7 +69,7 @@ const PostAdd = () => {
                 Post Your <span className="text-[#3ABBD0] relative">Add</span>
               </h1>
 
-              <p className="font-hugiller text-lg md:text-xl text-[#303435] mb-6 opacity-80 max-w-xl">
+              <p className="font-hugiller text-lg md:text-xl text-[#303435] mb-6 opacity-80 max-w-xl backdrop-blur-2xl p-5 rounded-[20px]">
                 Discover the smarter way to rent – effortlessly list your
                 boarding rooms, houses, hostels, or luxury apartments on our
                 all-in-one platform. We bridge the gap between property owners

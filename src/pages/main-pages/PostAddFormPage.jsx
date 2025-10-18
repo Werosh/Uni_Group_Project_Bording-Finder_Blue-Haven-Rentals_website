@@ -20,7 +20,6 @@ const CATEGORIES = [
   "Annexes",
   "Houses",
   "Apartments",
-  "Single Bedrooms",
 ];
 
 // Districts aligned with BrowsePlacePage
@@ -589,7 +588,7 @@ const PostAddFormPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200 relative overflow-hidden">
+    <div className="min-h-screen mt-16 bg-gradient-to-br from-cyan-300 via-blue-200 to-purple-200 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-48 h-48 bg-cyan-400/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
@@ -608,8 +607,8 @@ const PostAddFormPage = () => {
         <h1 className="font-hugiller text-[52px] sm:text-[84px] md:text-[96px] lg:text-[106px] text-[#263D5D] leading-[1.1] animate-fadeInUp">
           Post Your <span className="text-[#3ABBD0] relative">Add</span>
         </h1>
-        <p className="max-w-4xl mx-auto text-[#303435]/90 mt-4 font-hugiller text-lg sm:text-xl px-2">
-          Discover the smarter way to rent – effortlessly list your boarding
+        <p className="max-w-4xl mx-auto text-[#303435]/90 mt-4 font-montserrat text-lg sm:text-xl px-2">
+          Discover the smarter way to rent - effortlessly list your boarding
           rooms, houses, hostels, or luxury apartments on our all-in-one
           platform.
         </p>
