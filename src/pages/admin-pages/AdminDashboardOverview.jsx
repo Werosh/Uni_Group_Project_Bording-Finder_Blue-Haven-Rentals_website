@@ -10,6 +10,7 @@ import {
   UserCheck,
   Building2,
 } from "lucide-react";
+import RefreshButton from "../../components/RefreshButton";
 import {
   LineChart,
   Line,
@@ -35,6 +36,7 @@ const COLORS = ["#3ABBD0", "#263D5D", "#8B5CF6", "#F59E0B"];
 
 const AdminDashboardOverview = () => {
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [userStats, setUserStats] = useState({
     totalUsers: 0,
     boardingOwners: 0,
@@ -54,9 +56,14 @@ const AdminDashboardOverview = () => {
     fetchDashboardData();
   }, []);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
       const [users, posts, recentPosts, allUsers] = await Promise.all([
         getUserStatistics(),
         getPostStatistics(),
@@ -101,7 +108,12 @@ const AdminDashboardOverview = () => {
       console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchDashboardData(true);
   };
 
   // Mock data for trending chart
@@ -160,12 +172,21 @@ const AdminDashboardOverview = () => {
     <AdminLayout>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#263D5D] mb-2">
-          Dashboard Overview
-        </h1>
-        <p className="text-gray-600">
-          Welcome back! Here's what's happening with your platform.
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-[#263D5D] mb-2">
+              Dashboard Overview
+            </h1>
+            <p className="text-gray-600">
+              Welcome back! Here's what's happening with your platform.
+            </p>
+          </div>
+          <RefreshButton
+            onRefresh={handleRefresh}
+            loading={refreshing}
+            title="Refresh dashboard data"
+          />
+        </div>
       </div>
 
       {/* Stats Grid */}

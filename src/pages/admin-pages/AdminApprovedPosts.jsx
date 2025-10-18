@@ -11,6 +11,7 @@ import {
   X,
   Save,
 } from "lucide-react";
+import RefreshButton from "../../components/RefreshButton";
 import {
   getPostsByStatus,
   updatePost,
@@ -61,6 +62,7 @@ const DISTRICTS = [
 
 const AdminApprovedPosts = () => {
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [posts, setPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -92,9 +94,14 @@ const AdminApprovedPosts = () => {
     filterPosts();
   }, [searchTerm, filterCategory, posts]);
 
-  const fetchApprovedPosts = async () => {
+  const fetchApprovedPosts = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
       const approvedPosts = await getPostsByStatus("approved");
       setPosts(approvedPosts);
       setFilteredPosts(approvedPosts);
@@ -102,7 +109,12 @@ const AdminApprovedPosts = () => {
       console.error("Error fetching approved posts:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchApprovedPosts(true);
   };
 
   const filterPosts = () => {
@@ -234,12 +246,21 @@ const AdminApprovedPosts = () => {
     <AdminLayout>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#263D5D] mb-2">
-          Approved Posts Management
-        </h1>
-        <p className="text-gray-600">
-          View, edit, and manage all approved posts on the platform
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-[#263D5D] mb-2">
+              Approved Posts Management
+            </h1>
+            <p className="text-gray-600">
+              View, edit, and manage all approved posts on the platform
+            </p>
+          </div>
+          <RefreshButton
+            onRefresh={handleRefresh}
+            loading={refreshing}
+            title="Refresh approved posts"
+          />
+        </div>
       </div>
 
       {/* Stats Card */}

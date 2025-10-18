@@ -12,6 +12,7 @@ import {
   Edit,
   Eye,
 } from "lucide-react";
+import RefreshButton from "../../components/RefreshButton";
 import {
   getAllUsers,
   getUserStatistics,
@@ -32,6 +33,7 @@ import {
 
 const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [stats, setStats] = useState({
@@ -79,9 +81,14 @@ const AdminUsers = () => {
     filterAndSortUsers();
   }, [searchTerm, filterType, sortBy, users]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
       const [allUsers, userStats] = await Promise.all([
         getAllUsers(),
         getUserStatistics(),
@@ -92,7 +99,12 @@ const AdminUsers = () => {
       console.error("Error fetching users:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchUsers(true);
   };
 
   const filterAndSortUsers = () => {
@@ -274,10 +286,19 @@ const AdminUsers = () => {
     <AdminLayout>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#263D5D] mb-2">
-          Users Management
-        </h1>
-        <p className="text-gray-600">Manage and monitor platform users</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-[#263D5D] mb-2">
+              Users Management
+            </h1>
+            <p className="text-gray-600">Manage and monitor platform users</p>
+          </div>
+          <RefreshButton
+            onRefresh={handleRefresh}
+            loading={refreshing}
+            title="Refresh users data"
+          />
+        </div>
       </div>
 
       {/* Stats Cards */}

@@ -10,6 +10,7 @@ import {
   Home,
   User,
 } from "lucide-react";
+import RefreshButton from "../../components/RefreshButton";
 import {
   getPostsByStatus,
   updatePostStatus,
@@ -21,6 +22,7 @@ import Modal from "../../components/Modal";
 
 const AdminPendingPosts = () => {
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [posts, setPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,9 +54,14 @@ const AdminPendingPosts = () => {
     filterPosts();
   }, [searchTerm, filterCategory, posts]);
 
-  const fetchPendingPosts = async () => {
+  const fetchPendingPosts = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
       const [pendingPosts, editedPosts] = await Promise.all([
         getPostsByStatus("pending"),
         getEditedPosts(),
@@ -81,7 +88,12 @@ const AdminPendingPosts = () => {
       console.error("Error fetching pending posts:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchPendingPosts(true);
   };
 
   const filterPosts = () => {
@@ -191,12 +203,21 @@ const AdminPendingPosts = () => {
     <AdminLayout>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#263D5D] mb-2">
-          Pending Posts
-        </h1>
-        <p className="text-gray-600">
-          Review and approve posts submitted by users
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-[#263D5D] mb-2">
+              Pending Posts
+            </h1>
+            <p className="text-gray-600">
+              Review and approve posts submitted by users
+            </p>
+          </div>
+          <RefreshButton
+            onRefresh={handleRefresh}
+            loading={refreshing}
+            title="Refresh pending posts"
+          />
+        </div>
       </div>
 
       {/* Filters */}

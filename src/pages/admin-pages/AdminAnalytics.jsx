@@ -5,6 +5,7 @@ import {
   PieChart as PieChartIcon,
   Activity,
 } from "lucide-react";
+import RefreshButton from "../../components/RefreshButton";
 import {
   LineChart,
   Line,
@@ -36,6 +37,7 @@ const COLORS = [
 
 const AdminAnalytics = () => {
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [analyticsData, setAnalyticsData] = useState({
     postsByCategory: [],
     postsByLocation: [],
@@ -53,9 +55,14 @@ const AdminAnalytics = () => {
     fetchAnalytics();
   }, []);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
       const [analytics, stats] = await Promise.all([
         getAnalyticsData(),
         getPostStatistics(),
@@ -66,7 +73,12 @@ const AdminAnalytics = () => {
       console.error("Error fetching analytics:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchAnalytics(true);
   };
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -106,10 +118,21 @@ const AdminAnalytics = () => {
     <AdminLayout>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#263D5D] mb-2">Analytics</h1>
-        <p className="text-gray-600">
-          Comprehensive insights into your platform's performance
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-[#263D5D] mb-2">
+              Analytics
+            </h1>
+            <p className="text-gray-600">
+              Comprehensive insights into your platform's performance
+            </p>
+          </div>
+          <RefreshButton
+            onRefresh={handleRefresh}
+            loading={refreshing}
+            title="Refresh analytics data"
+          />
+        </div>
       </div>
 
       {/* Quick Stats */}
