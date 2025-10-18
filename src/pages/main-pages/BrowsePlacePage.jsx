@@ -72,15 +72,7 @@ const CATEGORIES = [
   "Single Bedrooms",
 ];
 
-// Property type mapping from Home page to BrowsePlacePage categories
-const PROPERTY_TYPE_MAPPING = {
-  House: "Houses",
-  Apartment: "Apartments",
-  "Boarding House": "Boarding Houses",
-  Studio: "Single Rooms",
-  Villa: "Houses",
-  Condo: "Apartments",
-};
+// Property type mapping is no longer needed since home page now uses exact same categories
 
 const BrowsePlacePage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -99,6 +91,112 @@ const BrowsePlacePage = () => {
   const [imageLoadErrors, setImageLoadErrors] = useState({});
   const postsPerPage = 12;
 
+  // Function to match search query to districts
+  const matchSearchToDistricts = (searchQuery) => {
+    if (!searchQuery) return [];
+
+    const query = searchQuery.toLowerCase().trim();
+    const matchedDistricts = [];
+
+    // Common location keywords mapping
+    const locationKeywords = {
+      colombo: ["Colombo"],
+      kandy: ["Kandy"],
+      galle: ["Galle"],
+      negombo: ["Gampaha"],
+      wattala: ["Gampaha"],
+      kadawatha: ["Gampaha"],
+      kelaniya: ["Gampaha"],
+      rathmalana: ["Colombo"],
+      "mount lavinia": ["Colombo"],
+      dehiwala: ["Colombo"],
+      moratuwa: ["Colombo"],
+      piliyandala: ["Colombo"],
+      maharagama: ["Colombo"],
+      kottawa: ["Colombo"],
+      pannipitiya: ["Colombo"],
+      battaramulla: ["Colombo"],
+      rajagiriya: ["Colombo"],
+      kotte: ["Colombo"],
+      nugegoda: ["Colombo"],
+      kohuwala: ["Colombo"],
+      wellawatta: ["Colombo"],
+      bambalapitiya: ["Colombo"],
+      kollupitiya: ["Colombo"],
+      fort: ["Colombo"],
+      pettah: ["Colombo"],
+      maradana: ["Colombo"],
+      borella: ["Colombo"],
+      narahenpita: ["Colombo"],
+      "havelock town": ["Colombo"],
+      "cinnamon gardens": ["Colombo"],
+      "slave island": ["Colombo"],
+      matara: ["Matara"],
+      jaffna: ["Jaffna"],
+      anuradhapura: ["Anuradhapura"],
+      trincomalee: ["Trincomalee"],
+      batticaloa: ["Batticaloa"],
+      kurunegala: ["Kurunegala"],
+      ratnapura: ["Ratnapura"],
+      badulla: ["Badulla"],
+      polonnaruwa: ["Polonnaruwa"],
+      puttalam: ["Puttalam"],
+      kalutara: ["Kalutara"],
+      gampaha: ["Gampaha"],
+      hambantota: ["Hambantota"],
+      "nuwara eliya": ["Nuwara Eliya"],
+      matale: ["Matale"],
+      kilinochchi: ["Kilinochchi"],
+      mannar: ["Mannar"],
+      vavuniya: ["Vavuniya"],
+      mullaitivu: ["Mullaitivu"],
+      ampara: ["Ampara"],
+      kegalle: ["Kegalle"],
+      monaragala: ["Monaragala"],
+    };
+
+    // Check for keyword matches first
+    for (const [keyword, districts] of Object.entries(locationKeywords)) {
+      if (query.includes(keyword)) {
+        matchedDistricts.push(...districts);
+      }
+    }
+
+    // Direct district name matching
+    DISTRICTS.forEach((district) => {
+      if (
+        district.name.toLowerCase().includes(query) ||
+        query.includes(district.name.toLowerCase())
+      ) {
+        if (!matchedDistricts.includes(district.name)) {
+          matchedDistricts.push(district.name);
+        }
+      }
+    });
+
+    // Province matching
+    if (matchedDistricts.length === 0) {
+      const matchedProvinces = PROVINCE_ORDER.filter(
+        (province) =>
+          province.toLowerCase().includes(query) ||
+          query.includes(province.toLowerCase())
+      );
+
+      matchedProvinces.forEach((province) => {
+        const districtsInProvince = DISTRICTS.filter(
+          (d) => d.province === province
+        );
+        districtsInProvince.forEach((district) => {
+          if (!matchedDistricts.includes(district.name)) {
+            matchedDistricts.push(district.name);
+          }
+        });
+      });
+    }
+
+    return matchedDistricts;
+  };
+
   // Handle URL parameters on component mount
   useEffect(() => {
     const search = searchParams.get("search");
@@ -108,13 +206,29 @@ const BrowsePlacePage = () => {
 
     if (search) {
       setSearchQuery(search);
+
+      // Auto-select districts based on search query
+      const matchedDistricts = matchSearchToDistricts(search);
+      if (matchedDistricts.length > 0) {
+        setSelectedDistricts(matchedDistricts);
+        // Auto-expand provinces that contain matched districts
+        const matchedProvinces = [
+          ...new Set(
+            matchedDistricts
+              .map((districtName) => {
+                const district = DISTRICTS.find((d) => d.name === districtName);
+                return district ? district.province : null;
+              })
+              .filter(Boolean)
+          ),
+        ];
+        setExpandedProvinces(matchedProvinces);
+      }
     }
 
-    if (propertyType && propertyType !== "Any Property Type") {
-      const mappedCategory =
-        PROPERTY_TYPE_MAPPING[propertyType] || propertyType;
-      if (CATEGORIES.includes(mappedCategory)) {
-        setSelectedCategories([mappedCategory]);
+    if (propertyType && propertyType !== "All Property Types") {
+      if (CATEGORIES.includes(propertyType)) {
+        setSelectedCategories([propertyType]);
       }
     }
 

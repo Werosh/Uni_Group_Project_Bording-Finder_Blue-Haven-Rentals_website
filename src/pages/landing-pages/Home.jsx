@@ -100,12 +100,15 @@ const Home = () => {
                       className="w-full bg-gray-50 rounded-xl px-2 py-2 outline-none text-slate-700 appearance-none cursor-pointer border border-gray-200 focus:border-cyan-500 transition-colors"
                     >
                       <option>All Property Types</option>
-                      <option>House</option>
-                      <option>Apartment</option>
-                      <option>Boarding House</option>
-                      <option>Studio</option>
-                      <option>Villa</option>
-                      <option>Condo</option>
+                      <option>Single Rooms</option>
+                      <option>Double Rooms</option>
+                      <option>Boarding Houses</option>
+                      <option>Hostels</option>
+                      <option>Sharing Rooms</option>
+                      <option>Annexes</option>
+                      <option>Houses</option>
+                      <option>Apartments</option>
+                      <option>Single Bedrooms</option>
                     </select>
                   </div>
 
