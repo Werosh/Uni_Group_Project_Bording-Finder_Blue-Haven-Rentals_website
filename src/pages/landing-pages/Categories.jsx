@@ -80,7 +80,7 @@ const CategoriesGallery = () => {
       {/* Main Content Container with Glass Effect */}
       <div className="relative container mx-auto rounded-[40px] shadow-2xl p-6 sm:p-10 z-10 border border-white/30 animate-fadeInUp">
         {/* Section Title */}
-        <h1 className="text-center font-hugiller text-[50px] sm:text-[70px] md:text-[100px] lg:text-[130px] text-[#263D5D] leading-[1.1] mb-10 font-bold">
+        <h1 className="text-center Hugiller-font-style text-[50px] sm:text-[70px] md:text-[100px] lg:text-[130px] text-[#263D5D] leading-[1.1] mb-10 ">
           Categories
         </h1>
 
