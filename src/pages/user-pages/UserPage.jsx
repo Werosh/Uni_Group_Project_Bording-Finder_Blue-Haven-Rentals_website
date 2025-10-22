@@ -4,7 +4,9 @@ import {
   getUserProfile,
   getPostsByOwner,
   getDeclinedPostsByOwner,
+  deletePost,
 } from "../../firebase/dbService";
+import { deleteImage } from "../../firebase/storageService";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   getInitials,
@@ -28,6 +30,9 @@ const UserPage = () => {
   const [loading, setLoading] = useState(true);
   const [editingPost, setEditingPost] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [deletingPost, setDeletingPost] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Handle URL query parameters for tab navigation
   useEffect(() => {
@@ -188,6 +193,64 @@ const UserPage = () => {
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setEditingPost(null);
+  };
+
+  const handleDeletePost = (post) => {
+    setDeletingPost(post);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeletePost = async () => {
+    if (!deletingPost) return;
+
+    try {
+      setDeleting(true);
+
+      // Delete post images from Firebase Storage
+      if (deletingPost.imageUrls && Array.isArray(deletingPost.imageUrls)) {
+        for (const imageUrl of deletingPost.imageUrls) {
+          try {
+            // Extract path from URL and delete
+            const urlParts = imageUrl.split('/');
+            const pathIndex = urlParts.findIndex(part => part === 'posts');
+            if (pathIndex !== -1) {
+              const imagePath = urlParts.slice(pathIndex).join('/');
+              await deleteImage(imagePath);
+            }
+          } catch (error) {
+            console.warn(`Failed to delete post image: ${error.message}`);
+          }
+        }
+      }
+
+      // Delete post document from Firestore
+      await deletePost(deletingPost.id);
+
+      // Refresh posts data
+      const userPosts = await getPostsByOwner(user.uid);
+      const declinedPostsData = await getDeclinedPostsByOwner(user.uid);
+      setPosts(
+        userPosts.filter(
+          (post) => post.status !== "draft" && post.status !== "declined"
+        )
+      );
+      setDrafts(userPosts.filter((post) => post.status === "draft"));
+      setDeclinedPosts(declinedPostsData);
+
+      // Close modal and reset state
+      setShowDeleteModal(false);
+      setDeletingPost(null);
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      alert("Failed to delete post. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeletingPost(null);
   };
 
   if (loading) {
@@ -449,7 +512,11 @@ const UserPage = () => {
                               />
                             </svg>
                           </button>
-                          <button className="bg-blue-600 bg-opacity-80 hover:bg-opacity-100 text-white p-1 rounded transition-all">
+                          <button
+                            onClick={() => handleDeletePost(post)}
+                            className="bg-red-600 bg-opacity-80 hover:bg-opacity-100 text-white p-1 rounded transition-all"
+                            title="Delete post"
+                          >
                             <svg
                               className="w-4 h-4"
                               fill="none"
@@ -460,7 +527,7 @@ const UserPage = () => {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                               />
                             </svg>
                           </button>
@@ -536,7 +603,7 @@ const UserPage = () => {
                             </svg>
                           </div>
                         </div>
-                        <div className="absolute top-3 right-3">
+                        <div className="absolute top-3 right-3 flex gap-2">
                           <button
                             onClick={() => handleEditPost(post)}
                             className="bg-blue-600 bg-opacity-80 hover:bg-opacity-100 text-white p-1 rounded transition-all"
@@ -553,6 +620,25 @@ const UserPage = () => {
                                 strokeLinejoin="round"
                                 strokeWidth={2}
                                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDeletePost(post)}
+                            className="bg-red-600 bg-opacity-80 hover:bg-opacity-100 text-white p-1 rounded transition-all"
+                            title="Delete draft"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                               />
                             </svg>
                           </button>
@@ -793,6 +879,25 @@ const UserPage = () => {
                                   </svg>
                                   <span>Edit & Resubmit</span>
                                 </button>
+                                <button
+                                  onClick={() => handleDeletePost(post)}
+                                  className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors"
+                                >
+                                  <svg
+                                    className="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                  </svg>
+                                  <span>Delete</span>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -902,6 +1007,72 @@ const UserPage = () => {
         post={editingPost}
         onSuccess={handleEditSuccess}
       />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Delete Post
+                </h3>
+                <p className="text-sm text-gray-600">
+                  This action cannot be undone
+                </p>
+              </div>
+            </div>
+
+            {deletingPost && (
+              <div className="mb-6">
+                <p className="text-gray-700 mb-2">
+                  Are you sure you want to delete this post?
+                </p>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <h4 className="font-medium text-gray-900 mb-1">
+                    {deletingPost.title}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {deletingPost.location} • {deletingPost.category}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleCloseDeleteModal}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-medium transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeletePost}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete Post"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -18,9 +18,6 @@ import {
   getUserStatistics,
   deleteUser,
   updateUserDetails,
-  getUserById,
-  updateUserRole,
-  toggleUserStatus,
 } from "../../firebase/dbService";
 import AdminLayout from "./AdminLayout";
 import Modal from "../../components/Modal";
@@ -73,14 +70,6 @@ const AdminUsers = () => {
     setShowAlertModal(true);
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    filterAndSortUsers();
-  }, [searchTerm, filterType, sortBy, users]);
-
   const fetchUsers = async (isRefresh = false) => {
     try {
       if (isRefresh) {
@@ -107,43 +96,50 @@ const AdminUsers = () => {
     fetchUsers(true);
   };
 
-  const filterAndSortUsers = () => {
-    let filtered = [...users];
 
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (user) =>
-          getDisplayName(user)
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-    // Type filter
-    if (filterType !== "all") {
-      filtered = filtered.filter(
-        (user) => user.role === filterType || user.userType === filterType
-      );
-    }
+  useEffect(() => {
+    if (users.length > 0) {
+      let filtered = [...users];
 
-    // Sort
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "recent":
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        case "oldest":
-          return new Date(a.createdAt) - new Date(b.createdAt);
-        case "name":
-          return getDisplayName(a).localeCompare(getDisplayName(b));
-        default:
-          return 0;
+      // Search filter
+      if (searchTerm) {
+        filtered = filtered.filter(
+          (user) =>
+            getDisplayName(user)
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
       }
-    });
 
-    setFilteredUsers(filtered);
-  };
+      // Type filter
+      if (filterType !== "all") {
+        filtered = filtered.filter(
+          (user) => user.role === filterType || user.userType === filterType
+        );
+      }
+
+      // Sort
+      filtered.sort((a, b) => {
+        switch (sortBy) {
+          case "recent":
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          case "oldest":
+            return new Date(a.createdAt) - new Date(b.createdAt);
+          case "name":
+            return getDisplayName(a).localeCompare(getDisplayName(b));
+          default:
+            return 0;
+        }
+      });
+
+      setFilteredUsers(filtered);
+    }
+  }, [users, searchTerm, filterType, sortBy]);
 
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
@@ -152,33 +148,79 @@ const AdminUsers = () => {
       setDeletingUserId(selectedUser.id);
       setShowDeleteModal(false);
 
-      await deleteUser(selectedUser.id);
+      // Show progress alert
+      showAlert(
+        "info",
+        "Deleting User",
+        "Comprehensive user deletion in progress. This may take a moment..."
+      );
 
-      // Remove user from list
-      setUsers(users.filter((u) => u.id !== selectedUser.id));
-      setFilteredUsers(filteredUsers.filter((u) => u.id !== selectedUser.id));
+      // Call comprehensive deletion function
+      const deletionResults = await deleteUser(selectedUser.id);
 
-      // Update stats
-      setStats({
-        ...stats,
-        totalUsers: stats.totalUsers - 1,
-        boardingOwners:
-          selectedUser.role === "boarding_owner" ||
-          selectedUser.userType === "boarding_owner"
-            ? stats.boardingOwners - 1
-            : stats.boardingOwners,
-        boardingFinders:
-          selectedUser.role === "boarding_finder" ||
-          selectedUser.userType === "boarding_finder"
-            ? stats.boardingFinders - 1
-            : stats.boardingFinders,
-      });
+      // Check deletion results and show appropriate feedback
+      const successCount = [
+        deletionResults.userDocument,
+        deletionResults.profileImages,
+        deletionResults.idDocuments,
+        deletionResults.userPosts,
+        deletionResults.authAccount
+      ].filter(Boolean).length;
+
+      const totalOperations = 5;
+      const hasErrors = deletionResults.errors.length > 0;
+
+      if (successCount === totalOperations && !hasErrors) {
+        // Complete success
+        showAlert(
+          "success",
+          "User Deleted Successfully",
+          `User "${getDisplayName(selectedUser)}" has been completely removed from the system. All associated data including profile images, ID documents, posts, and authentication account have been deleted.`
+        );
+      } else if (successCount > 0) {
+        // Partial success
+        const errorDetails = deletionResults.errors.length > 0 
+          ? `\n\nSome operations failed:\n${deletionResults.errors.slice(0, 3).join('\n')}${deletionResults.errors.length > 3 ? `\n... and ${deletionResults.errors.length - 3} more errors` : ''}`
+          : '';
+        
+        showAlert(
+          "warning",
+          "User Partially Deleted",
+          `User "${getDisplayName(selectedUser)}" has been partially deleted. ${successCount}/${totalOperations} operations completed successfully.${errorDetails}`
+        );
+      } else {
+        // Complete failure
+        throw new Error("All deletion operations failed");
+      }
+
+      // Remove user from list only if user document was successfully deleted
+      if (deletionResults.userDocument) {
+        setUsers(users.filter((u) => u.id !== selectedUser.id));
+        setFilteredUsers(filteredUsers.filter((u) => u.id !== selectedUser.id));
+
+        // Update stats
+        setStats({
+          ...stats,
+          totalUsers: stats.totalUsers - 1,
+          boardingOwners:
+            selectedUser.role === "boarding_owner" ||
+            selectedUser.userType === "boarding_owner"
+              ? stats.boardingOwners - 1
+              : stats.boardingOwners,
+          boardingFinders:
+            selectedUser.role === "boarding_finder" ||
+            selectedUser.userType === "boarding_finder"
+              ? stats.boardingFinders - 1
+              : stats.boardingFinders,
+        });
+      }
+
     } catch (error) {
       console.error("Error deleting user:", error);
       showAlert(
         "error",
         "Delete Failed",
-        "Failed to delete user. Please try again."
+        `Failed to delete user "${getDisplayName(selectedUser)}". ${error.message}`
       );
     } finally {
       setDeletingUserId(null);
@@ -238,25 +280,6 @@ const AdminUsers = () => {
     }
   };
 
-  const handleToggleUserStatus = async (user) => {
-    try {
-      await toggleUserStatus(user.id, !user.inactive);
-
-      // Update user in list
-      const updatedUsers = users.map((u) =>
-        u.id === user.id ? { ...u, inactive: !user.inactive } : u
-      );
-      setUsers(updatedUsers);
-      setFilteredUsers(updatedUsers);
-    } catch (error) {
-      console.error("Error toggling user status:", error);
-      showAlert(
-        "error",
-        "Status Update Failed",
-        "Failed to update user status. Please try again."
-      );
-    }
-  };
 
   const getUserTypeLabel = (user) => {
     const role = user.role || user.userType || "boarding_finder";
@@ -605,21 +628,64 @@ const AdminUsers = () => {
       <Modal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        title="Delete User?"
-        size="md"
+        title="Comprehensive User Deletion"
+        size="lg"
       >
         <div className="space-y-4">
-          <p className="text-gray-600">
-            Are you sure you want to delete this user? This action cannot be
-            undone and will remove all user data from the system.
-          </p>
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <h4 className="font-semibold text-red-800">Warning: This action is irreversible</h4>
+            </div>
+            <p className="text-sm text-red-700">
+              This will permanently delete the user and ALL associated data from the system.
+            </p>
+          </div>
 
           {selectedUser && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-              <h4 className="font-semibold text-[#263D5D] mb-1">
-                {getDisplayName(selectedUser)}
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+              <h4 className="font-semibold text-[#263D5D] mb-2">
+                User: {getDisplayName(selectedUser)}
               </h4>
-              <p className="text-sm text-gray-600">{selectedUser.email}</p>
+              <p className="text-sm text-gray-600 mb-3">{selectedUser.email}</p>
+              
+              <div className="space-y-2">
+                <h5 className="font-medium text-gray-800 text-sm">The following data will be deleted:</h5>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    User document from Firestore
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Profile images from Firebase Storage
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    ID verification documents (front & back)
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                    All user posts and associated images
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Firebase Authentication account
+                  </li>
+                </ul>
+              </div>
             </div>
           )}
 
@@ -632,9 +698,10 @@ const AdminUsers = () => {
             </button>
             <button
               onClick={handleDeleteUser}
-              className="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-colors"
+              disabled={deletingUserId === selectedUser?.id}
+              className="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-colors disabled:opacity-50"
             >
-              Delete User
+              {deletingUserId === selectedUser?.id ? "Deleting..." : "Delete User Completely"}
             </button>
           </div>
         </div>

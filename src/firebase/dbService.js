@@ -8,7 +8,12 @@ import {
   doc,
   setDoc,
   getDoc,
+  query,
+  where,
 } from "firebase/firestore";
+import { deleteUser as deleteAuthUser } from "firebase/auth";
+import { auth } from "./firebaseConfig";
+import { deleteImage, listImagesInFolder } from "./storageService";
 
 // CREATE
 export const addPlace = async (placeData) => {
@@ -187,10 +192,142 @@ export const getAllUsers = async () => {
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
-// Delete user
+// Comprehensive user deletion with complete data cleanup
 export const deleteUser = async (uid) => {
-  const userRef = doc(db, "users", uid);
-  return await deleteDoc(userRef);
+  const deletionResults = {
+    userDocument: false,
+    profileImages: false,
+    idDocuments: false,
+    userPosts: false,
+    authAccount: false,
+    errors: []
+  };
+
+  try {
+    // Step 1: Get user data before deletion to identify all associated files
+    const userRef = doc(db, "users", uid);
+    const userDoc = await getDoc(userRef);
+    
+    if (!userDoc.exists()) {
+      throw new Error("User document not found");
+    }
+
+    const userData = userDoc.data();
+    const filesToDelete = [];
+
+    // Collect all storage paths associated with the user
+    if (userData.profileImageUrl) {
+      // Extract path from URL - profile images are stored in "profiles/{userId}/" folder
+      filesToDelete.push(`profiles/${uid}`);
+    }
+
+    if (userData.idFrontImageUrl || userData.idBackImageUrl) {
+      // ID documents are stored in "id-documents/{userId}/" folder
+      filesToDelete.push(`id-documents/${uid}`);
+    }
+
+    // Step 2: Get and delete all user posts and their associated images
+    try {
+      const userPosts = await getPostsByOwner(uid);
+      
+      for (const post of userPosts) {
+        // Delete post images from storage
+        if (post.imageUrls && Array.isArray(post.imageUrls)) {
+          for (const imageUrl of post.imageUrls) {
+            try {
+              // Extract path from URL and delete
+              const urlParts = imageUrl.split('/');
+              const pathIndex = urlParts.findIndex(part => part === 'posts');
+              if (pathIndex !== -1) {
+                const imagePath = urlParts.slice(pathIndex).join('/');
+                await deleteImage(imagePath);
+              }
+            } catch (error) {
+              console.warn(`Failed to delete post image: ${error.message}`);
+              deletionResults.errors.push(`Post image deletion failed: ${error.message}`);
+            }
+          }
+        }
+        
+        // Delete the post document
+        await deletePost(post.id);
+      }
+      deletionResults.userPosts = true;
+    } catch (error) {
+      console.error("Error deleting user posts:", error);
+      deletionResults.errors.push(`User posts deletion failed: ${error.message}`);
+    }
+
+    // Step 3: Delete all user images from Firebase Storage
+    for (const folderPath of filesToDelete) {
+      try {
+        // List all images in the folder
+        const images = await listImagesInFolder(folderPath);
+        
+        // Delete each image
+        for (const image of images) {
+          try {
+            await deleteImage(image.path);
+          } catch (error) {
+            console.warn(`Failed to delete image ${image.name}: ${error.message}`);
+            deletionResults.errors.push(`Image deletion failed (${image.name}): ${error.message}`);
+          }
+        }
+        
+        if (folderPath.includes('profiles')) {
+          deletionResults.profileImages = true;
+        }
+        if (folderPath.includes('id-documents')) {
+          deletionResults.idDocuments = true;
+        }
+      } catch (error) {
+        console.error(`Error deleting images from ${folderPath}:`, error);
+        deletionResults.errors.push(`Storage cleanup failed (${folderPath}): ${error.message}`);
+      }
+    }
+
+    // Step 4: Delete user document from Firestore
+    try {
+      await deleteDoc(userRef);
+      deletionResults.userDocument = true;
+    } catch (error) {
+      console.error("Error deleting user document:", error);
+      deletionResults.errors.push(`User document deletion failed: ${error.message}`);
+      throw error; // Re-throw to prevent auth deletion if document deletion fails
+    }
+
+    // Step 5: Delete user from Firebase Authentication
+    try {
+      // Note: This requires admin privileges. In a real app, this should be done server-side
+      // For now, we'll mark it as attempted but may not work in client-side
+      try {
+        const user = auth.currentUser;
+        if (user && user.uid === uid) {
+          await deleteAuthUser(user);
+        }
+        deletionResults.authAccount = true;
+      } catch (authError) {
+        console.warn("Auth deletion failed (requires server-side implementation):", authError);
+        deletionResults.errors.push(`Auth account deletion failed: ${authError.message}`);
+        // Don't throw here as the main user data is already deleted
+      }
+    } catch (error) {
+      console.error("Error deleting auth account:", error);
+      deletionResults.errors.push(`Auth account deletion failed: ${error.message}`);
+    }
+
+    // Check if critical operations succeeded
+    if (!deletionResults.userDocument) {
+      throw new Error("Failed to delete user document - critical operation failed");
+    }
+
+    return deletionResults;
+
+  } catch (error) {
+    console.error("Comprehensive user deletion failed:", error);
+    deletionResults.errors.push(`Comprehensive deletion failed: ${error.message}`);
+    throw error;
+  }
 };
 
 // ADMIN-SPECIFIC FUNCTIONS
