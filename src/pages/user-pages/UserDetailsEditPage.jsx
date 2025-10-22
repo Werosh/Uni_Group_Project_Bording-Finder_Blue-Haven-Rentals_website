@@ -7,7 +7,7 @@ import { getInitials } from "../../utils/profileUtils";
 import Modal from "../../components/Modal";
 
 const UserDetailsEditPage = () => {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, refreshUserProfile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -105,6 +105,9 @@ const UserDetailsEditPage = () => {
         profileImageUrl,
         updatedAt: new Date().toISOString(),
       });
+
+      // Refresh user profile in AuthContext to update navbar
+      await refreshUserProfile();
 
       // Navigate back to profile page
       navigate("/user");

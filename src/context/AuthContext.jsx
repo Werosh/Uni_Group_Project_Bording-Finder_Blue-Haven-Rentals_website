@@ -12,27 +12,37 @@ export const AuthProvider = ({ children }) => {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Function to fetch user profile data
+  const fetchUserProfile = async (currentUser) => {
+    if (!currentUser) {
+      setUserProfile(null);
+      return;
+    }
+
+    try {
+      const profile = await getUserProfile(currentUser.uid);
+      setUserProfile(profile);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      setUserProfile(null);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-
-      if (currentUser) {
-        // Fetch user profile from Firestore to get role information
-        try {
-          const profile = await getUserProfile(currentUser.uid);
-          setUserProfile(profile);
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-          setUserProfile(null);
-        }
-      } else {
-        setUserProfile(null);
-      }
-
+      await fetchUserProfile(currentUser);
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
+
+  // Function to refresh user profile data (useful after profile updates)
+  const refreshUserProfile = async () => {
+    if (user) {
+      await fetchUserProfile(user);
+    }
+  };
 
   // Helper function to check if user has a specific role
   const hasRole = (role) => {
@@ -46,7 +56,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, userProfile, loading, hasRole, isAdmin }}
+      value={{ user, userProfile, loading, hasRole, isAdmin, refreshUserProfile }}
     >
       {!loading && children}
     </AuthContext.Provider>
