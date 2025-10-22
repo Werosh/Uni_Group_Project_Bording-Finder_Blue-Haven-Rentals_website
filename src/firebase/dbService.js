@@ -8,8 +8,6 @@ import {
   doc,
   setDoc,
   getDoc,
-  query,
-  where,
 } from "firebase/firestore";
 import { deleteUser as deleteAuthUser } from "firebase/auth";
 import { auth } from "./firebaseConfig";
@@ -393,13 +391,16 @@ export const getUserStatistics = async () => {
   const snapshot = await getDocs(colRef);
   const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
+  // Filter out admin users from total count
+  const nonAdminUsers = users.filter((u) => u.role !== "admin");
+
   const stats = {
-    totalUsers: users.length,
+    totalUsers: nonAdminUsers.length, // Exclude admins from total count
     boardingOwners: users.filter(
-      (u) => u.role === "boarding_owner" || u.userType === "boarding_owner"
+      (u) => u.role !== "admin" && (u.role === "boarding_owner" || u.userType === "boarding_owner")
     ).length,
     boardingFinders: users.filter(
-      (u) => u.role === "boarding_finder" || u.userType === "boarding_finder"
+      (u) => u.role !== "admin" && (u.role === "boarding_finder" || u.userType === "boarding_finder")
     ).length,
     admins: users.filter((u) => u.role === "admin").length,
   };

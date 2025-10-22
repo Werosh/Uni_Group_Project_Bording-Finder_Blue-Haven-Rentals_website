@@ -216,6 +216,46 @@ const AdminUsers = () => {
       // Update selected user
       setSelectedUser({ ...selectedUser, role: newRole, userType: newRole });
       
+      // Update stats based on role change
+      const oldRole = selectedUser.role || selectedUser.userType;
+      const isBecomingAdmin = newRole === "admin" && oldRole !== "admin";
+      const isLeavingAdmin = oldRole === "admin" && newRole !== "admin";
+      
+      if (isBecomingAdmin) {
+        // User is becoming admin - remove from total count and appropriate category
+        setStats(prevStats => ({
+          ...prevStats,
+          totalUsers: prevStats.totalUsers - 1,
+          admins: prevStats.admins + 1,
+          // Decrease the appropriate category (only if they were not already admin)
+          boardingOwners: (oldRole === "boarding_owner" || selectedUser.userType === "boarding_owner") && oldRole !== "admin" ? prevStats.boardingOwners - 1 : prevStats.boardingOwners,
+          boardingFinders: (oldRole === "boarding_finder" || selectedUser.userType === "boarding_finder") && oldRole !== "admin" ? prevStats.boardingFinders - 1 : prevStats.boardingFinders,
+        }));
+      } else if (isLeavingAdmin) {
+        // User is leaving admin role - add to total count and appropriate category
+        setStats(prevStats => ({
+          ...prevStats,
+          totalUsers: prevStats.totalUsers + 1,
+          admins: prevStats.admins - 1,
+          // Increase the appropriate category
+          boardingOwners: newRole === "boarding_owner" ? prevStats.boardingOwners + 1 : prevStats.boardingOwners,
+          boardingFinders: newRole === "boarding_finder" ? prevStats.boardingFinders + 1 : prevStats.boardingFinders,
+        }));
+      } else {
+        // Role change between non-admin roles - update specific categories
+        setStats(prevStats => ({
+          ...prevStats,
+          boardingOwners: 
+            (oldRole === "boarding_owner" || selectedUser.userType === "boarding_owner") && newRole !== "boarding_owner" ? prevStats.boardingOwners - 1 :
+            (oldRole !== "boarding_owner" && selectedUser.userType !== "boarding_owner") && newRole === "boarding_owner" ? prevStats.boardingOwners + 1 :
+            prevStats.boardingOwners,
+          boardingFinders:
+            (oldRole === "boarding_finder" || selectedUser.userType === "boarding_finder") && newRole !== "boarding_finder" ? prevStats.boardingFinders - 1 :
+            (oldRole !== "boarding_finder" && selectedUser.userType !== "boarding_finder") && newRole === "boarding_finder" ? prevStats.boardingFinders + 1 :
+            prevStats.boardingFinders,
+        }));
+      }
+      
       showAlert("success", "Role Updated", `User role changed to ${newRole}`);
     } catch (error) {
       console.error("Error updating user role:", error);
@@ -348,17 +388,20 @@ const AdminUsers = () => {
         // Update stats
         setStats({
           ...stats,
-          totalUsers: stats.totalUsers - 1,
+          // Only decrement totalUsers if the deleted user is not an admin
+          totalUsers: selectedUser.role !== "admin" ? stats.totalUsers - 1 : stats.totalUsers,
           boardingOwners:
-            selectedUser.role === "boarding_owner" ||
-            selectedUser.userType === "boarding_owner"
+            selectedUser.role !== "admin" && (selectedUser.role === "boarding_owner" ||
+            selectedUser.userType === "boarding_owner")
               ? stats.boardingOwners - 1
               : stats.boardingOwners,
           boardingFinders:
-            selectedUser.role === "boarding_finder" ||
-            selectedUser.userType === "boarding_finder"
+            selectedUser.role !== "admin" && (selectedUser.role === "boarding_finder" ||
+            selectedUser.userType === "boarding_finder")
               ? stats.boardingFinders - 1
               : stats.boardingFinders,
+          // Update admin count if an admin was deleted
+          admins: selectedUser.role === "admin" ? stats.admins - 1 : stats.admins,
         });
       }
 
