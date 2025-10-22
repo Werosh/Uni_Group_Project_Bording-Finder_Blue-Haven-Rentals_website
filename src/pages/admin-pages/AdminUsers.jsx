@@ -11,6 +11,28 @@ import {
   Trash2,
   Edit,
   Eye,
+  ArrowLeft,
+  ArrowRight,
+  X,
+  Shield,
+  FileText,
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  ExternalLink,
+  UserX,
+  UserCheck as UserCheckIcon,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  MapPin,
+  Phone,
+  Globe,
+  IdCard,
+  Camera,
+  Grid3X3,
+  List,
 } from "lucide-react";
 import RefreshButton from "../../components/RefreshButton";
 import {
@@ -18,7 +40,11 @@ import {
   getUserStatistics,
   deleteUser,
   updateUserDetails,
+  getPostsByOwner,
+  updateUserRole,
+  toggleUserStatus,
 } from "../../firebase/dbService";
+import { listImagesInFolder } from "../../firebase/storageService";
 import AdminLayout from "./AdminLayout";
 import Modal from "../../components/Modal";
 import {
@@ -64,6 +90,20 @@ const AdminUsers = () => {
     onClose: null,
   });
 
+  // Enhanced modal states
+  const [currentModalView, setCurrentModalView] = useState("details"); // "details", "posts", "id-documents"
+  const [userPosts, setUserPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [idDocuments, setIdDocuments] = useState([]);
+  const [loadingIdDocs, setLoadingIdDocs] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [currentImageSet, setCurrentImageSet] = useState([]);
+  const [imageModalTitle, setImageModalTitle] = useState("");
+  const [breadcrumbHistory, setBreadcrumbHistory] = useState([]);
+  const [userAccountStatus, setUserAccountStatus] = useState("active");
+  const [loadingStatusChange, setLoadingStatusChange] = useState(false);
+
   // Helper function to show alert modal
   const showAlert = (type, title, message, onClose = null) => {
     setAlertConfig({ type, title, message, onClose });
@@ -94,6 +134,113 @@ const AdminUsers = () => {
 
   const handleRefresh = () => {
     fetchUsers(true);
+  };
+
+  // Enhanced modal helper functions
+  const fetchUserPosts = async (userId) => {
+    try {
+      setLoadingPosts(true);
+      const posts = await getPostsByOwner(userId);
+      setUserPosts(posts);
+    } catch (error) {
+      console.error("Error fetching user posts:", error);
+      showAlert("error", "Error", "Failed to fetch user posts");
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  const fetchIdDocuments = async (userId) => {
+    try {
+      setLoadingIdDocs(true);
+      const idDocs = await listImagesInFolder(`id-documents/${userId}`);
+      setIdDocuments(idDocs);
+    } catch (error) {
+      console.error("Error fetching ID documents:", error);
+      showAlert("error", "Error", "Failed to fetch ID documents");
+    } finally {
+      setLoadingIdDocs(false);
+    }
+  };
+
+  const navigateToView = (view) => {
+    setBreadcrumbHistory([...breadcrumbHistory, { view: currentModalView, title: "User Details" }]);
+    setCurrentModalView(view);
+    
+    if (view === "posts" && selectedUser) {
+      fetchUserPosts(selectedUser.id);
+    } else if (view === "id-documents" && selectedUser) {
+      fetchIdDocuments(selectedUser.id);
+    }
+  };
+
+  const navigateBack = () => {
+    if (breadcrumbHistory.length > 0) {
+      const previous = breadcrumbHistory[breadcrumbHistory.length - 1];
+      setBreadcrumbHistory(breadcrumbHistory.slice(0, -1));
+      setCurrentModalView(previous.view);
+    } else {
+      setCurrentModalView("details");
+    }
+  };
+
+  const openImageModal = (images, title, startIndex = 0) => {
+    setCurrentImageSet(images);
+    setImageModalTitle(title);
+    setSelectedImageIndex(startIndex);
+    setShowImageModal(true);
+  };
+
+  const nextImage = () => {
+    setSelectedImageIndex((prev) => (prev + 1) % currentImageSet.length);
+  };
+
+  const prevImage = () => {
+    setSelectedImageIndex((prev) => (prev - 1 + currentImageSet.length) % currentImageSet.length);
+  };
+
+  const handleRoleChange = async (newRole) => {
+    if (!selectedUser) return;
+    
+    try {
+      setLoadingStatusChange(true);
+      await updateUserRole(selectedUser.id, newRole);
+      
+      // Update user in list
+      const updatedUsers = users.map((u) =>
+        u.id === selectedUser.id ? { ...u, role: newRole, userType: newRole } : u
+      );
+      setUsers(updatedUsers);
+      setFilteredUsers(updatedUsers);
+      
+      // Update selected user
+      setSelectedUser({ ...selectedUser, role: newRole, userType: newRole });
+      
+      showAlert("success", "Role Updated", `User role changed to ${newRole}`);
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      showAlert("error", "Update Failed", "Failed to update user role");
+    } finally {
+      setLoadingStatusChange(false);
+    }
+  };
+
+  const handleStatusToggle = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      setLoadingStatusChange(true);
+      const newStatus = userAccountStatus === "active" ? "inactive" : "active";
+      await toggleUserStatus(selectedUser.id, newStatus === "active");
+      
+      setUserAccountStatus(newStatus);
+      showAlert("success", "Status Updated", `User account ${newStatus}`);
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      showAlert("error", "Update Failed", "Failed to update user status");
+    } finally {
+      setLoadingStatusChange(false);
+    }
   };
 
 
@@ -278,6 +425,17 @@ const AdminUsers = () => {
     } finally {
       setEditingUserId(null);
     }
+  };
+
+  // Reset enhanced modal state when closing
+  const handleCloseDetailsModal = () => {
+    setShowDetailsModal(false);
+    setCurrentModalView("details");
+    setBreadcrumbHistory([]);
+    setUserPosts([]);
+    setIdDocuments([]);
+    setSelectedUser(null);
+    setUserAccountStatus("active");
   };
 
 
@@ -707,88 +865,365 @@ const AdminUsers = () => {
         </div>
       </Modal>
 
-      {/* User Details Modal */}
+      {/* Enhanced User Details Modal */}
       <Modal
         isOpen={showDetailsModal}
-        onClose={() => setShowDetailsModal(false)}
-        title="User Details"
-        size="lg"
+        onClose={handleCloseDetailsModal}
+        title={
+          <div className="flex items-center gap-3">
+            {currentModalView !== "details" && (
+              <button
+                onClick={navigateBack}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                title="Go Back"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+            )}
+            <div>
+              <h2 className="text-2xl font-bold text-[#263D5D]">
+                {currentModalView === "details" && "User Details"}
+                {currentModalView === "posts" && "User Posts"}
+                {currentModalView === "id-documents" && "ID Documents"}
+              </h2>
+              {breadcrumbHistory.length > 0 && (
+                <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                  <span>User Details</span>
+                  {breadcrumbHistory.map((item, index) => (
+                    <span key={index} className="flex items-center gap-1">
+                      <ChevronRight className="w-3 h-3" />
+                      {item.title}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        }
+        size="xl"
       >
         {selectedUser && (
           <div className="space-y-6">
-            <div className="flex items-center gap-4 pb-6 border-b">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#3ABBD0] to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-3xl overflow-hidden">
-                {hasProfileImage(selectedUser) ? (
-                  <img
-                    src={getProfileImageUrl(selectedUser)}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
+            {/* User Details View */}
+            {currentModalView === "details" && (
+              <>
+                {/* User Header */}
+                <div className="flex items-center gap-4 pb-6 border-b">
+                  <div className="w-20 h-20 bg-gradient-to-br from-[#3ABBD0] to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-3xl overflow-hidden">
+                    {hasProfileImage(selectedUser) ? (
+                      <img
+                        src={getProfileImageUrl(selectedUser)}
+                        alt="Profile"
+                        className="w-full h-full object-cover cursor-pointer"
+                        onClick={() => {
+                          const images = [{ url: getProfileImageUrl(selectedUser), name: "Profile Image" }];
+                          openImageModal(images, "Profile Image");
+                        }}
+                      />
+                    ) : (
+                      getInitials(selectedUser.firstName, selectedUser.lastName) || "?"
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-2xl font-bold text-[#263D5D]">
+                        {getDisplayName(selectedUser, "Unknown User")}
+                      </h3>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-semibold ${getUserTypeBadgeColor(
+                          selectedUser
+                        )}`}
+                      >
+                        {getUserTypeLabel(selectedUser)}
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          userAccountStatus === "active"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {userAccountStatus === "active" ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                    <p className="text-gray-600">User ID: {selectedUser.id}</p>
+                  </div>
+                </div>
+
+                {/* User Information Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-sm text-gray-500 mb-1 flex items-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      Email
+                    </label>
+                    <p className="text-[#263D5D] font-medium">{selectedUser.email}</p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-gray-500 mb-1 flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      Phone Number
+                    </label>
+                    <p className="text-[#263D5D] font-medium">
+                      {selectedUser.phoneNumber || "Not provided"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-gray-500 mb-1 flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      Date of Birth
+                    </label>
+                    <p className="text-[#263D5D] font-medium">
+                      {selectedUser.dateOfBirth || "Not provided"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-gray-500 mb-1 flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      Join Date
+                    </label>
+                    <p className="text-[#263D5D] font-medium">
+                      {new Date(selectedUser.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="text-sm text-gray-500 mb-1 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Address
+                    </label>
+                    <p className="text-[#263D5D] font-medium">
+                      {selectedUser.address || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-3 pt-6 border-t">
+                  <button
+                    onClick={() => navigateToView("posts")}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-semibold hover:bg-blue-100 transition-colors"
+                  >
+                    <FileText className="w-4 h-4" />
+                    View Posts ({userPosts.length || 0})
+                  </button>
+
+                  <button
+                    onClick={() => navigateToView("id-documents")}
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-xl font-semibold hover:bg-purple-100 transition-colors"
+                  >
+                    <IdCard className="w-4 h-4" />
+                    View ID Documents
+                  </button>
+
+                  <button
+                    onClick={() => handleEditUser(selectedUser)}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-xl font-semibold hover:bg-green-100 transition-colors"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit User
+                  </button>
+
+                  {/* Role Change Dropdown */}
+                  <div className="relative">
+                    <select
+                      value={selectedUser.role || selectedUser.userType || "boarding_finder"}
+                      onChange={(e) => handleRoleChange(e.target.value)}
+                      disabled={loadingStatusChange}
+                      className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3ABBD0] focus:border-transparent appearance-none bg-white pr-8"
+                    >
+                      <option value="boarding_finder">Boarding Finder</option>
+                      <option value="boarding_owner">Boarding Owner</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <Shield className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+
+                  {/* Status Toggle */}
+                  <button
+                    onClick={handleStatusToggle}
+                    disabled={loadingStatusChange}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-colors disabled:opacity-50 ${
+                      userAccountStatus === "active"
+                        ? "bg-red-50 text-red-600 hover:bg-red-100"
+                        : "bg-green-50 text-green-600 hover:bg-green-100"
+                    }`}
+                  >
+                    {userAccountStatus === "active" ? (
+                      <>
+                        <UserX className="w-4 h-4" />
+                        Deactivate
+                      </>
+                    ) : (
+                      <>
+                        <UserCheckIcon className="w-4 h-4" />
+                        Activate
+                      </>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* User Posts View */}
+            {currentModalView === "posts" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold text-[#263D5D]">
+                    User Posts ({userPosts.length})
+                  </h3>
+                </div>
+
+                {loadingPosts ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3ABBD0]"></div>
+                  </div>
+                ) : userPosts.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p>No posts found for this user</p>
+                  </div>
                 ) : (
-                  getInitials(selectedUser.firstName, selectedUser.lastName) ||
-                  "?"
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {userPosts.map((post) => (
+                      <div key={post.id} className="bg-gray-50 rounded-xl p-4 border">
+                        <div className="flex items-start justify-between mb-3">
+                          <h4 className="font-semibold text-[#263D5D] line-clamp-2">
+                            {post.title}
+                          </h4>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              post.status === "approved"
+                                ? "bg-green-100 text-green-700"
+                                : post.status === "pending"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {post.status}
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-2 text-sm text-gray-600 mb-3">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4" />
+                            <span>{post.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4" />
+                            <span>{post.category}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+
+                        {post.imageUrls && post.imageUrls.length > 0 && (
+                          <div className="flex gap-2 mb-3">
+                            {post.imageUrls.slice(0, 3).map((imageUrl, index) => (
+                              <img
+                                key={index}
+                                src={imageUrl}
+                                alt={`Post image ${index + 1}`}
+                                className="w-16 h-16 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => {
+                              const images = post.imageUrls.map((url, imageIndex) => ({
+                                url,
+                                name: `Post Image ${imageIndex + 1}`
+                              }));
+                              openImageModal(images, post.title, index);
+                            }}
+                              />
+                            ))}
+                            {post.imageUrls.length > 3 && (
+                              <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-xs text-gray-500">
+                                +{post.imageUrls.length - 3}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {post.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
-              <div>
-                <h3 className="text-2xl font-bold text-[#263D5D]">
-                  {getDisplayName(selectedUser, "Unknown User")}
-                </h3>
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mt-2 ${getUserTypeBadgeColor(
-                    selectedUser
-                  )}`}
-                >
-                  {getUserTypeLabel(selectedUser)}
-                </span>
-              </div>
-            </div>
+            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">
-                  Email
-                </label>
-                <p className="text-[#263D5D] font-medium">
-                  {selectedUser.email}
-                </p>
-              </div>
+            {/* ID Documents View */}
+            {currentModalView === "id-documents" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold text-[#263D5D]">
+                    ID Verification Documents
+                  </h3>
+                </div>
 
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">
-                  Phone Number
-                </label>
-                <p className="text-[#263D5D] font-medium">
-                  {selectedUser.phoneNumber || "Not provided"}
-                </p>
-              </div>
+                {loadingIdDocs ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3ABBD0]"></div>
+                  </div>
+                ) : idDocuments.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <IdCard className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p>No ID documents found for this user</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {idDocuments.map((doc, index) => (
+                      <div key={index} className="bg-gray-50 rounded-xl p-4 border">
+                        <div className="flex items-center gap-3 mb-3">
+                          <IdCard className="w-5 h-5 text-[#3ABBD0]" />
+                          <h4 className="font-semibold text-[#263D5D]">
+                            {doc.name.includes('front') ? 'ID Front' : 
+                             doc.name.includes('back') ? 'ID Back' : 
+                             'ID Document'}
+                          </h4>
+                        </div>
+                        
+                        <div className="relative group">
+                          <img
+                            src={doc.url}
+                            alt={doc.name}
+                            className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => {
+                              const images = idDocuments.map((d) => ({
+                                url: d.url,
+                                name: d.name
+                              }));
+                              openImageModal(images, "ID Documents", index);
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Camera className="w-8 h-8 text-white" />
+                            </div>
+                          </div>
+                        </div>
 
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">
-                  Date of Birth
-                </label>
-                <p className="text-[#263D5D] font-medium">
-                  {selectedUser.dateOfBirth || "Not provided"}
-                </p>
+                        <div className="mt-3 flex items-center justify-between">
+                          <span className="text-sm text-gray-500">{doc.name}</span>
+                          <button
+                            onClick={() => window.open(doc.url, '_blank')}
+                            className="p-1 hover:bg-gray-200 rounded transition-colors"
+                            title="Open in new tab"
+                          >
+                            <ExternalLink className="w-4 h-4 text-gray-500" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">
-                  Join Date
-                </label>
-                <p className="text-[#263D5D] font-medium">
-                  {new Date(selectedUser.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="text-sm text-gray-500 mb-1 block">
-                  Address
-                </label>
-                <p className="text-[#263D5D] font-medium">
-                  {selectedUser.address || "Not provided"}
-                </p>
-              </div>
-            </div>
+            )}
           </div>
         )}
       </Modal>
@@ -932,6 +1367,104 @@ const AdminUsers = () => {
             </button>
           </div>
         </div>
+      </Modal>
+
+      {/* Image Gallery Modal */}
+      <Modal
+        isOpen={showImageModal}
+        onClose={() => setShowImageModal(false)}
+        title={imageModalTitle}
+        size="xl"
+        showCloseButton={true}
+      >
+        {currentImageSet.length > 0 && (
+          <div className="space-y-4">
+            {/* Main Image Display */}
+            <div className="relative bg-gray-100 rounded-xl overflow-hidden">
+              <img
+                src={currentImageSet[selectedImageIndex]?.url}
+                alt={currentImageSet[selectedImageIndex]?.name || "Image"}
+                className="w-full h-96 object-contain"
+              />
+              
+              {/* Navigation Arrows */}
+              {currentImageSet.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Image Counter */}
+            {currentImageSet.length > 1 && (
+              <div className="text-center text-sm text-gray-600">
+                {selectedImageIndex + 1} of {currentImageSet.length}
+              </div>
+            )}
+
+            {/* Thumbnail Navigation */}
+            {currentImageSet.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {currentImageSet.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                      index === selectedImageIndex
+                        ? "border-[#3ABBD0]"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <img
+                      src={image.url}
+                      alt={image.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Image Actions */}
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="text-sm text-gray-600">
+                {currentImageSet[selectedImageIndex]?.name}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => window.open(currentImageSet[selectedImageIndex]?.url, '_blank')}
+                  className="flex items-center gap-2 px-3 py-2 bg-[#3ABBD0] text-white rounded-lg hover:bg-[#3ABBD0]/90 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Open in New Tab
+                </button>
+                <button
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = currentImageSet[selectedImageIndex]?.url;
+                    link.download = currentImageSet[selectedImageIndex]?.name || 'image';
+                    link.click();
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {/* Alert Modal */}
