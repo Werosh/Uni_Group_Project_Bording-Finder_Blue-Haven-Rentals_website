@@ -22,6 +22,10 @@ export const SignupProvider = ({ children }) => {
     password: "",
     confirmPassword: "",
 
+    // Step 2.5 - Email Verification
+    emailVerified: false,
+    verificationCode: "",
+
     // Step 3 - Account Details (boarding_owner only)
     username: "",
     description: "",
@@ -72,10 +76,10 @@ export const SignupProvider = ({ children }) => {
 
   const nextStep = () => {
     // For boarding_finder: skip steps 3-6 (account details, location, ID verification, profile image)
-    if (formData.userType === "boarding_finder" && currentStep === 2) {
-      // After step 2 (basic info), go directly to completion
-      setCurrentStep(7); // Step 7 will be the completion page
-    } else if (currentStep < 7) {
+    if (formData.userType === "boarding_finder" && currentStep === 3) {
+      // After step 3 (email verification), go directly to completion
+      setCurrentStep(8); // Step 8 will be the completion page
+    } else if (currentStep < 8) {
       setCurrentStep((prev) => prev + 1);
     }
   };
@@ -87,7 +91,7 @@ export const SignupProvider = ({ children }) => {
   };
 
   const goToStep = (step) => {
-    if (step >= 1 && step <= 7) {
+    if (step >= 1 && step <= 8) {
       setCurrentStep(step);
     }
   };
@@ -99,6 +103,8 @@ export const SignupProvider = ({ children }) => {
       email: "",
       password: "",
       confirmPassword: "",
+      emailVerified: false,
+      verificationCode: "",
       username: "",
       description: "",
       phone: "",
