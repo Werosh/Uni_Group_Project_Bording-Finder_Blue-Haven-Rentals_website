@@ -54,6 +54,21 @@ service cloud.firestore {
       allow update, delete: if isAuthenticated() && 
         (resource.data.ownerId == request.auth.uid || isAdmin());
     }
+    
+    // Reviews collection - for user reviews on posts
+    match /reviews/{reviewId} {
+      // Anyone can read reviews (public reviews)
+      allow read: if true;
+      
+      // Only boarding_finder users can create reviews
+      allow create: if isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'boarding_finder';
+      
+      // Only review author or admin can update/delete reviews
+      allow update, delete: if isAuthenticated() && 
+        (resource.data.reviewerId == request.auth.uid || isAdmin());
+    }
   }
 }
 

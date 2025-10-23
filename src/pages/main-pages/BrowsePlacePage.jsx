@@ -90,6 +90,7 @@ const BrowsePlacePage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageLoadErrors, setImageLoadErrors] = useState({});
   const [postImageUrls, setPostImageUrls] = useState({});
+  const [highlyRatedPosts, setHighlyRatedPosts] = useState([]);
   const postsPerPage = 12;
 
   // Function to match search query to districts
@@ -262,6 +263,20 @@ const BrowsePlacePage = () => {
           (post) => post.status === "approved"
         );
         setPosts(approvedPosts);
+        
+        // Get highly rated posts (posts with reviews, sorted by rating and review count)
+        const postsWithReviews = approvedPosts.filter(post => 
+          post.reviewCount && post.reviewCount > 0
+        );
+        const sortedByRating = postsWithReviews.sort((a, b) => {
+          // First sort by average rating (descending)
+          if (b.averageRating !== a.averageRating) {
+            return (b.averageRating || 0) - (a.averageRating || 0);
+          }
+          // Then by review count (descending)
+          return (b.reviewCount || 0) - (a.reviewCount || 0);
+        });
+        setHighlyRatedPosts(sortedByRating.slice(0, 6)); // Show top 6
       } catch (error) {
         console.error("Error fetching posts:", error);
       } finally {
@@ -683,6 +698,73 @@ const BrowsePlacePage = () => {
               ? "Loading..."
               : `Showing ${paginatedPosts.length} of ${filteredPosts.length} properties`}
           </div>
+
+          {/* Highly Rated Section */}
+          {!loading && highlyRatedPosts.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-[#263D5D] flex items-center gap-2">
+                  <svg className="w-6 h-6 text-[#3ABBD0]" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  Recent & Highly Rated
+                </h2>
+                <span className="text-sm text-gray-500">
+                  Top rated properties with reviews
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {highlyRatedPosts.map((post, index) => (
+                  <div
+                    key={post.id}
+                    onClick={() => openModal(posts.findIndex(p => p.id === post.id))}
+                    className="group bg-white/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/40 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                  >
+                    <div className="relative h-48 overflow-hidden bg-gray-200">
+                      <img
+                        src={getImageSrc(post)}
+                        alt={post.title}
+                        onError={() => handleImageError(post.id)}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      {post.imageUrls && post.imageUrls.length > 1 && (
+                        <div className="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-semibold backdrop-blur-sm">
+                          {post.imageUrls.length} photos
+                        </div>
+                      )}
+                      <div className="absolute top-3 right-3 bg-[#3ABBD0] text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        Rs. {post.rent?.toLocaleString()}
+                      </div>
+                      {/* Rating Badge */}
+                      <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-[#263D5D] px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+                        <svg className="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        {post.averageRating?.toFixed(1) || '0.0'} ({post.reviewCount || 0} reviews)
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-[#263D5D] font-semibold text-lg mb-2 line-clamp-2">
+                        {post.title}
+                      </h3>
+                      <p className="text-[#263D5D]/70 text-sm font-poppins mb-1">
+                        {post.location}
+                      </p>
+                      <p className="text-[#3ABBD0] text-xs font-poppins">
+                        {post.category}
+                      </p>
+                      {post.forWhom && (
+                        <p className="text-[#263D5D]/60 text-xs font-poppins mt-1">
+                          For {post.forWhom}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Posts Grid */}
           {loading ? (

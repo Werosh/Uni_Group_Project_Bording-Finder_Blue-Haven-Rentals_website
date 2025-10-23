@@ -5,9 +5,11 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    host: true, // 👈 listen on all addresses (0.0.0.0)
+    port: 5173,
+
+    host: true, 
     allowedHosts: [
-      ".trycloudflare.com", // 👈 allow any Cloudflare tunnel domain
+      ".trycloudflare.com", 
     ],
   },
 });

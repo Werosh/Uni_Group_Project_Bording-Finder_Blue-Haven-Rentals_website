@@ -12,7 +12,10 @@ import {
   ShieldAlert,
   PlusCircle,
   Search,
+  Star,
+  MessageSquare,
 } from "lucide-react";
+import { getPostStatistics, getUserStatistics, getAllReviews } from "../../firebase/dbService";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -22,17 +25,46 @@ const AdminDashboard = () => {
     totalListings: 0,
     boardingOwners: 0,
     typicalUsers: 0,
+    totalReviews: 0,
+    averageRating: 0,
   });
 
   useEffect(() => {
-    // In a real application, you would fetch these stats from your database
-    // For now, we'll use placeholder values
-    setStats({
-      totalUsers: 150,
-      totalListings: 45,
-      boardingOwners: 30,
-      typicalUsers: 120,
-    });
+    const fetchStats = async () => {
+      try {
+        const [userStats, postStats, reviews] = await Promise.all([
+          getUserStatistics(),
+          getPostStatistics(),
+          getAllReviews(),
+        ]);
+
+        const averageRating = reviews.length > 0 
+          ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
+          : 0;
+
+        setStats({
+          totalUsers: userStats.totalUsers,
+          totalListings: postStats.totalPosts,
+          boardingOwners: userStats.boardingOwners,
+          typicalUsers: userStats.boardingFinders,
+          totalReviews: reviews.length,
+          averageRating: Math.round(averageRating * 10) / 10,
+        });
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+        // Fallback to placeholder values
+        setStats({
+          totalUsers: 150,
+          totalListings: 45,
+          boardingOwners: 30,
+          typicalUsers: 120,
+          totalReviews: 0,
+          averageRating: 0,
+        });
+      }
+    };
+
+    fetchStats();
   }, []);
 
   return (
@@ -50,7 +82,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
           {/* Total Users */}
           <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-[#3ABBD0]/30 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
@@ -128,6 +160,46 @@ const AdminDashboard = () => {
               <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
               <span className="text-green-500">+15%</span>
               <span className="text-gray-500 ml-1">from last month</span>
+            </div>
+          </div>
+
+          {/* Total Reviews */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-yellow-300/30 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm mb-1">Total Reviews</p>
+                <h3 className="text-3xl font-bold text-[#263D5D]">
+                  {stats.totalReviews}
+                </h3>
+              </div>
+              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-yellow-600" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <Star className="w-4 h-4 text-yellow-500 mr-1" />
+              <span className="text-yellow-500">{stats.averageRating}/5.0</span>
+              <span className="text-gray-500 ml-1">avg rating</span>
+            </div>
+          </div>
+
+          {/* Average Rating */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-orange-300/30 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm mb-1">Avg Rating</p>
+                <h3 className="text-3xl font-bold text-[#263D5D]">
+                  {stats.averageRating}
+                </h3>
+              </div>
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <Star className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <Star className="w-4 h-4 text-yellow-400 mr-1" />
+              <span className="text-yellow-500">★★★★★</span>
+              <span className="text-gray-500 ml-1">platform rating</span>
             </div>
           </div>
         </div>

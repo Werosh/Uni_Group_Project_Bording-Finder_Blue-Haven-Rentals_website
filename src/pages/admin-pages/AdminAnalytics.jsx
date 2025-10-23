@@ -21,7 +21,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { getAnalyticsData, getPostStatistics } from "../../firebase/dbService";
+import { getAnalyticsData, getPostStatistics, getAllReviews } from "../../firebase/dbService";
 import AdminLayout from "./AdminLayout";
 
 const COLORS = [
@@ -50,6 +50,11 @@ const AdminAnalytics = () => {
     approvedPosts: 0,
     declinedPosts: 0,
   });
+  const [reviewStats, setReviewStats] = useState({
+    totalReviews: 0,
+    averageRating: 0,
+    reviewsByRating: [],
+  });
 
   useEffect(() => {
     fetchAnalytics();
@@ -63,12 +68,31 @@ const AdminAnalytics = () => {
         setLoading(true);
       }
 
-      const [analytics, stats] = await Promise.all([
+      const [analytics, stats, reviews] = await Promise.all([
         getAnalyticsData(),
         getPostStatistics(),
+        getAllReviews(),
       ]);
+      
+      // Calculate review statistics
+      const totalReviews = reviews.length;
+      const averageRating = totalReviews > 0 
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
+        : 0;
+      
+      // Group reviews by rating
+      const reviewsByRating = [1, 2, 3, 4, 5].map(rating => ({
+        rating,
+        count: reviews.filter(review => review.rating === rating).length,
+      }));
+
       setAnalyticsData(analytics);
       setPostStats(stats);
+      setReviewStats({
+        totalReviews,
+        averageRating: Math.round(averageRating * 10) / 10,
+        reviewsByRating,
+      });
     } catch (error) {
       console.error("Error fetching analytics:", error);
     } finally {
@@ -136,7 +160,7 @@ const AdminAnalytics = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
         <div className="bg-gradient-to-br from-[#3ABBD0] to-cyan-400 rounded-2xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between mb-2">
             <p className="text-white/80 text-sm">Total Posts</p>
@@ -168,10 +192,26 @@ const AdminAnalytics = () => {
           </div>
           <h3 className="text-4xl font-bold">{postStats.declinedPosts}</h3>
         </div>
+
+        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-white/80 text-sm">Total Reviews</p>
+            <Activity className="w-8 h-8 text-white/80" />
+          </div>
+          <h3 className="text-4xl font-bold">{reviewStats.totalReviews}</h3>
+        </div>
+
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-white/80 text-sm">Avg Rating</p>
+            <Activity className="w-8 h-8 text-white/80" />
+          </div>
+          <h3 className="text-4xl font-bold">{reviewStats.averageRating}</h3>
+        </div>
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* User Growth Over Time */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-[#263D5D] mb-4 flex items-center gap-2">
@@ -258,6 +298,36 @@ const AdminAnalytics = () => {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Review Distribution */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-xl font-bold text-[#263D5D] mb-4 flex items-center gap-2">
+            <PieChartIcon className="w-5 h-5" />
+            Review Distribution
+          </h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={reviewStats.reviewsByRating}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis 
+                dataKey="rating" 
+                stroke="#666"
+                tick={{ fontSize: 12 }}
+                tickFormatter={(value) => `${value}★`}
+              />
+              <YAxis stroke="#666" />
+              <Tooltip 
+                content={<CustomTooltip />}
+                formatter={(value, name) => [value, 'Reviews']}
+              />
+              <Bar 
+                dataKey="count" 
+                name="Reviews" 
+                radius={[8, 8, 0, 0]}
+                fill="#3ABBD0"
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

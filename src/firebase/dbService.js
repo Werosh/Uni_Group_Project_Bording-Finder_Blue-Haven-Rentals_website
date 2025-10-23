@@ -535,3 +535,114 @@ export const toggleUserStatus = async (userId, isActive) => {
   });
   return { id: userId, inactive: !isActive };
 };
+
+// REVIEW OPERATIONS
+
+// Create a new review
+export const createReview = async (reviewData) => {
+  const colRef = collection(db, "reviews");
+  const docRef = await addDoc(colRef, {
+    ...reviewData,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+  return docRef;
+};
+
+// Get reviews by post ID
+export const getReviewsByPost = async (postId) => {
+  const colRef = collection(db, "reviews");
+  const snapshot = await getDocs(colRef);
+  const reviews = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return reviews.filter((review) => review.postId === postId);
+};
+
+// Get reviews by user ID (reviews written by user)
+export const getReviewsByUser = async (userId) => {
+  const colRef = collection(db, "reviews");
+  const snapshot = await getDocs(colRef);
+  const reviews = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return reviews.filter((review) => review.reviewerId === userId);
+};
+
+// Get reviews received by user (reviews on their posts)
+export const getReviewsReceivedByUser = async (userId) => {
+  // First get all posts by the user
+  const userPosts = await getPostsByOwner(userId);
+  const postIds = userPosts.map(post => post.id);
+  
+  // Then get all reviews for those posts
+  const colRef = collection(db, "reviews");
+  const snapshot = await getDocs(colRef);
+  const reviews = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return reviews.filter((review) => postIds.includes(review.postId));
+};
+
+// Update a review
+export const updateReview = async (reviewId, updatedData) => {
+  const docRef = doc(db, "reviews", reviewId);
+  await updateDoc(docRef, {
+    ...updatedData,
+    updatedAt: new Date().toISOString(),
+  });
+  return { id: reviewId, ...updatedData };
+};
+
+// Delete a review
+export const deleteReview = async (reviewId) => {
+  const docRef = doc(db, "reviews", reviewId);
+  return await deleteDoc(docRef);
+};
+
+// Get all reviews (admin function)
+export const getAllReviews = async () => {
+  const colRef = collection(db, "reviews");
+  const snapshot = await getDocs(colRef);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+// Update post review statistics
+export const updatePostReviewStats = async (postId) => {
+  try {
+    const reviews = await getReviewsByPost(postId);
+    const reviewCount = reviews.length;
+    const averageRating = reviewCount > 0 
+      ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount 
+      : 0;
+
+    const postRef = doc(db, "posts", postId);
+    await updateDoc(postRef, {
+      reviewCount: reviewCount,
+      averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
+      updatedAt: new Date().toISOString(),
+    });
+
+    return { reviewCount, averageRating };
+  } catch (error) {
+    console.error("Error updating post review stats:", error);
+    throw error;
+  }
+};
+
+// Update user review statistics
+export const updateUserReviewStats = async (userId) => {
+  try {
+    const reviewsReceived = await getReviewsReceivedByUser(userId);
+    const totalReviews = reviewsReceived.length;
+    const averageRating = totalReviews > 0 
+      ? reviewsReceived.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
+      : 0;
+
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      totalReviews: totalReviews,
+      averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
+      updatedAt: new Date().toISOString(),
+    });
+
+    return { totalReviews, averageRating };
+  } catch (error) {
+    console.error("Error updating user review stats:", error);
+    throw error;
+  }
+};
