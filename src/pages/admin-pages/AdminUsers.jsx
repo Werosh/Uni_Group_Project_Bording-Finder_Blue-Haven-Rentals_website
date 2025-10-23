@@ -154,6 +154,17 @@ const AdminUsers = () => {
     }
   };
 
+  // Fetch user posts count when user details modal opens
+  const fetchUserPostsCount = async (userId) => {
+    try {
+      const posts = await getPostsByOwner(userId);
+      setUserPosts(posts);
+    } catch (error) {
+      console.error("Error fetching user posts count:", error);
+      // Don't show alert for this as it's just for count display
+    }
+  };
+
   const fetchIdDocuments = async (userId) => {
     try {
       setLoadingIdDocs(true);
@@ -857,6 +868,7 @@ const AdminUsers = () => {
                           onClick={() => {
                             setSelectedUser(user);
                             setShowDetailsModal(true);
+                            fetchUserPostsCount(user.id);
                           }}
                           className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
                           title="View Details"
@@ -940,6 +952,7 @@ const AdminUsers = () => {
                     onClick={() => {
                       setSelectedUser(user);
                       setShowDetailsModal(true);
+                      fetchUserPostsCount(user.id);
                     }}
                     className="flex-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-semibold hover:bg-blue-100 transition-colors"
                   >
@@ -1700,7 +1713,7 @@ const AdminUsers = () => {
             {/* Main Image Display with Zoom */}
             <div 
               className="relative bg-gray-100 rounded-xl overflow-hidden"
-              style={{ height: '70vh', minHeight: '400px' }}
+              style={{ height: '300px', }}
             >
               <div
                 className="w-full h-full flex items-center justify-center overflow-hidden"
