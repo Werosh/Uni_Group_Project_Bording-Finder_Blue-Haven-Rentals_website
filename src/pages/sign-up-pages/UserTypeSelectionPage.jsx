@@ -44,12 +44,12 @@ const UserTypeSelectionPage = () => {
                 Join <br />
                 <span className="text-[#3ABBD0] relative">Us Today</span>
               </h1>
-              <p className="font-hugiller text-lg md:text-xl text-[#303435] mb-4 opacity-80">
+              <p className="font-montserrat text-lg md:text-xl text-[#303435] mb-4 opacity-80">
                 Choose your account type to get started
               </p>
               <div className="flex items-center justify-center lg:justify-start gap-3 bg-[#303435]/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-lg text-sm sm:text-base border border-white/20">
                 <BsStars className="w-[25px] sm:w-[30px] text-[#3ABBD0] animate-spin-slow" />
-                <span className="font-hugiller font-thin whitespace-nowrap truncate">
+                <span className="font-montserrat font-thin whitespace-nowrap truncate">
                   Discover quality, comfort, and convenience with us.
                 </span>
               </div>
@@ -65,7 +65,7 @@ const UserTypeSelectionPage = () => {
               <h2 className="text-2xl font-bold text-[#263D5D] mb-2 text-center">
                 Select Your Account Type
               </h2>
-              <p className="text-gray-600 text-center mb-8">
+              <p className="text-gray-600 text-center mb-8 font-montserrat">
                 Choose how you want to use our platform
               </p>
 

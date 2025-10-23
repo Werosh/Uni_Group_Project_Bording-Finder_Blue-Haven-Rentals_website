@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Users,
   Building2,
@@ -100,6 +100,10 @@ const AdminUsers = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [currentImageSet, setCurrentImageSet] = useState([]);
   const [imageModalTitle, setImageModalTitle] = useState("");
+  const [imageZoom, setImageZoom] = useState(1);
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [breadcrumbHistory, setBreadcrumbHistory] = useState([]);
   const [userAccountStatus, setUserAccountStatus] = useState("active");
   const [loadingStatusChange, setLoadingStatusChange] = useState(false);
@@ -153,11 +157,64 @@ const AdminUsers = () => {
   const fetchIdDocuments = async (userId) => {
     try {
       setLoadingIdDocs(true);
+      setIdDocuments([]); // Clear previous documents
+      
       const idDocs = await listImagesInFolder(`id-documents/${userId}`);
-      setIdDocuments(idDocs);
+      
+      if (idDocs.length === 0) {
+        showAlert("info", "No ID Documents", "No ID verification documents found for this user");
+        setIdDocuments([]);
+        return;
+      }
+      
+      // Categorize documents by type
+      const categorizedDocs = idDocs.map(doc => {
+        const name = doc.name.toLowerCase();
+        let category = 'ID Document';
+        let type = 'other';
+        
+        if (name.includes('front')) {
+          category = 'ID Front';
+          type = 'front';
+        } else if (name.includes('back')) {
+          category = 'ID Back';
+          type = 'back';
+        } else if (name.includes('passport')) {
+          category = 'Passport';
+          type = 'passport';
+        } else if (name.includes('license')) {
+          category = 'Driver License';
+          type = 'license';
+        }
+        
+        return {
+          ...doc,
+          category,
+          type,
+          displayName: category
+        };
+      });
+      
+      setIdDocuments(categorizedDocs);
+      
+      // Show success message with document count
+      showAlert("success", "ID Documents Loaded", `Found ${categorizedDocs.length} ID verification document(s)`);
+      
     } catch (error) {
       console.error("Error fetching ID documents:", error);
-      showAlert("error", "Error", "Failed to fetch ID documents");
+      
+      // More specific error handling
+      if (error.message.includes('not found') || error.message.includes('does not exist')) {
+        showAlert("info", "No ID Documents", "No ID verification documents found for this user");
+      } else if (error.message.includes('permission')) {
+        showAlert("error", "Access Denied", "You don't have permission to view ID documents");
+      } else if (error.message.includes('network') || error.message.includes('timeout')) {
+        showAlert("error", "Network Error", "Failed to load ID documents due to network issues. Please try again.");
+      } else {
+        showAlert("error", "Error", `Failed to fetch ID documents: ${error.message}`);
+      }
+      
+      setIdDocuments([]);
     } finally {
       setLoadingIdDocs(false);
     }
@@ -188,16 +245,97 @@ const AdminUsers = () => {
     setCurrentImageSet(images);
     setImageModalTitle(title);
     setSelectedImageIndex(startIndex);
+    setImageZoom(1);
+    setImagePosition({ x: 0, y: 0 });
     setShowImageModal(true);
   };
 
-  const nextImage = () => {
+  const nextImage = useCallback(() => {
     setSelectedImageIndex((prev) => (prev + 1) % currentImageSet.length);
+    setImageZoom(1);
+    setImagePosition({ x: 0, y: 0 });
+  }, [currentImageSet.length]);
+
+  const prevImage = useCallback(() => {
+    setSelectedImageIndex((prev) => (prev - 1 + currentImageSet.length) % currentImageSet.length);
+    setImageZoom(1);
+    setImagePosition({ x: 0, y: 0 });
+  }, [currentImageSet.length]);
+
+  const handleZoomIn = useCallback(() => {
+    setImageZoom(prev => Math.min(prev * 1.5, 5));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setImageZoom(prev => Math.max(prev / 1.5, 0.5));
+  }, []);
+
+  const handleResetZoom = useCallback(() => {
+    setImageZoom(1);
+    setImagePosition({ x: 0, y: 0 });
+  }, []);
+
+  const handleImageMouseDown = (e) => {
+    if (imageZoom > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - imagePosition.x, y: e.clientY - imagePosition.y });
+    }
   };
 
-  const prevImage = () => {
-    setSelectedImageIndex((prev) => (prev - 1 + currentImageSet.length) % currentImageSet.length);
+  const handleImageMouseMove = (e) => {
+    if (isDragging && imageZoom > 1) {
+      setImagePosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
   };
+
+  const handleImageMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleImageWheel = (e) => {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      handleZoomIn();
+    } else {
+      handleZoomOut();
+    }
+  };
+
+  const handleKeyDown = useCallback((e) => {
+    if (!showImageModal) return;
+    
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        prevImage();
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        nextImage();
+        break;
+      case 'Escape':
+        setShowImageModal(false);
+        break;
+      case '+':
+      case '=':
+        e.preventDefault();
+        handleZoomIn();
+        break;
+      case '-':
+        e.preventDefault();
+        handleZoomOut();
+        break;
+      case '0':
+        e.preventDefault();
+        handleResetZoom();
+        break;
+      default:
+        break;
+    }
+  }, [showImageModal, prevImage, nextImage, handleZoomIn, handleZoomOut, handleResetZoom]);
 
   const handleRoleChange = async (newRole) => {
     if (!selectedUser) return;
@@ -287,6 +425,14 @@ const AdminUsers = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  // Keyboard event listener for image modal
+  useEffect(() => {
+    if (showImageModal) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [showImageModal, handleKeyDown]);
 
   useEffect(() => {
     if (users.length > 0) {
@@ -1202,67 +1348,153 @@ const AdminUsers = () => {
 
             {/* ID Documents View */}
             {currentModalView === "id-documents" && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-[#263D5D]">
-                    ID Verification Documents
-                  </h3>
+                  <div>
+                    <h3 className="text-xl font-semibold text-[#263D5D]">
+                      ID Verification Documents
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {idDocuments.length > 0 ? `${idDocuments.length} document(s) found` : 'No documents available'}
+                    </p>
+                  </div>
+                  {idDocuments.length > 0 && (
+                    <button
+                      onClick={() => {
+                        const images = idDocuments.map((d) => ({
+                          url: d.url,
+                          name: d.displayName || d.name
+                        }));
+                        openImageModal(images, "All ID Documents", 0);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-[#3ABBD0] text-white rounded-xl font-semibold hover:bg-[#3ABBD0]/90 transition-colors"
+                    >
+                      <Grid3X3 className="w-4 h-4" />
+                      View All
+                    </button>
+                  )}
                 </div>
 
                 {loadingIdDocs ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3ABBD0]"></div>
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="relative">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3ABBD0]"></div>
+                      <div className="absolute inset-0 animate-ping rounded-full h-12 w-12 border border-[#3ABBD0]/20"></div>
+                    </div>
+                    <p className="text-gray-600 mt-4 font-medium">Loading ID documents...</p>
+                    <p className="text-sm text-gray-500 mt-1">Fetching verification images from storage</p>
                   </div>
                 ) : idDocuments.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <IdCard className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p>No ID documents found for this user</p>
+                  <div className="text-center py-12 text-gray-500">
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <IdCard className="w-10 h-10 text-gray-300" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-gray-700 mb-2">No ID Documents Found</h4>
+                    <p className="text-gray-500">This user hasn't uploaded any ID verification documents yet.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {idDocuments.map((doc, index) => (
-                      <div key={index} className="bg-gray-50 rounded-xl p-4 border">
-                        <div className="flex items-center gap-3 mb-3">
-                          <IdCard className="w-5 h-5 text-[#3ABBD0]" />
-                          <h4 className="font-semibold text-[#263D5D]">
-                            {doc.name.includes('front') ? 'ID Front' : 
-                             doc.name.includes('back') ? 'ID Back' : 
-                             'ID Document'}
-                          </h4>
-                        </div>
-                        
-                        <div className="relative group">
-                          <img
-                            src={doc.url}
-                            alt={doc.name}
-                            className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => {
-                              const images = idDocuments.map((d) => ({
-                                url: d.url,
-                                name: d.name
-                              }));
-                              openImageModal(images, "ID Documents", index);
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Camera className="w-8 h-8 text-white" />
+                  <div className="space-y-6">
+                    {/* Document Categories */}
+                    {(() => {
+                      const categories = {};
+                      idDocuments.forEach(doc => {
+                        if (!categories[doc.type]) {
+                          categories[doc.type] = [];
+                        }
+                        categories[doc.type].push(doc);
+                      });
+
+                      return Object.entries(categories).map(([type, docs]) => (
+                        <div key={type} className="space-y-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-[#3ABBD0]/10 rounded-full flex items-center justify-center">
+                              {type === 'front' && <IdCard className="w-4 h-4 text-[#3ABBD0]" />}
+                              {type === 'back' && <IdCard className="w-4 h-4 text-[#3ABBD0]" />}
+                              {type === 'passport' && <IdCard className="w-4 h-4 text-[#3ABBD0]" />}
+                              {type === 'license' && <IdCard className="w-4 h-4 text-[#3ABBD0]" />}
+                              {type === 'other' && <IdCard className="w-4 h-4 text-[#3ABBD0]" />}
                             </div>
+                            <h4 className="text-lg font-semibold text-[#263D5D]">
+                              {docs[0].category}
+                              {docs.length > 1 && ` (${docs.length})`}
+                            </h4>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {docs.map((doc, index) => (
+                              <div key={`${type}-${index}`} className="bg-white rounded-xl p-4 border-2 border-gray-100 hover:border-[#3ABBD0]/30 transition-all duration-300 shadow-sm hover:shadow-lg transform hover:-translate-y-1">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full ${
+                                      type === 'front' ? 'bg-green-500' :
+                                      type === 'back' ? 'bg-blue-500' :
+                                      type === 'passport' ? 'bg-purple-500' :
+                                      type === 'license' ? 'bg-orange-500' :
+                                      'bg-gray-500'
+                                    }`}></div>
+                                    <span className="text-sm font-medium text-gray-700">
+                                      {doc.displayName}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      onClick={() => window.open(doc.url, '_blank')}
+                                      className="p-1 hover:bg-gray-100 rounded transition-colors"
+                                      title="Open in new tab"
+                                    >
+                                      <ExternalLink className="w-4 h-4 text-gray-400" />
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        const link = document.createElement('a');
+                                        link.href = doc.url;
+                                        link.download = doc.name;
+                                        link.click();
+                                      }}
+                                      className="p-1 hover:bg-gray-100 rounded transition-colors"
+                                      title="Download"
+                                    >
+                                      <Download className="w-4 h-4 text-gray-400" />
+                                    </button>
+                                  </div>
+                                </div>
+                                
+                                <div className="relative group">
+                                  <img
+                                    src={doc.url}
+                                    alt={doc.displayName}
+                                    className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-all duration-300"
+                                    onClick={() => {
+                                      const images = idDocuments.map((d) => ({
+                                        url: d.url,
+                                        name: d.displayName || d.name
+                                      }));
+                                      openImageModal(images, "ID Documents", idDocuments.indexOf(doc));
+                                    }}
+                                    onError={(e) => {
+                                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNzVMMTI1IDEwMEgxMDBWNzVaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0xMDAgMTI1TDc1IDEwMEgxMDBWMTI1WiIgZmlsbD0iIzlDQTNBRiIvPgo8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9IjEwIiBmaWxsPSIjOUNBM0FGIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOUNBM0FGIiBmb250LXNpemU9IjEyIj5JbWFnZSBFcnJvcjwvdGV4dD4KPC9zdmc+';
+                                      e.target.alt = 'Image failed to load';
+                                    }}
+                                  />
+                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg flex items-center justify-center">
+                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                      <Camera className="w-8 h-8 text-white drop-shadow-lg" />
+                                    </div>
+                                  </div>
+                                  <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    Click to view
+                                  </div>
+                                </div>
+
+                                <div className="mt-3 text-xs text-gray-500 truncate" title={doc.name}>
+                                  {doc.name}
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
-
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="text-sm text-gray-500">{doc.name}</span>
-                          <button
-                            onClick={() => window.open(doc.url, '_blank')}
-                            className="p-1 hover:bg-gray-200 rounded transition-colors"
-                            title="Open in new tab"
-                          >
-                            <ExternalLink className="w-4 h-4 text-gray-500" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      ));
+                    })()}
                   </div>
                 )}
               </div>
@@ -1412,82 +1644,164 @@ const AdminUsers = () => {
         </div>
       </Modal>
 
-      {/* Image Gallery Modal */}
+      {/* Enhanced Image Gallery Modal */}
       <Modal
         isOpen={showImageModal}
-        onClose={() => setShowImageModal(false)}
-        title={imageModalTitle}
+        onClose={() => {
+          setShowImageModal(false);
+          setImageZoom(1);
+          setImagePosition({ x: 0, y: 0 });
+        }}
+        title={
+          <div className="flex items-center justify-between w-full">
+            <div>
+              <h2 className="text-xl font-bold text-[#263D5D]">{imageModalTitle}</h2>
+              {currentImageSet.length > 1 && (
+                <p className="text-sm text-gray-500">
+                  {selectedImageIndex + 1} of {currentImageSet.length}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleZoomOut}
+                disabled={imageZoom <= 0.5}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                title="Zoom Out (-)"
+              >
+                <span className="text-lg font-bold">-</span>
+              </button>
+              <span className="text-sm text-gray-600 min-w-[3rem] text-center">
+                {Math.round(imageZoom * 100)}%
+              </span>
+              <button
+                onClick={handleZoomIn}
+                disabled={imageZoom >= 5}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                title="Zoom In (+)"
+              >
+                <span className="text-lg font-bold">+</span>
+              </button>
+              <button
+                onClick={handleResetZoom}
+                className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                title="Reset Zoom (0)"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        }
         size="xl"
         showCloseButton={true}
       >
         {currentImageSet.length > 0 && (
           <div className="space-y-4">
-            {/* Main Image Display */}
-            <div className="relative bg-gray-100 rounded-xl overflow-hidden">
-              <img
-                src={currentImageSet[selectedImageIndex]?.url}
-                alt={currentImageSet[selectedImageIndex]?.name || "Image"}
-                className="w-full h-96 object-contain"
-              />
+            {/* Main Image Display with Zoom */}
+            <div 
+              className="relative bg-gray-100 rounded-xl overflow-hidden"
+              style={{ height: '70vh', minHeight: '400px' }}
+            >
+              <div
+                className="w-full h-full flex items-center justify-center overflow-hidden"
+                onMouseDown={handleImageMouseDown}
+                onMouseMove={handleImageMouseMove}
+                onMouseUp={handleImageMouseUp}
+                onMouseLeave={handleImageMouseUp}
+                onWheel={handleImageWheel}
+                style={{ cursor: imageZoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+              >
+                <img
+                  src={currentImageSet[selectedImageIndex]?.url}
+                  alt={currentImageSet[selectedImageIndex]?.name || "Image"}
+                  className="max-w-full max-h-full object-contain transition-transform duration-200"
+                  style={{
+                    transform: `scale(${imageZoom}) translate(${imagePosition.x / imageZoom}px, ${imagePosition.y / imageZoom}px)`,
+                    transformOrigin: 'center center'
+                  }}
+                  draggable={false}
+                />
+              </div>
               
               {/* Navigation Arrows */}
               {currentImageSet.length > 1 && (
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all z-10"
+                    title="Previous Image (←)"
                   >
                     <ChevronLeft className="w-6 h-6" />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all z-10"
+                    title="Next Image (→)"
                   >
                     <ChevronRight className="w-6 h-6" />
                   </button>
                 </>
               )}
-            </div>
 
-            {/* Image Counter */}
-            {currentImageSet.length > 1 && (
-              <div className="text-center text-sm text-gray-600">
-                {selectedImageIndex + 1} of {currentImageSet.length}
+              {/* Zoom Controls Overlay */}
+              <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded-lg text-sm">
+                <div className="flex items-center gap-2">
+                  <span>Zoom: {Math.round(imageZoom * 100)}%</span>
+                  {imageZoom > 1 && (
+                    <span className="text-xs opacity-75">
+                      (Drag to pan)
+                    </span>
+                  )}
+                </div>
               </div>
-            )}
+            </div>
 
             {/* Thumbnail Navigation */}
             {currentImageSet.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {currentImageSet.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                      index === selectedImageIndex
-                        ? "border-[#3ABBD0]"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <img
-                      src={image.url}
-                      alt={image.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
+              <div className="space-y-3">
+                <div className="text-center">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Quick Navigation</h4>
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-2 max-h-20">
+                  {currentImageSet.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSelectedImageIndex(index);
+                        setImageZoom(1);
+                        setImagePosition({ x: 0, y: 0 });
+                      }}
+                      className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                        index === selectedImageIndex
+                          ? "border-[#3ABBD0] ring-2 ring-[#3ABBD0]/20"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <img
+                        src={image.url}
+                        alt={image.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
             {/* Image Actions */}
             <div className="flex items-center justify-between pt-4 border-t">
-              <div className="text-sm text-gray-600">
-                {currentImageSet[selectedImageIndex]?.name}
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-gray-900 truncate">
+                  {currentImageSet[selectedImageIndex]?.name}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Use arrow keys to navigate, +/- to zoom, 0 to reset, Esc to close
+                </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 ml-4">
                 <button
                   onClick={() => window.open(currentImageSet[selectedImageIndex]?.url, '_blank')}
-                  className="flex items-center gap-2 px-3 py-2 bg-[#3ABBD0] text-white rounded-lg hover:bg-[#3ABBD0]/90 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#3ABBD0] text-white rounded-lg hover:bg-[#3ABBD0]/90 transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Open in New Tab
@@ -1499,7 +1813,7 @@ const AdminUsers = () => {
                     link.download = currentImageSet[selectedImageIndex]?.name || 'image';
                     link.click();
                   }}
-                  className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   Download

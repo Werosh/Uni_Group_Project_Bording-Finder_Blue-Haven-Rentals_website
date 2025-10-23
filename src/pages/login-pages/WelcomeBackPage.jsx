@@ -81,7 +81,7 @@ const WelcomeBackPage = () => {
                 Welcome <br />
                 <span className="text-[#3ABBD0] relative">Back !</span>
               </h1>
-              <p className="font-hugiller text-lg md:text-xl text-[#303435] mb-4 opacity-80">
+              <p className="font-montserrat text-lg md:text-xl text-[#303435] mb-4 opacity-80">
                 Welcome back to the Blue Haven Rentals
               </p>
               <div className="flex items-center justify-center lg:justify-start gap-3 bg-[#303435]/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-lg text-sm sm:text-base border border-white/20">

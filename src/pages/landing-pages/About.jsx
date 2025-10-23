@@ -45,7 +45,7 @@ const About = () => {
                 border border-white/20"
             >
               <BsStars className="w-[20px] sm:w-[25px] lg:w-[30px] text-white animate-spin-slow" />
-              <span className="Hugiller-font-style font-thin whitespace-nowrap truncate text-[20px] tracking-[0.1em]">
+              <span className="font-montserrat font-thin whitespace-nowrap truncate text-[20px] tracking-[0.1em]">
                 Discover quality, comfort, and convenience with us.
               </span>
             </div>

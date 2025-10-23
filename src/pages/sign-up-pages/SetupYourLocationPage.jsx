@@ -87,7 +87,7 @@ const SetupYourLocationPage = () => {
           </p>
           <div className="flex items-center justify-center lg:justify-start gap-3 bg-[#303435]/90 backdrop-blur-md text-white px-4 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-lg text-sm sm:text-base border border-white/20">
             <BsStars className="w-[20px] sm:w-[25px] text-[#3ABBD0] animate-spin-slow" />
-            <span className="font-hugiller font-thin whitespace-nowrap truncate">
+            <span className="font-montserrat font-thin whitespace-nowrap truncate">
               Discover quality, comfort, and convenience with us.
             </span>
           </div>

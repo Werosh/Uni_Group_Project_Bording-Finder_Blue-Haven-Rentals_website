@@ -7,7 +7,7 @@ import { getInitials } from "../../utils/profileUtils";
 import Modal from "../../components/Modal";
 
 const UserDetailsEditPage = () => {
-  const { user, userProfile, refreshUserProfile } = useAuth();
+  const { user, refreshUserProfile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -94,7 +94,7 @@ const UserDetailsEditPage = () => {
       if (profileImageFile) {
         const imageUrl = await uploadImage(
           profileImageFile,
-          `users/${user.uid}/profile.jpg`
+          `profiles/${user.uid}`
         );
         profileImageUrl = imageUrl;
       }

@@ -5,13 +5,12 @@ import { signup } from "../../firebase/authService";
 import { createUserProfile } from "../../firebase/dbService";
 import {
   uploadCompressedImage,
-  validateRequiredImages,
 } from "../../firebase/storageService";
 import { useNavigate } from "react-router-dom";
 import heroBackground from "../../assets/images/background/hero-background.webp";
 
 const SetupYourImagePage = () => {
-  const { formData, updateFormData, nextStep, prevStep, resetSignup } =
+  const { formData, updateFormData, prevStep, resetSignup } =
     useSignup();
   const navigate = useNavigate();
 
@@ -78,7 +77,7 @@ const SetupYourImagePage = () => {
       // 2. Upload images to Firebase Storage (MANDATORY)
       const profileImageUrl = await uploadCompressedImage(
         profileImage,
-        "profiles",
+        `profiles/${user.uid}`,
         {
           maxWidth: 800,
           maxHeight: 800,
@@ -88,7 +87,7 @@ const SetupYourImagePage = () => {
 
       const idFrontImageUrl = await uploadCompressedImage(
         formData.frontImage,
-        "id-documents",
+        `id-documents/${user.uid}`,
         {
           maxWidth: 1200,
           maxHeight: 1200,
@@ -98,7 +97,7 @@ const SetupYourImagePage = () => {
 
       const idBackImageUrl = await uploadCompressedImage(
         formData.backImage,
-        "id-documents",
+        `id-documents/${user.uid}`,
         {
           maxWidth: 1200,
           maxHeight: 1200,
@@ -178,7 +177,7 @@ const SetupYourImagePage = () => {
               </p>
               <div className="flex items-center justify-center lg:justify-start gap-3 bg-[#303435]/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-lg text-sm sm:text-base border border-white/20">
                 <BsStars className="w-[25px] sm:w-[30px] text-[#3ABBD0] animate-spin-slow" />
-                <span className="font-hugiller font-thin whitespace-nowrap truncate">
+                <span className="font-montserrat font-thin whitespace-nowrap truncate">
                   Discover quality, comfort, and convenience with us.
                 </span>
               </div>
