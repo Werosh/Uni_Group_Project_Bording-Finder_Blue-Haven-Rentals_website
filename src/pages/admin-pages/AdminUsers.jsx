@@ -669,7 +669,7 @@ const AdminUsers = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-[#263D5D] mb-2">
+            <h1 className="text-4xl font-montserrat font-bold text-[#263D5D] mb-2">
               Users Management
             </h1>
             <p className="text-gray-600">Manage and monitor platform users</p>
