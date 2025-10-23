@@ -143,10 +143,49 @@ export const editPost = async (id, updatedData) => {
   return { id, ...updatedData, status: newStatus };
 };
 
-// Delete a post
+// Delete a post with complete image cleanup
 export const deletePost = async (id) => {
-  const docRef = doc(db, "posts", id);
-  return await deleteDoc(docRef);
+  try {
+    // First, get the post data to access image URLs
+    const postRef = doc(db, "posts", id);
+    const postDoc = await getDoc(postRef);
+    
+    if (!postDoc.exists()) {
+      throw new Error("Post not found");
+    }
+    
+    const postData = postDoc.data();
+    
+    // Delete all associated images from Firebase Storage
+    if (postData.imageUrls && Array.isArray(postData.imageUrls)) {
+      const { deleteImage } = await import('./storageService.js');
+      
+      for (const imageUrl of postData.imageUrls) {
+        try {
+          // Extract path from URL and delete
+          const urlParts = imageUrl.split('/');
+          const pathIndex = urlParts.findIndex(part => part === 'posts');
+          if (pathIndex !== -1) {
+            const imagePath = urlParts.slice(pathIndex).join('/');
+            await deleteImage(imagePath);
+            console.log(`Successfully deleted image: ${imagePath}`);
+          }
+        } catch (error) {
+          console.warn(`Failed to delete post image: ${error.message}`);
+          // Continue with other images even if one fails
+        }
+      }
+    }
+    
+    // Delete the post document from Firestore
+    await deleteDoc(postRef);
+    console.log(`Successfully deleted post: ${id}`);
+    
+    return true;
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    throw new Error(`Failed to delete post: ${error.message}`);
+  }
 };
 
 // USER PROFILE OPERATIONS

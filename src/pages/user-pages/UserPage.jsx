@@ -7,7 +7,6 @@ import {
   deletePost,
   getReviewsReceivedByUser,
 } from "../../firebase/dbService";
-import { deleteImage } from "../../firebase/storageService";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   getInitials,
@@ -184,24 +183,7 @@ const UserPage = () => {
     try {
       setDeleting(true);
 
-      // Delete post images from Firebase Storage
-      if (deletingPost.imageUrls && Array.isArray(deletingPost.imageUrls)) {
-        for (const imageUrl of deletingPost.imageUrls) {
-          try {
-            // Extract path from URL and delete
-            const urlParts = imageUrl.split('/');
-            const pathIndex = urlParts.findIndex(part => part === 'posts');
-            if (pathIndex !== -1) {
-              const imagePath = urlParts.slice(pathIndex).join('/');
-              await deleteImage(imagePath);
-            }
-          } catch (error) {
-            console.warn(`Failed to delete post image: ${error.message}`);
-          }
-        }
-      }
-
-      // Delete post document from Firestore
+      // Delete post and all associated images (handled in deletePost function)
       await deletePost(deletingPost.id);
 
       // Refresh posts data
