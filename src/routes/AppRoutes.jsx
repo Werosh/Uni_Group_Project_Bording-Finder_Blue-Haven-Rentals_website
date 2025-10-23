@@ -53,7 +53,7 @@ function ScrollToTop() {
 
 function ConditionalFooter() {
   const location = useLocation();
-  const hiddenPaths = ["/browse", "/browse-more"];
+  const hiddenPaths = ["/browse", "/browse-more" , "/contact" , "/post-add" , "/user" , "/admin/dashboard" , "/admin/pending-posts" , "/admin/approved-posts" , "/admin/users" , "/admin/analytics" , "/login" , "/forgot-password" , "/password-reset-verification" , "/set-new-password" , "/password-reset-success" , "/signup" , "/signup/complete"];
 
   // Hide footer on browse pages and all admin pages
   if (

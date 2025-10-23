@@ -46,19 +46,19 @@ const Footer = () => {
         <div className=" grid grid-cols-2 sm:grid-cols-4 gap-8 my-12 font-sans">
           <div className="space-y-3">
             <a
-              href="#"
+              href="#home"
               className="text-[23px] font-semibold block text-lg hover:text-[#3ABBD0] transition-colors"
             >
               Home
             </a>
             <a
-              href="#"
+              href="#about"
               className="text-[23px] font-semibold block text-lg hover:text-[#3ABBD0] transition-colors"
             >
               About
             </a>
             <a
-              href="#"
+              href="/contact"
               className="text-[23px] font-semibold block text-lg hover:text-[#3ABBD0] transition-colors"
             >
               Contact
@@ -66,13 +66,13 @@ const Footer = () => {
           </div>
           <div className="space-y-3">
             <a
-              href="#"
+              href="/browse"
               className="text-[23px] font-semibold block text-lg hover:text-[#3ABBD0] transition-colors"
             >
               Find Place
             </a>
             <a
-              href="#"
+              href="/post-add"
               className="text-[23px] font-semibold block text-lg hover:text-[#3ABBD0] transition-colors"
             >
               Add Post
@@ -80,7 +80,7 @@ const Footer = () => {
           </div>
           <div className="space-y-3">
             <a
-              href="#"
+              href="/user"
               className="text-[23px] font-semibold block text-lg hover:text-[#3ABBD0] transition-colors"
             >
               User
@@ -88,13 +88,13 @@ const Footer = () => {
           </div>
           <div className="space-y-3">
             <a
-              href="#"
+              href="/contact"
               className="text-[23px] font-semibold block text-lg hover:text-[#3ABBD0] transition-colors"
             >
               FAQ
-            </a>
+            </a>  
             <a
-              href="#"
+              href="/privacy-policy"
               className="text-[23px] font-semibold block text-lg hover:text-[#3ABBD0] transition-colors"
             >
               Privacy Policy

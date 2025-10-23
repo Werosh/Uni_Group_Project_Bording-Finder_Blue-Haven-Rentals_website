@@ -20,11 +20,14 @@ The application supports three distinct user types:
 ### 2. **Boarding Owner** (`boarding_owner`)
 
 - **Purpose**: Users who list and manage boarding/rental properties
-- **Access**: All Typical User features plus:
+- **Access**: Full platform access except admin dashboard:
+  - All Typical User features (browse, view properties, contact owners)
   - Create new property listings
   - Manage their properties
   - View pending posts
   - Respond to inquiries
+  - Access to all user pages and features
+  - **Restricted from**: Admin dashboard and admin-only features
 
 ### 3. **Admin** (`admin`)
 
