@@ -1,7 +1,6 @@
 import { useSignup } from "../../context/SignupContext";
 import UserTypeSelectionPage from "./UserTypeSelectionPage";
 import GetStartedPage from "./GetStartedPage";
-import EmailVerificationPage from "./EmailVerificationPage";
 import SetupYourAccountPage from "./SetupYourAccountPage";
 import SetupYourLocationPage from "./SetupYourLocationPage";
 import VerifyYourIdPage from "./VerifyYourIdPage";
@@ -18,36 +17,34 @@ const SignupFlow = () => {
       case 2:
         return <GetStartedPage />;
       case 3:
-        return <EmailVerificationPage />;
-      case 4:
         // Only for boarding_owner
         return formData.userType === "boarding_owner" ? (
           <SetupYourAccountPage />
         ) : (
           <SignupCompletePage />
         );
-      case 5:
+      case 4:
         // Only for boarding_owner
         return formData.userType === "boarding_owner" ? (
           <SetupYourLocationPage />
         ) : (
           <SignupCompletePage />
         );
-      case 6:
+      case 5:
         // Only for boarding_owner
         return formData.userType === "boarding_owner" ? (
           <VerifyYourIdPage />
         ) : (
           <SignupCompletePage />
         );
-      case 7:
+      case 6:
         // Only for boarding_owner
         return formData.userType === "boarding_owner" ? (
           <SetupYourImagePage />
         ) : (
           <SignupCompletePage />
         );
-      case 8:
+      case 7:
         return <SignupCompletePage />;
       default:
         return <UserTypeSelectionPage />;
