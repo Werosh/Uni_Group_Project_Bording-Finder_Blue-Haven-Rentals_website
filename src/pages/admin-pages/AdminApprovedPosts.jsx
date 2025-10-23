@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   MapPin,
   Calendar,
@@ -10,6 +10,7 @@ import {
   Trash2,
   X,
   Save,
+  Eye,
 } from "lucide-react";
 import RefreshButton from "../../components/RefreshButton";
 import {
@@ -69,9 +70,12 @@ const AdminApprovedPosts = () => {
   const [filterCategory, setFilterCategory] = useState("all");
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPostModal, setShowPostModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [selectedPostForModal, setSelectedPostForModal] = useState(null);
   const [editFormData, setEditFormData] = useState({});
   const [processingId, setProcessingId] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAlertModal, setShowAlertModal] = useState(false);
   const [alertConfig, setAlertConfig] = useState({
     type: "info",
@@ -85,14 +89,6 @@ const AdminApprovedPosts = () => {
     setAlertConfig({ type, title, message, onClose });
     setShowAlertModal(true);
   };
-
-  useEffect(() => {
-    fetchApprovedPosts();
-  }, []);
-
-  useEffect(() => {
-    filterPosts();
-  }, [searchTerm, filterCategory, posts]);
 
   const fetchApprovedPosts = async (isRefresh = false) => {
     try {
@@ -117,7 +113,7 @@ const AdminApprovedPosts = () => {
     fetchApprovedPosts(true);
   };
 
-  const filterPosts = () => {
+  const filterPosts = useCallback(() => {
     let filtered = [...posts];
 
     // Search filter
@@ -136,7 +132,15 @@ const AdminApprovedPosts = () => {
     }
 
     setFilteredPosts(filtered);
-  };
+  }, [posts, searchTerm, filterCategory]);
+
+  useEffect(() => {
+    fetchApprovedPosts();
+  }, []);
+
+  useEffect(() => {
+    filterPosts();
+  }, [filterPosts]);
 
   const handleEdit = (post) => {
     setSelectedPost(post);
@@ -156,6 +160,38 @@ const AdminApprovedPosts = () => {
   const handleDelete = (post) => {
     setSelectedPost(post);
     setShowDeleteModal(true);
+  };
+
+  const handleViewPost = (post) => {
+    setSelectedPostForModal(post);
+    setCurrentImageIndex(0);
+    setShowPostModal(true);
+  };
+
+  const closePostModal = () => {
+    setShowPostModal(false);
+    setSelectedPostForModal(null);
+    setCurrentImageIndex(0);
+  };
+
+  const goToPreviousImage = () => {
+    if (
+      selectedPostForModal &&
+      selectedPostForModal.imageUrls &&
+      currentImageIndex > 0
+    ) {
+      setCurrentImageIndex(currentImageIndex - 1);
+    }
+  };
+
+  const goToNextImage = () => {
+    if (
+      selectedPostForModal &&
+      selectedPostForModal.imageUrls &&
+      currentImageIndex < selectedPostForModal.imageUrls.length - 1
+    ) {
+      setCurrentImageIndex(currentImageIndex + 1);
+    }
   };
 
   const handleEditFormChange = (e) => {
@@ -395,6 +431,14 @@ const AdminApprovedPosts = () => {
 
                     {/* Actions */}
                     <div className="flex lg:flex-col gap-3">
+                      <button
+                        onClick={() => handleViewPost(post)}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl transition-colors"
+                      >
+                        <Eye className="w-5 h-5" />
+                        <span>View Details</span>
+                      </button>
+
                       <button
                         onClick={() => handleEdit(post)}
                         disabled={processingId === post.id}
@@ -741,6 +785,271 @@ const AdminApprovedPosts = () => {
             </button>
           </div>
         </div>
+      </Modal>
+
+      {/* Post Details Modal */}
+      <Modal
+        isOpen={showPostModal}
+        onClose={closePostModal}
+        title="Post Details"
+        size="lg"
+      >
+        {selectedPostForModal && (
+          <div className="space-y-6" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+            {/* Post Header */}
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-2xl font-bold text-[#263D5D] mb-2">
+                  {selectedPostForModal.title}
+                </h3>
+                <div className="flex items-center gap-2 text-gray-600 mb-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>{selectedPostForModal.location}</span>
+                  <span className="text-gray-400">•</span>
+                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+                    {selectedPostForModal.category}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <User className="w-4 h-4" />
+                  <span>Owner: {selectedPostForModal.ownerName}</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-[#263D5D]">
+                  Rs. {selectedPostForModal.rent?.toLocaleString()}
+                </div>
+                <div className="text-sm text-gray-500">per month</div>
+              </div>
+            </div>
+
+            {/* Image Gallery */}
+            {selectedPostForModal.imageUrls &&
+              selectedPostForModal.imageUrls.length > 0 && (
+                <div className="relative">
+                  <div className="relative h-48 bg-gray-200 rounded-xl overflow-hidden">
+                    <img
+                      src={selectedPostForModal.imageUrls[currentImageIndex]}
+                      alt={selectedPostForModal.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src =
+                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%236b7280' font-family='Arial' font-size='16'%3ENo Image Available%3C/text%3E%3C/svg%3E";
+                      }}
+                    />
+
+                    {/* Image Navigation Arrows */}
+                    {selectedPostForModal.imageUrls.length > 1 && (
+                      <>
+                        <button
+                          onClick={goToPreviousImage}
+                          disabled={currentImageIndex === 0}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <svg
+                            className="w-5 h-5 text-[#263D5D]"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 19l-7-7 7-7"
+                            />
+                          </svg>
+                        </button>
+
+                        <button
+                          onClick={goToNextImage}
+                          disabled={
+                            currentImageIndex ===
+                            selectedPostForModal.imageUrls.length - 1
+                          }
+                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <svg
+                            className="w-5 h-5 text-[#263D5D]"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </button>
+
+                        {/* Image Counter */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+                          {currentImageIndex + 1} /{" "}
+                          {selectedPostForModal.imageUrls.length}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+            {/* Post Details */}
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-lg font-semibold text-[#263D5D] mb-2">
+                  Description
+                </h4>
+                <p className="text-gray-700 leading-relaxed">
+                  {selectedPostForModal.description}
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold text-[#263D5D] mb-2">
+                  Property Details
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    <Home className="w-5 h-5 text-[#3ABBD0]" />
+                    <span className="text-gray-700">
+                      Category: {selectedPostForModal.category}
+                    </span>
+                  </div>
+                  {selectedPostForModal.forWhom && (
+                    <div className="flex items-center gap-2">
+                      <User className="w-5 h-5 text-[#3ABBD0]" />
+                      <span className="text-gray-700">
+                        For: {selectedPostForModal.forWhom}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold text-[#263D5D] mb-2">
+                  Contact Information
+                </h4>
+                <div className="space-y-2">
+                  {selectedPostForModal.email && (
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5 text-[#3ABBD0]"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <a
+                        href={`mailto:${selectedPostForModal.email}`}
+                        className="text-[#3ABBD0] hover:underline"
+                      >
+                        {selectedPostForModal.email}
+                      </a>
+                    </div>
+                  )}
+                  {selectedPostForModal.mobile && (
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5 text-[#3ABBD0]"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.949.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                        />
+                      </svg>
+                      <a
+                        href={`tel:+94${selectedPostForModal.mobile}`}
+                        className="text-[#3ABBD0] hover:underline"
+                      >
+                        +94 {selectedPostForModal.mobile}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold text-[#263D5D] mb-2">
+                  Submission Details
+                </h4>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Calendar className="w-5 h-5" />
+                  <span>
+                    Created:{" "}
+                    {new Date(
+                      selectedPostForModal.createdAt
+                    ).toLocaleDateString()}
+                  </span>
+                </div>
+                {selectedPostForModal.editedAt && (
+                  <div className="flex items-center gap-2 text-orange-600 mt-1">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                    <span>
+                      Edited:{" "}
+                      {new Date(
+                        selectedPostForModal.editedAt
+                      ).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <button
+                onClick={closePostModal}
+                className="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  closePostModal();
+                  handleEdit(selectedPostForModal);
+                }}
+                className="flex-1 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold transition-colors"
+              >
+                Edit Post
+              </button>
+              <button
+                onClick={() => {
+                  closePostModal();
+                  handleDelete(selectedPostForModal);
+                }}
+                className="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-colors"
+              >
+                Delete Post
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </AdminLayout>
   );

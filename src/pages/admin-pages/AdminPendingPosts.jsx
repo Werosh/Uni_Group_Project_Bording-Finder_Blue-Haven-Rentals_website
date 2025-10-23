@@ -613,7 +613,7 @@ const AdminPendingPosts = () => {
         size="lg"
       >
         {selectedPostForModal && (
-          <div className="space-y-6">
+          <div className="space-y-6 " style={{ maxHeight: '500px', overflowY: 'auto' }}>
             {/* Post Header */}
             <div className="flex items-start justify-between">
               <div>
@@ -645,7 +645,7 @@ const AdminPendingPosts = () => {
             {selectedPostForModal.imageUrls &&
               selectedPostForModal.imageUrls.length > 0 && (
                 <div className="relative">
-                  <div className="relative h-64 bg-gray-200 rounded-xl overflow-hidden">
+                  <div className="relative h-48 bg-gray-200 rounded-xl overflow-hidden">
                     <img
                       src={selectedPostForModal.imageUrls[currentImageIndex]}
                       alt={selectedPostForModal.title}
