@@ -34,7 +34,7 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, userProfile, isAdmin } = useAuth();
+  const { user, userProfile, isAdmin, loading } = useAuth();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -56,6 +56,7 @@ const Navbar = () => {
       navigate("/login");
       return;
     }
+    
     setIsDropdownOpen(!isDropdownOpen);
   };
 
@@ -206,8 +207,11 @@ const Navbar = () => {
               <button
                 onClick={toggleDropdown}
                 className="w-10 h-10  rounded-full flex items-center justify-center text-white border-2 border-white  transition-colors duration-200 font-semibold text-lg"
+                disabled={loading}
               >
-                {user && userProfile ? (
+                {loading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : user && userProfile ? (
                   <span>
                     {getInitials(userProfile.firstName, userProfile.lastName) ||
                       userProfile.username?.[0]?.toUpperCase() ||
@@ -220,7 +224,7 @@ const Navbar = () => {
               </button>
 
               {/* Dropdown Menu - Only show if user is logged in */}
-              {isDropdownOpen && user && (
+              {isDropdownOpen && user && userProfile && (
                 <div
                   className="absolute bg-white right-0 mt-2 w-86 rounded-lg shadow-lg border z-50 bg-cover bg-center"
                   style={{
@@ -280,6 +284,14 @@ const Navbar = () => {
                     )}
 
                     <div className="py-1 text-[15px] text-[#235A78]">
+                      {/* Show loading or fallback if userProfile is not loaded yet */}
+                      {!userProfile && (
+                        <div className="text-center py-4">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500 mx-auto"></div>
+                          <p className="text-gray-600 mt-2">Loading profile...</p>
+                        </div>
+                      )}
+                      
                       {/* boarding_finder: only logout */}
                       {userProfile?.role === "boarding_finder" && (
                         <div className=" py-1">
@@ -445,7 +457,13 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200 max-h-[calc(100vh-4rem)] overflow-y-auto">
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <div className="md:hidden bg-white border-t border-gray-200 max-h-[calc(100vh-4rem)] overflow-y-auto fixed top-16 left-0 right-0 z-50">
           <div className="px-4 py-4 space-y-3">
             {/* Mobile Search Bar - Now inside the menu */}
             <div className="relative mb-4">
@@ -509,7 +527,12 @@ const Navbar = () => {
 
             {/* Mobile User Section */}
             <div className="pt-4 border-t">
-              {user ? (
+              {loading ? (
+                <div className="flex items-center justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500"></div>
+                  <span className="ml-2 text-gray-600">Loading...</span>
+                </div>
+              ) : user ? (
                 <>
                   {/* Profile section - hide for boarding_finder users */}
                   {userProfile?.role !== "boarding_finder" && (
@@ -551,6 +574,14 @@ const Navbar = () => {
                   )}
 
                   <div className="space-y-2">
+                    {/* Show loading or fallback if userProfile is not loaded yet */}
+                    {!userProfile && (
+                      <div className="text-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500 mx-auto"></div>
+                        <p className="text-gray-600 mt-2">Loading profile...</p>
+                      </div>
+                    )}
+                    
                     {/* boarding_finder: only logout */}
                     {userProfile?.role === "boarding_finder" && (
                       <button
@@ -692,7 +723,8 @@ const Navbar = () => {
               )}
             </div>
           </div>
-        </div>
+          </div>
+        </>
       )}
 
       {/* Role Restriction Modal */}

@@ -62,7 +62,15 @@ const ReviewDisplay = ({ postId, postOwnerId, showAddReview = true }) => {
 
   const canAddReview = () => {
     if (!user || !userProfile) return false;
-    if (userProfile.role !== "boarding_finder") return false;
+    
+    // Allow both boarding finders and boarding owners to add reviews
+    const canReview = userProfile.role === "boarding_finder" || 
+                     userProfile.userType === "boarding_finder" ||
+                     userProfile.role === "boarding_owner" || 
+                     userProfile.userType === "boarding_owner";
+    
+    if (!canReview) return false;
+    
     // Check if user already reviewed this post
     return !reviews.some(review => review.reviewerId === user.uid);
   };

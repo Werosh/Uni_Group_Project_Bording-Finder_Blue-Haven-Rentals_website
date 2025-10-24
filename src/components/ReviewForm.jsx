@@ -28,8 +28,12 @@ const ReviewForm = ({ postId, postOwnerId, onReviewSubmitted, onCancel }) => {
       return;
     }
 
-    if (userProfile.role !== "boarding_finder") {
-      setError("Only boarding finders can submit reviews");
+    if (userProfile.role === "boarding_finder" || userProfile.userType === "boarding_finder") {
+      // Boarding finders can submit reviews
+    } else if (userProfile.role === "boarding_owner" || userProfile.userType === "boarding_owner") {
+      // Boarding owners can also submit reviews
+    } else {
+      setError("You must be a registered user to submit reviews");
       return;
     }
 
