@@ -2,7 +2,7 @@ import { Mail } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BsStars } from "react-icons/bs";
-import { checkEmailLink, signInWithEmailLinkAuth } from "../../firebase/authService";
+import { verifyResetCode, sendPasswordReset } from "../../firebase/authService";
 import Img from "../../assets/images/background/about-background.webp";
 import Modal from "../../components/Modal";
 
@@ -26,43 +26,12 @@ const PwdResetPage = () => {
     setShowAlertModal(true);
   };
 
-  // Check if user came from forgot password page or email link
+  // Check if user came from forgot password page
   useEffect(() => {
-    // Check if this is an email link authentication
-    if (checkEmailLink()) {
-      handleEmailLinkAuth();
-    } else if (!location.state?.email) {
+    if (!location.state?.email) {
       navigate("/forgot-password");
     }
-  }, [location.state, navigate, handleEmailLinkAuth]);
-
-  const handleEmailLinkAuth = useCallback(async () => {
-    try {
-      // Get email from localStorage or prompt user
-      let email = localStorage.getItem('emailForSignIn');
-      if (!email) {
-        email = prompt('Please provide your email for confirmation');
-        if (!email) {
-          navigate("/forgot-password");
-          return;
-        }
-      }
-
-      // Sign in with email link
-      await signInWithEmailLinkAuth(email);
-      
-      // Clear email from storage
-      localStorage.removeItem('emailForSignIn');
-      
-      // Navigate to set new password page
-      navigate("/set-new-password", {
-        state: { email: email, isEmailLink: true }
-      });
-    } catch (error) {
-      console.error('Email link authentication failed:', error);
-      showAlert("error", "Authentication Failed", "Invalid or expired link. Please request a new one.");
-    }
-  }, [navigate, showAlert]);
+  }, [location.state, navigate]);
 
   const validate = () => {
     let newErrors = {};
@@ -101,23 +70,45 @@ const PwdResetPage = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
       const verificationCode = codes.join("");
-      // Navigate to set new password page with the code
-      navigate("/set-new-password", {
-        state: {
-          code: verificationCode,
-          email: email,
-        },
-      });
+      try {
+        // Verify the reset code first
+        await verifyResetCode(verificationCode);
+        // Navigate to set new password page with the code
+        navigate("/set-new-password", {
+          state: {
+            code: verificationCode,
+            email: email,
+          },
+        });
+      } catch (error) {
+        let errorMessage = "Invalid verification code. Please try again.";
+        if (error.code === "auth/invalid-action-code") {
+          errorMessage = "Invalid or expired code. Please request a new one.";
+        } else if (error.code === "auth/expired-action-code") {
+          errorMessage = "Code has expired. Please request a new one.";
+        }
+        showAlert("error", "Verification Failed", errorMessage);
+      }
     }
   };
 
-  const handleResend = () => {
-    // In a real implementation, this would call sendPasswordReset again
-    showAlert("success", "Code Sent", `New code sent to ${email}`);
+  const handleResend = async () => {
+    try {
+      await sendPasswordReset(email);
+      showAlert("success", "Code Sent", `New code sent to ${email}`);
+    } catch (error) {
+      let errorMessage = "Failed to resend code. Please try again.";
+      if (error.code === "auth/user-not-found") {
+        errorMessage = "No account found with this email.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Invalid email address.";
+      }
+      showAlert("error", "Resend Failed", errorMessage);
+    }
   };
 
   return (
