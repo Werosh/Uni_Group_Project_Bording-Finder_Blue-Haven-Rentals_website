@@ -1,8 +1,9 @@
-import { Lock, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsStars } from "react-icons/bs";
 import { login } from "../../firebase/authService";
+import PasswordInput from "../../components/PasswordInput";
 import Img from "../../assets/images/background/hero-background.webp";
 
 const WelcomeBackPage = () => {
@@ -24,7 +25,7 @@ const WelcomeBackPage = () => {
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (
-      !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+      !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]{8,}$/.test(
         formData.password
       )
     ) {
@@ -137,21 +138,13 @@ const WelcomeBackPage = () => {
                   <div className="w-2 h-2 bg-[#3ABBD0] rounded-full"></div>
                   Password
                 </label>
-                <div className="relative group">
-                  <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className={`w-full pl-14 pr-6 py-4 rounded-2xl bg-gray-50/80 backdrop-blur-sm border-2 focus:outline-none focus:ring-4 focus:ring-[#3ABBD0]/20 transition-all duration-300 group-hover:border-[#3ABBD0]/50 ${
-                      errors.password
-                        ? "border-red-500"
-                        : "border-[#3ABBD0]/30 focus:border-[#3ABBD0]"
-                    }`}
-                    placeholder="Enter your password"
-                  />
-                </div>
+                <PasswordInput
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  error={errors.password}
+                />
                 {errors.password && (
                   <p className="text-red-500 text-xs mt-2">{errors.password}</p>
                 )}
