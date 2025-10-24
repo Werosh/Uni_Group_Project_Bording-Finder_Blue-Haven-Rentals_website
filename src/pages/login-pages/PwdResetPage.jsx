@@ -1,7 +1,8 @@
 import { Mail } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BsStars } from "react-icons/bs";
+import { checkEmailLink, signInWithEmailLinkAuth } from "../../firebase/authService";
 import Img from "../../assets/images/background/about-background.webp";
 import Modal from "../../components/Modal";
 
@@ -25,12 +26,43 @@ const PwdResetPage = () => {
     setShowAlertModal(true);
   };
 
-  // Check if user came from forgot password page
+  // Check if user came from forgot password page or email link
   useEffect(() => {
-    if (!location.state?.email) {
+    // Check if this is an email link authentication
+    if (checkEmailLink()) {
+      handleEmailLinkAuth();
+    } else if (!location.state?.email) {
       navigate("/forgot-password");
     }
-  }, [location.state, navigate]);
+  }, [location.state, navigate, handleEmailLinkAuth]);
+
+  const handleEmailLinkAuth = useCallback(async () => {
+    try {
+      // Get email from localStorage or prompt user
+      let email = localStorage.getItem('emailForSignIn');
+      if (!email) {
+        email = prompt('Please provide your email for confirmation');
+        if (!email) {
+          navigate("/forgot-password");
+          return;
+        }
+      }
+
+      // Sign in with email link
+      await signInWithEmailLinkAuth(email);
+      
+      // Clear email from storage
+      localStorage.removeItem('emailForSignIn');
+      
+      // Navigate to set new password page
+      navigate("/set-new-password", {
+        state: { email: email, isEmailLink: true }
+      });
+    } catch (error) {
+      console.error('Email link authentication failed:', error);
+      showAlert("error", "Authentication Failed", "Invalid or expired link. Please request a new one.");
+    }
+  }, [navigate, showAlert]);
 
   const validate = () => {
     let newErrors = {};

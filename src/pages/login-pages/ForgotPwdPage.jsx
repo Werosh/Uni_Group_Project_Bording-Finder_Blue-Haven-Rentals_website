@@ -2,7 +2,7 @@ import { Mail, Fingerprint } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsStars } from "react-icons/bs";
-import { sendPasswordReset } from "../../firebase/authService";
+import { sendPasswordResetLink } from "../../firebase/authService";
 import Img from "../../assets/images/background/location-background.webp";
 
 const ForgotPwdPage = () => {
@@ -33,7 +33,9 @@ const ForgotPwdPage = () => {
     if (validate()) {
       setIsLoading(true);
       try {
-        await sendPasswordReset(formData.email);
+        await sendPasswordResetLink(formData.email);
+        // Save email locally for the email link flow
+        localStorage.setItem('emailForSignIn', formData.email);
         // Navigate to the verification page with email as state
         navigate("/password-reset-verification", {
           state: { email: formData.email },

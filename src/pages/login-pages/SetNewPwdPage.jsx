@@ -2,7 +2,7 @@ import { Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BsStars } from "react-icons/bs";
-import { confirmPasswordResetWithCode } from "../../firebase/authService";
+import { confirmPasswordResetWithCode, updateUserPassword } from "../../firebase/authService";
 import PasswordInput from "../../components/PasswordInput";
 import Img from "../../assets/images/background/hero-background.webp";
 
@@ -59,7 +59,14 @@ const SetNewPwdPage = () => {
     if (validate()) {
       setIsLoading(true);
       try {
-        await confirmPasswordResetWithCode(resetCode, formData.password);
+        // Check if this is email link flow or traditional reset code flow
+        if (location.state?.isEmailLink) {
+          // User is already authenticated via email link, just update password
+          await updateUserPassword(formData.password);
+        } else {
+          // Traditional reset code flow
+          await confirmPasswordResetWithCode(resetCode, formData.password);
+        }
         navigate("/password-reset-success");
       } catch (error) {
         let errorMessage = "Failed to reset password. Please try again.";
@@ -69,6 +76,9 @@ const SetNewPwdPage = () => {
         } else if (error.code === "auth/weak-password") {
           errorMessage =
             "Password is too weak. Please choose a stronger password.";
+        } else if (error.code === "auth/requires-recent-login") {
+          errorMessage =
+            "Please sign in again to change your password.";
         }
         setErrors({ general: errorMessage });
       } finally {
