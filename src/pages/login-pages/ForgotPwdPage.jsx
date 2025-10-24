@@ -2,8 +2,9 @@ import { Mail, Fingerprint } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsStars } from "react-icons/bs";
-import { sendPasswordReset } from "../../firebase/authService";
+import { sendPasswordResetWithCode } from "../../firebase/authService";
 import Img from "../../assets/images/background/location-background.webp";
+import Modal from "../../components/Modal";
 
 const ForgotPwdPage = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const ForgotPwdPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
   const validate = () => {
     let newErrors = {};
@@ -33,11 +35,9 @@ const ForgotPwdPage = () => {
     if (validate()) {
       setIsLoading(true);
       try {
-        await sendPasswordReset(formData.email);
-        // Navigate to the verification page with email as state
-        navigate("/password-reset-verification", {
-          state: { email: formData.email },
-        });
+        await sendPasswordResetWithCode(formData.email);
+        // Show email modal instead of navigating
+        setShowEmailModal(true);
       } catch (error) {
         let errorMessage = "Failed to send reset email. Please try again.";
         if (error.code === "auth/user-not-found") {
@@ -195,6 +195,87 @@ const ForgotPwdPage = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-[#DFECF8]/80 to-transparent opacity-100 block md:hidden"></div>
         </div>
       </div>
+
+      {/* Email Modal */}
+      <Modal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        title="Check Your Email"
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <Mail className="w-6 h-6 text-blue-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">Password Reset Email Sent</h3>
+              <p className="text-gray-600 text-sm">
+                We've sent a password reset link to <strong>{formData.email}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-yellow-800 font-medium text-sm">Important:</h4>
+                <ul className="text-yellow-700 text-sm mt-1 space-y-1">
+                  <li>• Check your email inbox and spam folder</li>
+                  <li>• Click the password reset link in the email</li>
+                  <li>• The link will expire in 1 hour</li>
+                  <li>• You'll be redirected to set a new password</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-blue-800 font-medium text-sm">Password Requirements:</h4>
+                <p className="text-blue-700 text-sm mt-1">
+                  Your new password must be at least 8 characters and include:
+                </p>
+                <ul className="text-blue-700 text-sm mt-1 space-y-1 ml-4">
+                  <li>• Uppercase letter (A-Z)</li>
+                  <li>• Lowercase letter (a-z)</li>
+                  <li>• Number (0-9)</li>
+                  <li>• Special character (!@#$%^&*)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              onClick={() => setShowEmailModal(false)}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => {
+                setShowEmailModal(false);
+                navigate("/login");
+              }}
+              className="px-6 py-2 bg-[#3ABBD0] hover:bg-[#2A9BB8] text-white rounded-lg font-medium transition-colors"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <style>{`
         @keyframes fadeInUp {

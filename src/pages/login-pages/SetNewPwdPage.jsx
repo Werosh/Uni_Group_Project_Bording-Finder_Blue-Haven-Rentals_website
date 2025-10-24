@@ -2,7 +2,7 @@ import { Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BsStars } from "react-icons/bs";
-import { confirmPasswordResetWithCode, updateUserPassword } from "../../firebase/authService";
+import { updatePasswordForCurrentUser } from "../../firebase/authService";
 import PasswordInput from "../../components/PasswordInput";
 import Img from "../../assets/images/background/hero-background.webp";
 
@@ -17,12 +17,12 @@ const SetNewPwdPage = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check if user came from verification page
+  // Check if user came from verification page or email link
   useEffect(() => {
-    if (!resetCode) {
+    if (!resetCode && !location.state?.isEmailLink) {
       navigate("/forgot-password");
     }
-  }, [resetCode, navigate]);
+  }, [resetCode, location.state, navigate]);
 
   const validate = () => {
     let newErrors = {};
@@ -32,7 +32,7 @@ const SetNewPwdPage = () => {
     } else if (formData.password.length < 8) {
       newErrors.password = "Password must be at least 8 characters";
     } else if (
-      !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]{8,}$/.test(
+      !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]{8,}$/.test(
         formData.password
       )
     ) {
@@ -59,26 +59,24 @@ const SetNewPwdPage = () => {
     if (validate()) {
       setIsLoading(true);
       try {
-        // Check if this is email link flow or traditional reset code flow
-        if (location.state?.isEmailLink) {
-          // User is already authenticated via email link, just update password
-          await updateUserPassword(formData.password);
-        } else {
-          // Traditional reset code flow
-          await confirmPasswordResetWithCode(resetCode, formData.password);
-        }
-        navigate("/password-reset-success");
+        // Update password for the current user (authenticated via email link)
+        await updatePasswordForCurrentUser(formData.password);
+        
+        // Navigate to success page with user info
+        navigate("/password-reset-success", {
+          state: { 
+            email: location.state?.email,
+            isPasswordReset: true 
+          }
+        });
       } catch (error) {
         let errorMessage = "Failed to reset password. Please try again.";
-        if (error.code === "auth/invalid-action-code") {
-          errorMessage =
-            "Invalid or expired reset code. Please request a new one.";
-        } else if (error.code === "auth/weak-password") {
-          errorMessage =
-            "Password is too weak. Please choose a stronger password.";
+        if (error.code === "auth/weak-password") {
+          errorMessage = "Password is too weak. Please choose a stronger password.";
         } else if (error.code === "auth/requires-recent-login") {
-          errorMessage =
-            "Please sign in again to change your password.";
+          errorMessage = "Please sign in again to change your password.";
+        } else if (error.message === "No user is currently signed in") {
+          errorMessage = "Session expired. Please request a new password reset.";
         }
         setErrors({ general: errorMessage });
       } finally {

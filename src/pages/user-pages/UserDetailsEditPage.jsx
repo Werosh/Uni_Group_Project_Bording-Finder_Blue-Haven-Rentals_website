@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { getUserProfile, updateUserProfile } from "../../firebase/dbService";
+import { updateEmail } from "firebase/auth";
 import { uploadImage } from "../../firebase/storageService";
 import { useNavigate } from "react-router-dom";
 import { getInitials } from "../../utils/profileUtils";
@@ -15,6 +16,7 @@ const UserDetailsEditPage = () => {
     firstName: "",
     lastName: "",
     username: "",
+    email: "",
     description: "",
     phone: "",
     country: "",
@@ -47,7 +49,10 @@ const UserDetailsEditPage = () => {
         try {
           const profileData = await getUserProfile(user.uid);
           if (profileData) {
-            setProfile(profileData);
+            setProfile({
+              ...profileData,
+              email: user.email || "", // Add email from user object
+            });
             if (profileData.profileImageUrl) {
               setProfileImagePreview(profileData.profileImageUrl);
             }
@@ -105,6 +110,11 @@ const UserDetailsEditPage = () => {
         profileImageUrl,
         updatedAt: new Date().toISOString(),
       });
+
+      // Update Firebase Auth email if it has changed
+      if (profile.email && profile.email !== user.email) {
+        await updateEmail(user, profile.email);
+      }
 
       // Refresh user profile in AuthContext to update navbar
       await refreshUserProfile();
@@ -237,6 +247,24 @@ const UserDetailsEditPage = () => {
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={profile.email}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="your.email@example.com"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                This email will be used for account notifications and password resets.
+              </p>
             </div>
 
             <div>

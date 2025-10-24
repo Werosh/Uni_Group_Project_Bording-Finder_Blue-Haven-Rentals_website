@@ -35,6 +35,51 @@ export const sendPasswordReset = (email) => {
   return sendPasswordResetEmail(auth, email);
 };
 
+// Production-level password reset using Firebase Email Link Authentication
+export const sendPasswordResetWithCode = async (email) => {
+  const actionCodeSettings = {
+    // URL you want to redirect back to. The domain must be in the authorized domains list
+    url: `${window.location.origin}/password-reset-verification`,
+    // This must be true for email link authentication
+    handleCodeInApp: true,
+  };
+
+  // Send the email link
+  await sendPasswordResetEmail(auth, email, actionCodeSettings);
+  
+  // Store email for verification
+  localStorage.setItem('emailForPasswordReset', email);
+  
+  return Promise.resolve();
+};
+
+// Check if the current URL is a password reset link
+export const isPasswordResetLink = () => {
+  return isSignInWithEmailLink(auth, window.location.href);
+};
+
+// Verify password reset link and get the action code
+export const verifyPasswordResetLink = async (email) => {
+  // Sign in with the email link
+  const result = await signInWithEmailLink(auth, email, window.location.href);
+  
+  // Clear the stored email
+  localStorage.removeItem('emailForPasswordReset');
+  
+  return result;
+};
+
+// Update password for the current user
+export const updatePasswordForCurrentUser = async (newPassword) => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('No user is currently signed in');
+  }
+  
+  await updatePassword(user, newPassword);
+  return Promise.resolve();
+};
+
 // Verify password reset code
 export const verifyResetCode = (code) => {
   return verifyPasswordResetCode(auth, code);

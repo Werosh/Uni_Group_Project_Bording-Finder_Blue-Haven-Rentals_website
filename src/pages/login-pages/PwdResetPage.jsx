@@ -2,7 +2,7 @@ import { Mail } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BsStars } from "react-icons/bs";
-import { verifyResetCode, sendPasswordReset } from "../../firebase/authService";
+import { isPasswordResetLink, verifyPasswordResetLink, sendPasswordResetWithCode } from "../../firebase/authService";
 import Img from "../../assets/images/background/about-background.webp";
 import Modal from "../../components/Modal";
 
@@ -21,17 +21,45 @@ const PwdResetPage = () => {
   });
 
   // Helper function to show alert modal
-  const showAlert = (type, title, message, onClose = null) => {
+  const showAlert = useCallback((type, title, message, onClose = null) => {
     setAlertConfig({ type, title, message, onClose });
     setShowAlertModal(true);
-  };
+  }, []);
 
-  // Check if user came from forgot password page
+  const handleEmailLinkAuth = useCallback(async () => {
+    try {
+      // Get email from localStorage or prompt user
+      let email = localStorage.getItem('emailForPasswordReset');
+      if (!email) {
+        email = prompt('Please provide your email for confirmation');
+        if (!email) {
+          navigate("/forgot-password");
+          return;
+        }
+      }
+
+      // Verify the password reset link
+      await verifyPasswordResetLink(email);
+      
+      // Navigate to set new password page
+      navigate("/set-new-password", {
+        state: { email: email, isEmailLink: true }
+      });
+    } catch (error) {
+      console.error('Email link authentication failed:', error);
+      showAlert("error", "Authentication Failed", "Invalid or expired link. Please request a new one.");
+    }
+  }, [navigate, showAlert]);
+
+  // Check if user came from forgot password page or email link
   useEffect(() => {
-    if (!location.state?.email) {
+    // Check if this is an email link authentication
+    if (isPasswordResetLink()) {
+      handleEmailLinkAuth();
+    } else if (!location.state?.email) {
       navigate("/forgot-password");
     }
-  }, [location.state, navigate]);
+  }, [location.state, navigate, handleEmailLinkAuth]);
 
   const validate = () => {
     let newErrors = {};
@@ -73,35 +101,18 @@ const PwdResetPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
-      const verificationCode = codes.join("");
-      try {
-        // Verify the reset code first
-        await verifyResetCode(verificationCode);
-        // Navigate to set new password page with the code
-        navigate("/set-new-password", {
-          state: {
-            code: verificationCode,
-            email: email,
-          },
-        });
-      } catch (error) {
-        let errorMessage = "Invalid verification code. Please try again.";
-        if (error.code === "auth/invalid-action-code") {
-          errorMessage = "Invalid or expired code. Please request a new one.";
-        } else if (error.code === "auth/expired-action-code") {
-          errorMessage = "Code has expired. Please request a new one.";
-        }
-        showAlert("error", "Verification Failed", errorMessage);
-      }
+      // For email link flow, we don't need to verify codes here
+      // The verification happens when the user clicks the email link
+      showAlert("info", "Check Your Email", "Please check your email and click the password reset link to continue.");
     }
   };
 
   const handleResend = async () => {
     try {
-      await sendPasswordReset(email);
-      showAlert("success", "Code Sent", `New code sent to ${email}`);
+      await sendPasswordResetWithCode(email);
+      showAlert("success", "Email Sent", `New password reset email sent to ${email}`);
     } catch (error) {
-      let errorMessage = "Failed to resend code. Please try again.";
+      let errorMessage = "Failed to resend email. Please try again.";
       if (error.code === "auth/user-not-found") {
         errorMessage = "No account found with this email.";
       } else if (error.code === "auth/invalid-email") {

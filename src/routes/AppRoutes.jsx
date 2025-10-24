@@ -16,6 +16,7 @@ import ForgotPwdPage from "../pages/login-pages/ForgotPwdPage";
 import PwdResetPage from "../pages/login-pages/PwdResetPage";
 import SetNewPwdPage from "../pages/login-pages/SetNewPwdPage";
 import AllDonePage from "../pages/login-pages/AllDonePage";
+import PasswordResetSuccessPage from "../pages/login-pages/PasswordResetSuccessPage";
 import SignupFlow from "../pages/sign-up-pages/SignupFlow";
 import SignupCompletePage from "../pages/sign-up-pages/SignupCompletePage";
 import AdminDashboard from "../pages/admin-pages/AdminDashboard";
@@ -157,7 +158,7 @@ function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPwdPage />} />
         <Route path="/password-reset-verification" element={<PwdResetPage />} />
         <Route path="/set-new-password" element={<SetNewPwdPage />} />
-        <Route path="/password-reset-success" element={<AllDonePage />} />
+        <Route path="/password-reset-success" element={<PasswordResetSuccessPage />} />
         <Route path="/signup" element={<SignupFlow />} />
         <Route path="/signup/complete" element={<SignupCompletePage />} />
 
