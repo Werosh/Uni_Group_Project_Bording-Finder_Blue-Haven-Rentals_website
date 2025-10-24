@@ -97,6 +97,7 @@ const Navbar = () => {
       setIsRoleModalOpen(true);
     } else if (
       userProfile?.role === "boarding_owner" ||
+      userProfile?.userType === "boarding_owner" ||
       userProfile?.role === "admin"
     ) {
       // Navigate to post-add for boarding_owner and admin
@@ -293,7 +294,7 @@ const Navbar = () => {
                       )}
 
                       {/* boarding_owner: profile, find place, add post, pending posts, logout */}
-                      {userProfile?.role === "boarding_owner" && (
+                      {(userProfile?.role === "boarding_owner" || userProfile?.userType === "boarding_owner") && (
                         <>
                           <button
                             onClick={() => {
@@ -562,7 +563,7 @@ const Navbar = () => {
                     )}
 
                     {/* boarding_owner: profile, find place, add post, pending posts, logout */}
-                    {userProfile?.role === "boarding_owner" && (
+                    {(userProfile?.role === "boarding_owner" || userProfile?.userType === "boarding_owner") && (
                       <>
                         <button
                           onClick={() => {

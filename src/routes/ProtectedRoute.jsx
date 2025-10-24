@@ -23,11 +23,11 @@ const ProtectedRoute = ({ children, requireRole = null }) => {
   // Boarding owners have access to all routes except admin dashboard
   if (requireRole && userProfile?.role !== requireRole && !isAdmin()) {
     // Special case: boarding owners should not access admin routes
-    if (requireRole === "admin" && userProfile?.role === "boarding_owner") {
+    if (requireRole === "admin" && (userProfile?.role === "boarding_owner" || userProfile?.userType === "boarding_owner")) {
       return <Navigate to="/" />;
     }
     // For all other routes, boarding owners have full access
-    if (userProfile?.role === "boarding_owner") {
+    if (userProfile?.role === "boarding_owner" || userProfile?.userType === "boarding_owner") {
       return children;
     }
     return <Navigate to="/" />;

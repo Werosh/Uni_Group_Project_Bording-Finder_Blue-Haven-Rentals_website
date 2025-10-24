@@ -40,7 +40,7 @@ const PostAdd = () => {
     }
 
     // Check if user is a boarding owner or admin
-    if (userProfile?.role === "boarding_owner" || isAdmin()) {
+    if (userProfile?.role === "boarding_owner" || userProfile?.userType === "boarding_owner" || isAdmin()) {
       navigate("/post-add");
       return;
     }
