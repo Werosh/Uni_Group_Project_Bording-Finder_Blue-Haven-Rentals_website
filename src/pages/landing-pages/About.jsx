@@ -36,7 +36,7 @@ const About = () => {
             </p>
 
             <div
-              className="inline-flex items-center justify-center gap-3 w-fit 
+              className="inline-flex flex-wrap sm:flex-nowrap items-center justify-center gap-3 w-full sm:w-fit max-w-full
                 bg-[#3ABBD0]/90 backdrop-blur-md text-white 
                 px-4 sm:px-6 lg:px-8 
                 py-3 sm:py-4 lg:py-5 
@@ -45,7 +45,7 @@ const About = () => {
                 border border-white/20"
             >
               <BsStars className="w-[20px] sm:w-[25px] lg:w-[30px] text-white animate-spin-slow" />
-              <span className="font-montserrat font-thin whitespace-nowrap truncate text-[20px] tracking-[0.1em]">
+              <span className="font-montserrat font-thin text-[18px] sm:text-[20px] tracking-[0.1em] text-center sm:text-left leading-snug">
                 Discover quality, comfort, and convenience with us.
               </span>
             </div>
