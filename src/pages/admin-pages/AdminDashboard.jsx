@@ -15,7 +15,11 @@ import {
   Star,
   MessageSquare,
 } from "lucide-react";
-import { getPostStatistics, getUserStatistics, getAllReviews } from "../../firebase/dbService";
+import {
+  getPostStatistics,
+  getUserStatistics,
+  getAllReviews,
+} from "../../firebase/dbService";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -38,9 +42,11 @@ const AdminDashboard = () => {
           getAllReviews(),
         ]);
 
-        const averageRating = reviews.length > 0 
-          ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
-          : 0;
+        const averageRating =
+          reviews.length > 0
+            ? reviews.reduce((sum, review) => sum + review.rating, 0) /
+              reviews.length
+            : 0;
 
         setStats({
           totalUsers: userStats.totalUsers,
