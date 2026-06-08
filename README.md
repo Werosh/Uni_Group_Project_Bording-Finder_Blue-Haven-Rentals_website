@@ -268,14 +268,14 @@ Please run `npm run lint` before submitting and ensure the production build pass
 
 ## License
 
-This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for details.
 
 ### Third-Party Open Source
 
 Blue Haven Rentals depends on open-source packages released under their own licenses. Attribution and license summaries are documented in:
 
-- [THIRD-PARTY-LICENSES.md](./THIRD-PARTY-LICENSES.md) — direct dependencies and dependency-tree summary
-- [LICENSES/](./LICENSES/) — full text of all license types used by dependencies (MIT, Apache-2.0, ISC, BSD, MPL-2.0, and others)
+- [THIRD-PARTY-LICENSES.md](./THIRD-PARTY-LICENSES.md) - direct dependencies and dependency-tree summary
+- [LICENSES/](./LICENSES/) - full text of all license types used by dependencies (MIT, Apache-2.0, ISC, BSD, MPL-2.0, and others)
 
 Developed as a **Semester 4 university group project** by the Blue Haven Rentals team.
 
