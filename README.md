@@ -3,6 +3,7 @@
 **Discover your perfect haven -a modern platform for finding and listing rental houses and boarding accommodations across Sri Lanka.**
 
 [![Live Demo](https://img.shields.io/badge/demo-live-3ABBD0?style=for-the-badge&logo=netlify&logoColor=white)](https://bluehavenrentals.netlify.app/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-263D5D?style=for-the-badge)](./LICENSE)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Firebase](https://img.shields.io/badge/Firebase-12-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
@@ -267,7 +268,16 @@ Please run `npm run lint` before submitting and ensure the production build pass
 
 ## License
 
-This project was developed as a **Semester 4 university group project**. All rights reserved by the contributing team unless otherwise specified.
+This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
+
+### Third-Party Open Source
+
+Blue Haven Rentals depends on open-source packages released under their own licenses. Attribution and license summaries are documented in:
+
+- [THIRD-PARTY-LICENSES.md](./THIRD-PARTY-LICENSES.md) — direct dependencies and dependency-tree summary
+- [LICENSES/](./LICENSES/) — full text of all license types used by dependencies (MIT, Apache-2.0, ISC, BSD, MPL-2.0, and others)
+
+Developed as a **Semester 4 university group project** by the Blue Haven Rentals team.
 
 ---
 

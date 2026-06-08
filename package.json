@@ -2,6 +2,8 @@
   "name": "gp",
   "private": true,
   "version": "0.0.0",
+  "description": "A modern platform for finding and listing rental houses and boarding accommodations across Sri Lanka.",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
