@@ -1,6 +1,6 @@
 # Blue Haven Rentals
 
-**Discover your perfect haven — a modern platform for finding and listing rental houses and boarding accommodations across Sri Lanka.**
+**Discover your perfect haven -a modern platform for finding and listing rental houses and boarding accommodations across Sri Lanka.**
 
 [![Live Demo](https://img.shields.io/badge/demo-live-3ABBD0?style=for-the-badge&logo=netlify&logoColor=white)](https://bluehavenrentals.netlify.app/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
@@ -32,7 +32,7 @@
 
 [Blue Haven Rentals](https://bluehavenrentals.netlify.app/) connects **renters** and **property owners** through a single, streamlined web experience. Seekers can search verified listings by location, property type, and capacity across all nine provinces of Sri Lanka. Owners can publish listings with photos, track approval status, and reach an active audience of renters.
 
-Built as a full-stack web application with a React SPA frontend and Firebase backend, the platform includes role-based access control, an admin moderation workflow, analytics dashboards, and a review system — designed to scale from a university group project to a production-ready rental marketplace.
+Built as a full-stack web application with a React SPA frontend and Firebase backend, the platform includes role-based access control, an admin moderation workflow, analytics dashboards, and a review system -designed to scale from a university group project to a production-ready rental marketplace.
 
 ---
 
@@ -40,25 +40,25 @@ Built as a full-stack web application with a React SPA frontend and Firebase bac
 
 ### For Renters (`boarding_finder`)
 
-- **Smart search** — Filter by keyword, property type, guest count, and district
-- **Browse listings** — Paginated results with image galleries and detailed property information
-- **Location explorer** — Interactive map and province/district navigation covering all 25 districts of Sri Lanka
-- **Reviews & ratings** — Star-rated feedback on approved listings
-- **User profiles** — Manage account details and preferences
+- **Smart search** -Filter by keyword, property type, guest count, and district
+- **Browse listings** -Paginated results with image galleries and detailed property information
+- **Location explorer** -Interactive map and province/district navigation covering all 25 districts of Sri Lanka
+- **Reviews & ratings** -Star-rated feedback on approved listings
+- **User profiles** -Manage account details and preferences
 
 ### For Property Owners (`boarding_owner`)
 
-- **Multi-step onboarding** — Guided signup with location, ID verification, and profile photo upload
-- **Listing management** — Create, edit, and track rental posts with Firebase Storage image uploads
-- **Approval workflow** — Submissions enter a pending queue until reviewed by an admin
-- **Owner dashboard** — View active, pending, and declined posts from the user profile
+- **Multi-step onboarding** -Guided signup with location, ID verification, and profile photo upload
+- **Listing management** -Create, edit, and track rental posts with Firebase Storage image uploads
+- **Approval workflow** -Submissions enter a pending queue until reviewed by an admin
+- **Owner dashboard** -View active, pending, and declined posts from the user profile
 
 ### For Administrators
 
-- **Dashboard overview** — At-a-glance stats on users, posts, and platform activity
-- **Post moderation** — Approve or decline pending listings before they go live
-- **User management** — View, edit roles, and manage registered accounts
-- **Analytics** — Charts for posts by category/location, user growth, and review metrics (powered by Recharts)
+- **Dashboard overview** -At-a-glance stats on users, posts, and platform activity
+- **Post moderation** -Approve or decline pending listings before they go live
+- **User management** -View, edit roles, and manage registered accounts
+- **Analytics** -Charts for posts by category/location, user growth, and review metrics (powered by Recharts)
 
 ### Platform
 
@@ -72,15 +72,15 @@ Built as a full-stack web application with a React SPA frontend and Firebase bac
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | React 19, React Router 7, Tailwind CSS 4 |
-| **Build Tool** | Vite 7 |
+| Layer              | Technology                                                           |
+| ------------------ | -------------------------------------------------------------------- |
+| **Frontend**       | React 19, React Router 7, Tailwind CSS 4                             |
+| **Build Tool**     | Vite 7                                                               |
 | **Backend / BaaS** | Firebase Auth, Cloud Firestore, Firebase Storage, Firebase Analytics |
-| **Charts** | Recharts |
-| **Icons** | Lucide React, React Icons |
-| **Hosting** | Netlify |
-| **Linting** | ESLint 9 |
+| **Charts**         | Recharts                                                             |
+| **Icons**          | Lucide React, React Icons                                            |
+| **Hosting**        | Netlify                                                              |
+| **Linting**        | ESLint 9                                                             |
 
 ---
 
@@ -116,11 +116,11 @@ flowchart TB
 
 **Data collections (Firestore):**
 
-| Collection | Purpose |
-|------------|---------|
-| `users` | Profiles, roles, verification status |
-| `posts` | Rental listings with approval status (`pending` · `approved` · `declined` · `active`) |
-| `reviews` | User ratings and comments on listings |
+| Collection | Purpose                                                                               |
+| ---------- | ------------------------------------------------------------------------------------- |
+| `users`    | Profiles, roles, verification status                                                  |
+| `posts`    | Rental listings with approval status (`pending` · `approved` · `declined` · `active`) |
+| `reviews`  | User ratings and comments on listings                                                 |
 
 ---
 
@@ -182,12 +182,12 @@ VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 
 ## Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite dev server with HMR |
-| `npm run build` | Production build to `dist/` |
+| Command           | Description                          |
+| ----------------- | ------------------------------------ |
+| `npm run dev`     | Start Vite dev server with HMR       |
+| `npm run build`   | Production build to `dist/`          |
 | `npm run preview` | Preview the production build locally |
-| `npm run lint` | Run ESLint across the project |
+| `npm run lint`    | Run ESLint across the project        |
 
 ---
 
@@ -218,11 +218,11 @@ VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 
 ## User Roles
 
-| Role | Description | Key Access |
-|------|-------------|------------|
-| `boarding_finder` | Renter seeking accommodation | Browse, search, review, profile |
-| `boarding_owner` | Property owner / advertiser | All finder access + create & manage listings |
-| `admin` | Platform administrator | Full access including moderation & analytics |
+| Role              | Description                  | Key Access                                   |
+| ----------------- | ---------------------------- | -------------------------------------------- |
+| `boarding_finder` | Renter seeking accommodation | Browse, search, review, profile              |
+| `boarding_owner`  | Property owner / advertiser  | All finder access + create & manage listings |
+| `admin`           | Platform administrator       | Full access including moderation & analytics |
 
 Route protection is handled by `ProtectedRoute`, which gates pages based on authentication state and required role.
 
